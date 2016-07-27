@@ -65,6 +65,7 @@ import checkers.inference.model.VariableSlot;
 import checkers.inference.qual.VarAnnot;
 import checkers.inference.util.ConstantToVariableAnnotator;
 import checkers.inference.util.InferenceUtil;
+import checkers.inference.util.VPUtil;
 
 /**
  * InferenceAnnotatedTypeFactory is responsible for creating AnnotatedTypeMirrors that are annotated with
@@ -290,19 +291,13 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             return;
         }
 
-        AnnotatedTypeMirror declType = this.getAnnotatedType(element);
+        // AnnotatedTypeMirror declType = this.getAnnotatedType(element);
 
         if (withCombineConstraints) {
             /*if (InferenceMain.DEBUG(this)) {
                 println("InferenceAnnotatedTypeFactory::postAsMemberOf: Combine constraint.")
             }*/
-            Slot recvSlot = slotManager.getVariableSlot(owner);
-            Slot declSlot = slotManager.getVariableSlot(declType);
-            final CombVariableSlot combSlot = slotManager
-                    .createCombVariableSlot(recvSlot, declSlot);
-            constraintManager.addCombineConstraint(recvSlot, declSlot, combSlot);
-
-            type.replaceAnnotation(slotManager.getAnnotation(combSlot));
+            VPUtil.combineRecvTypeWithDeclType(owner, type);
         }
     }
 
@@ -317,12 +312,44 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         //The type of the class in which the type params were declared
         final AnnotatedDeclaredType ownerOfTypeParams = getAnnotatedType(element);
         final List<AnnotatedTypeMirror> declaredTypeParameters = ownerOfTypeParams.getTypeArguments();
+        final List<AnnotatedTypeMirror> useTypeArguments = useType
+                .getTypeArguments();
+
+        assert declaredTypeParameters.size() == useTypeArguments
+                .size() : "Mismatch in type argument size between "
+                        + declaredTypeParameters + " and " + useTypeArguments;
 
         final List<AnnotatedTypeParameterBounds> result = new ArrayList<>();
 
+        Map<TypeVariable, AnnotatedTypeMirror> mapping = new HashMap<>();
+
+        for (int i = 0; i < useTypeArguments.size(); ++i) {
+            mapping.put(((AnnotatedTypeVariable) declaredTypeParameters.get(i))
+                    .getUnderlyingType(), useTypeArguments.get(i));
+        }
+
         for (int i = 0; i < declaredTypeParameters.size(); ++i) {
-            final AnnotatedTypeVariable declaredTypeParam = (AnnotatedTypeVariable) declaredTypeParameters.get(i);
-            result.add(new AnnotatedTypeParameterBounds(declaredTypeParam.getUpperBound(), declaredTypeParam.getLowerBound()));
+            final AnnotatedTypeVariable declaredTypeParameter = (AnnotatedTypeVariable) declaredTypeParameters.get(i);
+            // Upper bound processing
+            // AnnotatedTypeMirror can again be compound recursive type mirror.
+            // So, we should call utilities method here
+            AnnotatedTypeMirror upper = typeVarSubstitutor.substitute(mapping,
+                    declaredTypeParameter.getUpperBound());
+            // leave the line above still in inferenceATF, cause it's ATF's job,
+            // compared to its counterparts
+            if (withCombineConstraints) {
+                VPUtil.combineRecvTypeWithDeclType(useType, upper);
+            }
+            // Lower bound processing
+            AnnotatedTypeMirror lower = typeVarSubstitutor.substitute(mapping,
+                    declaredTypeParameter.getLowerBound());
+            if (withCombineConstraints) {
+                VPUtil.combineRecvTypeWithDeclType(useType, lower);
+            }
+            // Writing result with subsituted upper and lower bounds if
+            // withCombineConstraints is true
+            result.add(new AnnotatedTypeParameterBounds(
+                    upper, lower));
 
             //TODO: Original InferenceAnnotatedTypeFactory#typeVariablesFromUse would create a combine constraint
             //TODO: between the useType and the effectiveUpperBound of the declaredTypeParameter
@@ -347,7 +374,7 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         final ExecutableElement methodElem = TreeUtils.elementFromUse(methodInvocationTree);
 
         //TODO: Used in comb constraints, going to leave it in to ensure the element has been visited
-        final AnnotatedExecutableType methodType = getAnnotatedType(methodElem);
+        //final AnnotatedExecutableType methodType = getAnnotatedType(methodElem);
 
         final ExpressionTree methodSelectExpression = methodInvocationTree.getMethodSelect();
         final AnnotatedTypeMirror receiverType;
@@ -360,10 +387,25 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         assert receiverType != null : "Null receiver type when getting method from use for tree ( " + methodInvocationTree + " )";
 
         //TODO: Add CombConstraints for method parameter types as well as return types
+        final AnnotatedExecutableType methodOfReceiver = AnnotatedTypes.asMemberOf(types, this, receiverType, methodElem);
+        AnnotatedTypeMirror returnType = methodOfReceiver.getReturnType();
+        List<AnnotatedTypeMirror> parameterTypes = methodOfReceiver.getParameterTypes();
+        // TODO type variables? Now it throws null pointer exception.
+        List<AnnotatedTypeVariable> typeVariables = methodOfReceiver.getTypeVariables();
+
+        if (withCombineConstraints) {
+            VPUtil.combineRecvTypeWithDeclType(receiverType, returnType);
+            for (AnnotatedTypeMirror parameterType : parameterTypes){
+                VPUtil.combineRecvTypeWithDeclType(receiverType, parameterType);
+            }
+            for (AnnotatedTypeVariable typeVariable: typeVariables) {
+                VPUtil.combineRecvTypeWithDeclType(receiverType, typeVariable);
+            }
+        }
 
         //TODO: Is the asMemberOf correct, was not in Werner's original implementation but I had added it
         //TODO: It is also what the AnnotatedTypeFactory default implementation does
-        final AnnotatedExecutableType methodOfReceiver = AnnotatedTypes.asMemberOf(types, this, receiverType, methodElem);
+        // TODO: This method has some problems
         Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> mfuPair = substituteTypeArgs(methodInvocationTree, methodElem, methodOfReceiver);
 
         AnnotatedExecutableType method = mfuPair.first;
@@ -401,12 +443,24 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                                       "Current path:\n" + this.visitorState.getPath();
 
         final ExecutableElement constructorElem = TreeUtils.elementFromUse(newClassTree);
-        final AnnotatedTypeMirror constructorReturnType = fromNewClass(newClassTree);
-        addComputedTypeAnnotations(newClassTree, constructorReturnType);
+        final AnnotatedTypeMirror constructorUseType = fromNewClass(newClassTree);
+        addComputedTypeAnnotations(newClassTree, constructorUseType);
 
-        final AnnotatedExecutableType constructorType = AnnotatedTypes.asMemberOf(types, this, constructorReturnType, constructorElem);
+        final AnnotatedExecutableType constructorDeclType = AnnotatedTypes.asMemberOf(types, this, constructorUseType, constructorElem);
 
-        Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> substitutedPair = substituteTypeArgs(newClassTree, constructorElem, constructorType);
+        // Add CombConstraints only for parameters of constructor
+        List<AnnotatedTypeMirror> parameterTypes = constructorDeclType.getParameterTypes();
+        List<AnnotatedTypeVariable> typeVariables = constructorDeclType.getTypeVariables();
+        if (withCombineConstraints) {
+            for (AnnotatedTypeMirror parameterType : parameterTypes){
+                VPUtil.combineRecvTypeWithDeclType(constructorUseType, parameterType);
+            }
+            for (AnnotatedTypeMirror typeVariable : typeVariables){
+                VPUtil.combineRecvTypeWithDeclType(constructorUseType, typeVariable);
+            }
+        }
+        Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> substitutedPair = substituteTypeArgs(
+                newClassTree, constructorElem, constructorDeclType);
         inferencePoly.replacePolys(newClassTree, substitutedPair.first);
 
         //TODO: ADD CombConstraints
