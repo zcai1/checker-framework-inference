@@ -885,9 +885,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
         // From the invocation of a class, get the declaration bound of its
         // class declaration
         VariableSlot boundSlot = getOrCreateDeclBound(adt);
-        SubtypeConstraint instantiationConstraint = new SubtypeConstraint(
-                instantiationSlot, boundSlot);
-        constraintManager.add(instantiationConstraint);
+        constraintManager.addSubtypeConstraint(instantiationSlot, boundSlot);
     }
 
     /**

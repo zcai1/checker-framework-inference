@@ -9,11 +9,10 @@ import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedNullType
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedTypeVariable;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedWildcardType;
 
-import checkers.inference.ConstraintManager;
 import checkers.inference.InferenceMain;
 import checkers.inference.SlotManager;
 import checkers.inference.model.CombVariableSlot;
-import checkers.inference.model.CombineConstraint;
+import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
 
 public class VPUtil {
@@ -92,7 +91,7 @@ public class VPUtil {
             Slot declSlot = slotManager.getVariableSlot(declDeclaredType);
             // Can recvSlot and declSlot be null?
             CombVariableSlot combSlot = slotManager.createCombVariableSlot(recvSlot, declSlot);
-            constraintManager.add(new CombineConstraint(recvSlot, declSlot, combSlot));
+            constraintManager.addCombineConstraint(recvSlot, declSlot, combSlot);
             declDeclaredType.replaceAnnotation(slotManager.getAnnotation(combSlot));
 
             // Get the combined type arguments
@@ -121,7 +120,7 @@ public class VPUtil {
             // ensure the inner parts get adapted first, like the GUTQualsUtils
             Slot declMainSlot = slotManager.getVariableSlot(declArrayType);
             CombVariableSlot combMainSlot = slotManager.createCombVariableSlot(recvSlot, declMainSlot);
-            constraintManager.add(new CombineConstraint(recvSlot, declMainSlot, combMainSlot));
+            constraintManager.addCombineConstraint(recvSlot, declMainSlot, combMainSlot);
             // Construct result type
             declArrayType.replaceAnnotation(slotManager.getAnnotation(combMainSlot));
             return;
