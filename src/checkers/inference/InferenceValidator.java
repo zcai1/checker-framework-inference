@@ -1,5 +1,10 @@
 package checkers.inference;
 
+import java.util.List;
+
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
+
 /*>>>
 import org.checkerframework.checker.compilermsgs.qual.CompilerMessageKey;
 */
@@ -18,11 +23,6 @@ import org.checkerframework.framework.type.AnnotatedTypeParameterBounds;
 import org.checkerframework.framework.type.visitor.AnnotatedTypeScanner;
 import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
-
-import java.util.List;
-
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
 
 import com.sun.source.tree.AnnotatedTypeTree;
 import com.sun.source.tree.ExpressionTree;
@@ -66,7 +66,7 @@ public class InferenceValidator extends AnnotatedTypeScanner<Void, Tree> impleme
     }
 
     protected void reportError(final AnnotatedTypeMirror type, final Tree p) {
-        reportValidityResult("type.invalid", type, p);
+        reportValidityResult("type.invalid.use", type, p);
     }
 
     @Override
@@ -197,13 +197,19 @@ public class InferenceValidator extends AnnotatedTypeScanner<Void, Tree> impleme
         case EXTENDS_WILDCARD:
         case SUPER_WILDCARD:
         case TYPE_PARAMETER:
+        case STRING_LITERAL:
+        case METHOD_INVOCATION:
+        case PLUS:
+        case METHOD:
             // Nothing to do.
             // System.out.println("Found a: " + (tree instanceof
             // ParameterizedTypeTree));
             break;
         default:
+            /*Thread.dumpStack();*/
             System.err.printf("TypeValidator.visitDeclared unhandled tree: %s of kind %s\n",
                             tree, tree.getKind());
+            break;
         }
 
         return Pair.of(typeargtree, type);
