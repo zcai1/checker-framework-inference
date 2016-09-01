@@ -1585,12 +1585,11 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
     }
 
     /**
-     * Annotate a BinaryTree by creating and storing the LUB of the elemtns.
+     * Annotate a BinaryTree by creating and storing the LUB of the elements.
      * @param atm the type of the binary tree to annotate
      * @param binaryTree the binary tree
      */
     public void handleBinaryTree(AnnotatedTypeMirror atm, BinaryTree binaryTree) {
-
         if (treeToVarAnnoPair.containsKey(binaryTree)) {
             atm.replaceAnnotations(treeToVarAnnoPair.get(binaryTree).second);
         } else {
@@ -1608,6 +1607,13 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
             } else {
                 // The slot returned was a constant. Regenerating it is ok.
             }
+        }
+        // TODO atm only contains VarAnno, but doesn't have unqualified
+        // annotation, so the length is less than 2 and emits error. Is this
+        // case normal? Should it be avoided before? This fixes the annotations
+        // length problem in inference.
+        if (atm.getEffectiveAnnotationInHierarchy(unqualified) == null) {
+            atm.addAnnotation(unqualified);
         }
     }
 
@@ -1705,25 +1711,40 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
      *            AnnotatedDeclaredType of the declaration/invocation of a
      *            class/interface, which we will use to create new declaration
      *            bound annotation on its class declaration
-     * @return VariableSlot that represents the declaration bound of this class
+     * @return VariableSlot that represents the declaration bound of this class.
+     *         It can be ConstantSlot, if the class declaration is pre-annotated
+     *         /no explicit class declaration exists; Or
+     *         VariableSlot(existential) if no pre-annotation exists on it
      *
      */
     private VariableSlot getOrCreateDeclBound(AnnotatedDeclaredType type) {
 
         // Get the TypeElement of this AnnotatedDeclaredTypee first
         TypeElement classDecl = (TypeElement) type.getUnderlyingType().asElement();
-
+        // Get the annotated declared type of the corresponding class declaration.
+        AnnotatedDeclaredType classDeclATM = inferenceTypeFactory.fromElement(classDecl);
         VariableSlot declSlot = classDeclAnnos.get(classDecl);
-        // Not declSlot exists yet.
-        if (declSlot == null) {
+
+        if (!classDeclAnnos.containsKey(classDecl)) {
+            // No declaration slot exists yet.
             Tree decl = inferenceTypeFactory.declarationFromElement(classDecl);
             if (decl != null) {
-                // If there is ClassTree,i.e., an explicit class declaration, in
-                // the source code of this TypeElement, create a
-                // PotentialVariableSlot to represent its bound
-                VariableSlot potentialDeclSlot = createVariable(decl);
-                declSlot = getOrCreateExistentialVariable(potentialDeclSlot, getTopConstant());
-                classDeclAnnos.put(classDecl, potentialDeclSlot);
+                // If there is ClassTree,i.e., an explicit class declaration,
+                // there might or might not be pre-annotation on it. So, there
+                // are two cases:
+                if (classDeclATM != null && classDeclATM.getAnnotations().iterator().hasNext()) {
+                    // Class declaration is pre-annotated, so load that annotation.
+                    AnnotationMirror classDeclAM = classDeclATM.getAnnotations().iterator().next();
+                    declSlot = slotManager.createConstantSlot(classDeclAM);
+                    classDeclAnnos.put(classDecl, declSlot);
+                } else {
+                    // No annotation on class declaration. Create a
+                    // potential VariableSlot to annotated it, and an
+                    // existential VariableSlot to represent its bound
+                    VariableSlot potentialDeclSlot = createVariable(decl);
+                    declSlot = getOrCreateExistentialVariable(potentialDeclSlot, getTopConstant());
+                    classDeclAnnos.put(classDecl, potentialDeclSlot);
+                }
 
             } else {
                 // If no explicit class declaration in the source
@@ -1733,6 +1754,8 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
                 // covered
                 declSlot = getTopConstant();
             }
+        } else {
+            // Skip. Since the declaration slot is already in cache.
         }
 
         return declSlot;

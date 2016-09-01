@@ -1,8 +1,5 @@
 package checkers.inference.solver;
 
-import org.checkerframework.framework.type.QualifierHierarchy;
-import org.checkerframework.javacutil.AnnotationUtils;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +8,8 @@ import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 
+import org.checkerframework.framework.type.QualifierHierarchy;
+import org.checkerframework.javacutil.AnnotationUtils;
 import org.sat4j.core.VecInt;
 import org.sat4j.maxsat.WeightedMaxSatDecorator;
 
@@ -93,7 +92,6 @@ public class MaxSat2TypeSolver implements InferenceSolver {
         VecInt lastClause = null;
         try {
             for (VecInt clause : clauses) {
-
                 lastClause = clause;
                 solver.addSoftClause(clause);
             }
@@ -108,12 +106,16 @@ public class MaxSat2TypeSolver implements InferenceSolver {
                     if (isTop) {
                         var = -var;
                     }
-
-                    Integer potential = existentialToPotentialIds.get(var);
-                    if (potential != null) {
-                        // idToExistence.put(potential, !isTop);
-                        // TODO: which AnnotationMirror should be used?
-                        result.put(potential, bottom);
+                    if (existentialToPotentialIds.containsKey(var)) {
+                        // isTop is ture => var<0 => potential VariableSlot doesn't exist
+                        if (isTop) {
+                            // Get to id of potential slot first
+                            Integer potentialId = existentialToPotentialIds.get(var);
+                            // Remove the already written solution for the current potential slot from result
+                            result.remove(potentialId);
+                        } else {
+                            // Keep to slutions of potential VariableSlots
+                        }
                     } else {
                         result.put(var, isTop ? top : bottom );
                     }
