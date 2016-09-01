@@ -1,5 +1,16 @@
 package checkers.inference;
 
+import java.lang.annotation.Annotation;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+
 /*>>>
 import org.checkerframework.checker.compilermsgs.qual.CompilerMessageKey;
 */
@@ -21,16 +32,13 @@ import org.checkerframework.framework.util.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.ErrorReporter;
 
-import java.lang.annotation.Annotation;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
-
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
+import com.sun.source.tree.CatchTree;
+import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.ThrowTree;
+import com.sun.source.tree.Tree;
+import com.sun.source.tree.Tree.Kind;
+import com.sun.source.tree.VariableTree;
 
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
@@ -39,14 +47,6 @@ import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.qual.VarAnnot;
 import checkers.inference.util.InferenceUtil;
-
-import com.sun.source.tree.CatchTree;
-import com.sun.source.tree.ExpressionTree;
-import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.ThrowTree;
-import com.sun.source.tree.Tree;
-import com.sun.source.tree.Tree.Kind;
-import com.sun.source.tree.VariableTree;
 
 
 /**
@@ -851,16 +851,13 @@ public class InferenceVisitor<Checker extends InferenceChecker,
 
         // basic consistency checks
         if (!AnnotatedTypes.isValidType(atypeFactory.getQualifierHierarchy(), type)) {
-//            checker.report(Result.failure("type.invalid", type.getAnnotations(),
-//                    type.toString()), tree);
-//            return false;
-            return true;
+            checker.report(Result.failure("type.invalid.use", type.getAnnotations(),
+                    type.toString()), tree);
+            return false;
         }
 
-        //TODO: THIS MIGHT FAIL
-//        typeValidator.isValid(type, tree);
         // more checks (also specific to checker, potentially)
-        return true;
+        return typeValidator.isValid(type, tree);
     }
 
     @Override
