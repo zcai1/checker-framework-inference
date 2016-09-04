@@ -626,6 +626,17 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             } else {
                 bytecodeTypeAnnotator.annotate(element, type);
 
+                // Use top qualifier for classes from bytecode
+                switch(element.getKind()){
+                    case CLASS:
+                    case INTERFACE:
+                    case ENUM:
+                    case ANNOTATION_TYPE:
+                        type.replaceAnnotation(slotManager.getAnnotation(variableAnnotator.getTopConstant()));
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     }
