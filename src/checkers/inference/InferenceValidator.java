@@ -79,12 +79,13 @@ public class InferenceValidator extends AnnotatedTypeScanner<Void, Tree> impleme
             // isValidUse determines the erasure of the types.
             TypeElement typeElement = (TypeElement)type.getUnderlyingType().asElement();
             AnnotatedDeclaredType elemExplicitType = (AnnotatedDeclaredType) atypeFactory.fromElement(typeElement);
+            boolean hasPreAnnotation = elemExplicitType.getAnnotations().iterator().hasNext();
             AnnotatedDeclaredType elemType = (AnnotatedDeclaredType) atypeFactory.getAnnotatedType(typeElement);
 
             // If there is pre-annotation on class declaration, then check.
             // Otherwise, top qualifier is used, so if only the instantiation type itself is
             // valid, all uses are valid, therefore no need to check.
-            if (elemExplicitType.getAnnotations().iterator().hasNext()&&!visitor.isValidUse(elemType, type, tree)) {
+            if (!visitor.isValidUse(elemType, type, tree) && hasPreAnnotation) {
                 reportError(type, tree);
             }
         }
