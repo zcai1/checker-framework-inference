@@ -139,7 +139,12 @@ public class VPUtil {
             return;
         } else if (type instanceof AnnotatedNullType) {
             // System.out.println("VPUtils: type is: " + type);
-            // Viewpoint result is still type, nothing changes, so return
+            // Viewpoint result is still type, nothing changes, so return -> Update: should adapt, too
+            AnnotatedNullType declNullType = (AnnotatedNullType)type;
+            Slot declSlot = slotManager.getVariableSlot(declNullType);
+            CombVariableSlot combSlot = slotManager.createCombVariableSlot(recvSlot, declSlot);
+            constraintManager.addCombineConstraint(recvSlot, declSlot, combSlot);
+            declNullType.replaceAnnotation(slotManager.getAnnotation(combSlot));
             return;
         } else {
             System.err.println("Unknown result.getKind(): " + type.getKind());
