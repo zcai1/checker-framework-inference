@@ -74,21 +74,7 @@ public class InferenceValidator extends AnnotatedTypeScanner<Void, Tree> impleme
         if (checker.shouldSkipUses(type.getUnderlyingType().asElement()))
             return super.visitDeclared(type, tree);
 
-        {
-            // Ensure that type use is a subtype of the element type
-            // isValidUse determines the erasure of the types.
-            TypeElement typeElement = (TypeElement)type.getUnderlyingType().asElement();
-            AnnotatedDeclaredType elemExplicitType = (AnnotatedDeclaredType) atypeFactory.fromElement(typeElement);
-            boolean hasPreAnnotation = elemExplicitType.getAnnotations().iterator().hasNext();
-            AnnotatedDeclaredType elemType = (AnnotatedDeclaredType) atypeFactory.getAnnotatedType(typeElement);
-
-            // If there is pre-annotation on class declaration, then check.
-            // Otherwise, top qualifier is used, so if only the instantiation type itself is
-            // valid, all uses are valid, therefore no need to check.
-            if (!visitor.isValidUse(elemType, type, tree) && hasPreAnnotation) {
-                reportError(type, tree);
-            }
-        }
+        checkValidUse(type, tree);
 
         // System.out.println("Type: " + type);
         // System.out.println("Tree: " + tree);
@@ -146,6 +132,24 @@ public class InferenceValidator extends AnnotatedTypeScanner<Void, Tree> impleme
         }
 
         return super.visitDeclared(type, tree);
+    }
+
+    protected void checkValidUse(AnnotatedDeclaredType type, Tree tree){
+        {
+            // Ensure that type use is a subtype of the element type
+            // isValidUse determines the erasure of the types.
+            TypeElement typeElement = (TypeElement)type.getUnderlyingType().asElement();
+            AnnotatedDeclaredType elemExplicitType = (AnnotatedDeclaredType) atypeFactory.fromElement(typeElement);
+            boolean hasPreAnnotation = elemExplicitType.getAnnotations().iterator().hasNext();
+            AnnotatedDeclaredType elemType = (AnnotatedDeclaredType) atypeFactory.getAnnotatedType(typeElement);
+
+            // If there is pre-annotation on class declaration, then check.
+            // Otherwise, top qualifier is used, so if only the instantiation type itself is
+            // valid, all uses are valid, therefore no need to check.
+            if (!visitor.isValidUse(elemType, type, tree) && hasPreAnnotation) {
+                reportError(type, tree);
+            }
+        }
     }
 
     private Pair<ParameterizedTypeTree, AnnotatedDeclaredType> extractParameterizedTypeTree(
