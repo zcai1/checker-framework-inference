@@ -28,4 +28,9 @@ public class OsTrustedTest extends CFInferenceTest {
         testfiles.addAll(TestUtilities.findRelativeNestedJavaFiles("testdata", "ostrusted"));
         return testfiles;
     }
+
+    @Override
+    public boolean useHacks() {
+        return true;
+    }
 }
