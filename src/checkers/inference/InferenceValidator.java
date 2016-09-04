@@ -77,10 +77,14 @@ public class InferenceValidator extends AnnotatedTypeScanner<Void, Tree> impleme
         {
             // Ensure that type use is a subtype of the element type
             // isValidUse determines the erasure of the types.
-            AnnotatedDeclaredType elemType = (AnnotatedDeclaredType) atypeFactory
-                    .getAnnotatedType(type.getUnderlyingType().asElement());
+            TypeElement typeElement = (TypeElement)type.getUnderlyingType().asElement();
+            AnnotatedDeclaredType elemExplicitType = (AnnotatedDeclaredType) atypeFactory.fromElement(typeElement);
+            AnnotatedDeclaredType elemType = (AnnotatedDeclaredType) atypeFactory.getAnnotatedType(typeElement);
 
-            if (!visitor.isValidUse(elemType, type, tree)) {
+            // If there is pre-annotation on class declaration, then check.
+            // Otherwise, top qualifier is used, so if only the instantiation type itself is
+            // valid, all uses are valid, therefore no need to check.
+            if (elemExplicitType.getAnnotations().iterator().hasNext()&&!visitor.isValidUse(elemType, type, tree)) {
                 reportError(type, tree);
             }
         }
@@ -200,6 +204,7 @@ public class InferenceValidator extends AnnotatedTypeScanner<Void, Tree> impleme
         case STRING_LITERAL:
         case METHOD_INVOCATION:
         case PLUS:
+        case PLUS_ASSIGNMENT:
         case METHOD:
             // Nothing to do.
             // System.out.println("Found a: " + (tree instanceof
