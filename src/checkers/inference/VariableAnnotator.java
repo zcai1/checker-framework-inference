@@ -140,7 +140,8 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
     private final AnnotationMirror varAnnot;
     //A single top in the target type system
     private final AnnotationMirror realTop;
-
+    // Use existential variableslot and constraints or not
+    private final boolean withExistentialVariables;
 
 
     private final ExistentialVariableInserter existentialInserter;
@@ -163,6 +164,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
         this.idsToExistentialSlots = new HashMap<>();
         this.classDeclAnnos = new HashMap<>();
         this.realChecker = realChecker;
+        this.withExistentialVariables = realChecker.withExistentialVariables();
         this.constraintManager = constraintManager;
 
         this.unqualified = new AnnotationBuilder(typeFactory.getProcessingEnv(), Unqualified.class).build();
@@ -426,37 +428,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
             annotateElementFromStore(varElem, typeVar);
             return;
         }
-
-        AnnotationMirror explicitPrimary = null;
-        if (treeToVarAnnoPair.containsKey(typeTree)) {
-            potentialVariable = treeToVarAnnoPair.get(typeTree).first;
-            typeVar.clearAnnotations();  //might have a primary annotation lingering around
-                                         // (that would removed in the else clause)
-
-        } else {
-            //element from use and see if we already have this as a local var or field?
-            //if(tree.getKind() == ) //TODO: GOTTA FIGURE OUT IDENTIFIER STUFF
-            if (!typeVar.getAnnotations().isEmpty()) {
-                if (typeVar.getAnnotations().size() > 2) {
-                    ErrorReporter.errorAbort("There should be only 1 or 2 primary annotation on the typevar: \n"
-                                           + "typeVar=" + typeVar + "\n"
-                                           + "tree=" + tree + "\n");
-                }
-                typeVar.clearAnnotations();
-            }
-
-            potentialVariable = createVariable(typeTree);
-            final Pair<VariableSlot, Set<? extends AnnotationMirror>> varATMPair = Pair
-                    .<VariableSlot, Set<? extends AnnotationMirror>> of(
-                    potentialVariable, typeVar.getAnnotations());
-            treeToVarAnnoPair.put(typeTree, varATMPair);
-
-            // TODO: explicitPrimary is null at this point! Someone needs to set it.
-            if (explicitPrimary != null) {
-                constraintManager.addEqualityConstraint(potentialVariable, slotManager.getSlot(explicitPrimary));
-            }
-        }
-
+        // Handle alternative slot first, because it's guaranteed to exist
         final Element typeVarDeclElem = typeVar.getUnderlyingType().asElement();
         final AnnotatedTypeMirror typeVarDecl;
         if (!elementToAtm.containsKey(typeVarDeclElem)) {
@@ -473,7 +445,44 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
 //            }
         }
 
-        existentialInserter.insert(potentialVariable, typeVar, typeVarDecl);
+        if(!withExistentialVariables){
+            // Don't allow existential variables, so directly use atm of the corresponding Element
+            CopyUtil.copyAnnotations(typeVarDecl, typeVar);
+        }else{
+            // Allow existential variables. Handle potential slot(overwriting annotation)
+            AnnotationMirror explicitPrimary = null;
+            if (treeToVarAnnoPair.containsKey(typeTree)) {
+                // If we already have the potential variable slot corresponding to this typeTree, load it.
+                potentialVariable = treeToVarAnnoPair.get(typeTree).first;
+                typeVar.clearAnnotations();// Clear annotations before inserting existential variable slots?
+
+            } else {
+                // Otherwise, create a fresh potential variable slot]
+                //element from use and see if we already have this as a local var or field?
+                //if(tree.getKind() == ) //TODO: GOTTA FIGURE OUT IDENTIFIER STUFF
+                if (!typeVar.getAnnotations().isEmpty()) {
+                    if (typeVar.getAnnotations().size() > 2) {
+                        ErrorReporter.errorAbort("There should be only 1 or 2 primary annotation on the typevar: \n"
+                                               + "typeVar=" + typeVar + "\n"
+                                               + "tree=" + tree + "\n");
+                    }
+                    typeVar.clearAnnotations();
+                }
+
+                potentialVariable = createVariable(typeTree);
+                final Pair<VariableSlot, Set<? extends AnnotationMirror>> varATMPair = Pair
+                        .<VariableSlot, Set<? extends AnnotationMirror>> of(
+                        potentialVariable, typeVar.getAnnotations());
+                treeToVarAnnoPair.put(typeTree, varATMPair);
+
+                // TODO: explicitPrimary is null at this point! Someone needs to set it.
+                if (explicitPrimary != null) {
+                    constraintManager.addEqualityConstraint(potentialVariable, slotManager.getSlot(explicitPrimary));
+                }
+            }
+            // Finally, insert existential variable slot using existentialInserter
+            existentialInserter.insert(potentialVariable, typeVar, typeVarDecl);
+        }
     }
 
     //TODO JB: I think this means we don't need the isUpperBoundOfTypeParam parameter above
@@ -1741,9 +1750,14 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
                     // No annotation on class declaration. Create a
                     // potential VariableSlot to annotated it, and an
                     // existential VariableSlot to represent its bound
-                    VariableSlot potentialDeclSlot = createVariable(decl);
-                    declSlot = getOrCreateExistentialVariable(potentialDeclSlot, getTopConstant());
-                    classDeclAnnos.put(classDecl, potentialDeclSlot);
+                    if(withExistentialVariables){
+                        VariableSlot potentialDeclSlot = createVariable(decl);
+                        declSlot = getOrCreateExistentialVariable(potentialDeclSlot, getTopConstant());
+                        classDeclAnnos.put(classDecl, potentialDeclSlot);
+                    }else{
+                        declSlot=getTopConstant();
+                        classDeclAnnos.put(classDecl, getTopConstant());
+                    }
                 }
 
             } else {
