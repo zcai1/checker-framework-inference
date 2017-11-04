@@ -1,5 +1,7 @@
 package checkers.inference;
 
+import checkers.inference.model.AnnotationLocation;
+import checkers.inference.util.InferenceViewpointAdapter;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.flow.CFAbstractAnalysis;
 import org.checkerframework.framework.flow.CFAnalysis;
@@ -22,6 +24,7 @@ import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.type.visitor.AnnotatedTypeScanner;
 import org.checkerframework.framework.util.AnnotatedTypes;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy;
+import org.checkerframework.framework.util.ViewpointAdapter;
 import org.checkerframework.framework.util.defaults.QualifierDefaults;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.ErrorReporter;
@@ -51,9 +54,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeVariable;
 
 import checkers.inference.dataflow.InferenceAnalysis;
-import checkers.inference.model.CombVariableSlot;
 import checkers.inference.model.ConstraintManager;
-import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.qual.VarAnnot;
 import checkers.inference.util.ConstantToVariableAnnotator;
@@ -286,7 +287,7 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
     @Override
     public void postAsMemberOf(final AnnotatedTypeMirror type,
-                               final AnnotatedTypeMirror owner, final Element element) {
+                               final AnnotatedTypeMirror owner, final Element element, final Tree tree) {
         final TypeKind typeKind = type.getKind();
         if (typeKind != TypeKind.DECLARED && typeKind != TypeKind.ARRAY) {
             return;
@@ -297,21 +298,9 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             return;
         }
 
-        AnnotatedTypeMirror declType = this.getAnnotatedType(element);
-
-        if (withCombineConstraints) {
-            /*if (InferenceMain.DEBUG(this)) {
-                println("InferenceAnnotatedTypeFactory::postAsMemberOf: Combine constraint.")
-            }*/
-            Slot recvSlot = slotManager.getVariableSlot(owner);
-            Slot declSlot = slotManager.getVariableSlot(declType);
-            final CombVariableSlot combSlot = slotManager
-                    .createCombVariableSlot(recvSlot, declSlot);
-            constraintManager.addCombineConstraint(recvSlot, declSlot, combSlot);
-
-            type.replaceAnnotation(slotManager.getAnnotation(combSlot));
+        setViewpointAdaptationLocation(tree, viewpointAdapter);
+        viewpointAdaptMember(type, owner, element);
         }
-    }
 
     /**
      * TODO: The implementation in AnnotatedTypeFactory essentially replaces the parameterized bounds with concrete bounds
@@ -320,21 +309,27 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
      * TODO: FOR THAT LOCATION?
      */
     @Override
-    public List<AnnotatedTypeParameterBounds> typeVariablesFromUse(final AnnotatedDeclaredType useType, final TypeElement element ) {
-        // The type of the class in which the type params were declared
+    public List<AnnotatedTypeParameterBounds> typeVariablesFromUse(final AnnotatedDeclaredType useType, final TypeElement element, final Tree tree ) {
+        // Declared types
+        List<AnnotatedTypeMirror> typeArguments = useType.getTypeArguments();
+        //The type of the class in which the type params were declared
         final AnnotatedDeclaredType ownerOfTypeParams = getAnnotatedType(element);
         final List<AnnotatedTypeMirror> declaredTypeParameters = ownerOfTypeParams.getTypeArguments();
 
-        final List<AnnotatedTypeParameterBounds> result = new ArrayList<>();
+        assert typeArguments.size() == declaredTypeParameters.size()
+                : "Mismatch in type argument size between " + typeArguments + " and " + declaredTypeParameters;
 
-        for (int i = 0; i < declaredTypeParameters.size(); ++i) {
-            final AnnotatedTypeVariable declaredTypeParam = (AnnotatedTypeVariable) declaredTypeParameters.get(i);
-            result.add(new AnnotatedTypeParameterBounds(declaredTypeParam.getUpperBound(), declaredTypeParam.getLowerBound()));
+        // System.err.printf("TVFU\n  type: %s\n  generic: %s\n", type, generic);
 
-            // TODO: Original InferenceAnnotatedTypeFactory#typeVariablesFromUse would create a combine constraint
-            // TODO: between the useType and the effectiveUpperBound of the declaredTypeParameter
-            // TODO: and then copy the annotations from the type with the CombVars to the declared type
+        Map<TypeVariable, AnnotatedTypeMirror> mapping = new HashMap<>();
+
+        for (int i = 0; i < typeArguments.size(); ++i) {
+            mapping.put(((AnnotatedTypeVariable) declaredTypeParameters.get(i)).getUnderlyingType(), typeArguments.get(i));
         }
+
+        final List<AnnotatedTypeParameterBounds> result = new ArrayList<>();
+        setViewpointAdaptationLocation(tree, viewpointAdapter);
+        viewpointAdaptTypeVariableBounds(useType, declaredTypeParameters, mapping, result);
 
         return result;
     }
@@ -353,8 +348,8 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                                               "Current path:\n" + this.visitorState.getPath();
         final ExecutableElement methodElem = TreeUtils.elementFromUse(methodInvocationTree);
 
-        // TODO: Used in comb constraints, going to leave it in to ensure the element has been visited
-        final AnnotatedExecutableType methodType = getAnnotatedType(methodElem);
+        //TODO: Used in comb constraints, going to leave it in to ensure the element has been visited
+        //final AnnotatedExecutableType methodType = getAnnotatedType(methodElem);
 
         final ExpressionTree methodSelectExpression = methodInvocationTree.getMethodSelect();
         final AnnotatedTypeMirror receiverType;
@@ -368,9 +363,11 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         // TODO: Add CombConstraints for method parameter types as well as return types
 
-        // TODO: Is the asMemberOf correct, was not in Werner's original implementation but I had added it
-        // TODO: It is also what the AnnotatedTypeFactory default implementation does
-        final AnnotatedExecutableType methodOfReceiver = AnnotatedTypes.asMemberOf(types, this, receiverType, methodElem);
+        //TODO: Is the asMemberOf correct, was not in Werner's original implementation but I had added it
+        //TODO: It is also what the AnnotatedTypeFactory default implementation does
+        final AnnotatedExecutableType methodOfReceiver = AnnotatedTypes.asMemberOf(types, this, receiverType, methodElem, methodInvocationTree);
+        setViewpointAdaptationLocation(methodInvocationTree, viewpointAdapter);
+        viewpointAdaptMethod(methodElem, receiverType, methodOfReceiver);
         Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> mfuPair = substituteTypeArgs(methodInvocationTree, methodElem, methodOfReceiver);
 
         AnnotatedExecutableType method = mfuPair.first;
@@ -381,6 +378,14 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             adaptGetClassReturnTypeToReceiver(method, receiverType);
         }
         return mfuPair;
+    }
+
+    private void setViewpointAdaptationLocation(Tree tree, ViewpointAdapter viewpointAdaptor) {
+        if (viewpointAdaptor == null) return;;
+        AnnotationLocation location = VariableAnnotator.treeToLocation(this, tree);
+        if (!(viewpointAdaptor instanceof InferenceViewpointAdapter))
+            ErrorReporter.errorAbort("In inference, viewpoint adaptor must be InferenceViewpointAdapter!");
+        ((InferenceViewpointAdapter)viewpointAdaptor).setLocation(location);
     }
 
     private final AnnotatedTypeScanner<Boolean, Void> fullyQualifiedVisitor = new AnnotatedTypeScanner<Boolean, Void>() {
@@ -411,13 +416,15 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         final AnnotatedTypeMirror constructorReturnType = fromNewClass(newClassTree);
         addComputedTypeAnnotations(newClassTree, constructorReturnType);
 
-        final AnnotatedExecutableType constructorType = AnnotatedTypes.asMemberOf(types, this, constructorReturnType, constructorElem);
+        AnnotatedExecutableType constructorType = AnnotatedTypes.asMemberOf(types, this, constructorReturnType, constructorElem, newClassTree);
+
+        setViewpointAdaptationLocation(newClassTree, viewpointAdapter);
+        constructorType = viewpointAdaptConstructor(constructorReturnType, constructorType);
 
         Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> substitutedPair = substituteTypeArgs(newClassTree, constructorElem, constructorType);
         inferencePoly.replacePolys(newClassTree, substitutedPair.first);
 
-        // TODO: ADD CombConstraints
-        // TODO: Should we be doing asMemberOf like super?
+        //TODO: Should we be doing asMemberOf like super?
         return substitutedPair;
     }
 
@@ -595,6 +602,11 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         this.realTypeFactory.setRoot( root );
         this.variableAnnotator.clearTreeInfo();
         super.setRoot(root);
+    }
+
+    @Override
+    protected InferenceViewpointAdapter createViewpointAdapter() {
+        return withCombineConstraints?new InferenceViewpointAdapter():null;
     }
 }
 
