@@ -117,6 +117,13 @@ public interface SlotManager {
     AnnotationMirror getAnnotation( Slot slot );
 
     /**
+     * Returns the AnnotationMirror in VarAnnot hierarchy of this atm
+     * @param atm AnnotatedTypeMirror from which we extract AnnotationMirror
+     * @return VarAnnot in atm
+     */
+    AnnotationMirror getAnnotation( AnnotatedTypeMirror atm);
+
+    /**
      * Return the Slot (or an equivalent Slot) that is represented by the given AnnotationMirror.  A RuntimeException
      * is thrown if the annotation isn't a VarAnnot, RefVarAnnot, CombVarAnnot or a member of one of the
      * REAL_QUALIFIER set provided by InferenceChecker.

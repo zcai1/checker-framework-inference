@@ -162,6 +162,11 @@ public class DefaultSlotManager implements SlotManager {
         throw new IllegalArgumentException("Slot type unrecognized( " + slot.getClass() + ") Slot=" + slot.toString() );
     }
 
+    @Override
+    public AnnotationMirror getAnnotation(AnnotatedTypeMirror atm) {
+        return getAnnotation(getVariableSlot(atm));
+    }
+
     /**
      * Converts the given VariableSlot into an annotation using the given AnnotationBuiklder
      * @param variable VariableSlot to convert

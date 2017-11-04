@@ -195,7 +195,8 @@ public class InferenceVisitor<Checker extends InferenceChecker,
     }
 
     public void mainIs(AnnotatedTypeMirror ty, AnnotationMirror mod, String msgkey, Tree node) {
-        annoIs(ty, ty.getAnnotationInHierarchy(mod), mod, msgkey, node);
+        final SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
+        annoIs(ty, slotManager.getAnnotation(ty), mod, msgkey, node);
     }
 
     public void mainIsSubtype(AnnotatedTypeMirror ty, AnnotationMirror mod, String msgkey, Tree node) {
