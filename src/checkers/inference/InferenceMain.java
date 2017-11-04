@@ -282,7 +282,7 @@ public class InferenceMain {
         return visitor;
     }
 
-    private InferrableChecker getRealChecker() {
+    public InferrableChecker getRealChecker() {
         if (realChecker == null) {
             try {
                 realChecker = (InferrableChecker) Class.forName(
