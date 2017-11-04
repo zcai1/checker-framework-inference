@@ -637,7 +637,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
         case IDENTIFIER:
             VariableSlot primary = addPrimaryVariable(adt, tree);
             handleWasRawDeclaredTypes(adt);
-            addDeclarationConstraints(getOrCreateDeclBound(adt), primary);
+            handleInstantiationConstraint(adt, primary, tree);
             break;
 
         case VARIABLE:
@@ -665,7 +665,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
 
             if (typeParamTree.getBounds().isEmpty()) {
                 primary = addPrimaryVariable(adt, tree);
-                addDeclarationConstraints(getOrCreateDeclBound(adt), primary);
+                handleInstantiationConstraint(adt, primary, tree);
                 // TODO: HANDLE MISSING EXTENDS BOUND?
             } else {
                 visit(adt, typeParamTree.getBounds().get(0));
@@ -682,7 +682,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
                     && ((MemberSelectTree) tree).getExpression().getKind() != Tree.Kind.IDENTIFIER) {
                 visit(adt.getEnclosingType(), ((MemberSelectTree) tree).getExpression());
             }
-            addDeclarationConstraints(getOrCreateDeclBound(adt), primary);
+            handleInstantiationConstraint(adt, primary, tree);
             break;
 
         case PARAMETERIZED_TYPE:
@@ -721,7 +721,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
                     visit(typeArg, treeArgs.get(i));
                 }
             }
-            addDeclarationConstraints(getOrCreateDeclBound(newAdt), primary);
+            handleInstantiationConstraint(adt, primary, tree);
             break;
 
         default:
@@ -807,14 +807,30 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
 
         visitTogether(classType.getTypeArguments(), classTree.getTypeParameters());
 
-        VariableSlot varSlot = getOrCreateDeclBound(classType);
-        classType.addAnnotation(slotManager.getAnnotation(varSlot));
+        handleClassDeclarationBound(classType);
 
         //before we were relying on trees but the ClassTree has it's type args erased
         //when the compiler moves on to the next class
         Element classElement = classType.getUnderlyingType().asElement();
         storeElementType(classElement, classType);
 
+    }
+
+    protected void handleClassDeclarationBound(
+            AnnotatedDeclaredType classType) {
+        VariableSlot boundSlot = getOrCreateDeclBound(classType);
+        // Add the VarAnnot associated with boundSlot to classType
+        classType.addAnnotation(slotManager.getAnnotation(boundSlot));
+    }
+
+    protected void handleInstantiationConstraint(AnnotatedDeclaredType adt,
+                                                 VariableSlot instantiationSlot,
+                                                 Tree tree) {
+        // From the invocation of a class, get the declaration bound of its
+        // class declaration
+        VariableSlot boundSlot = getOrCreateDeclBound(adt);
+        /*AnnotationLocation location = treeToLocation(tree);*/
+        constraintManager.addSubtypeConstraint(instantiationSlot, boundSlot);
     }
 
     /**

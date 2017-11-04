@@ -265,7 +265,7 @@ public class InferenceValidator extends AnnotatedTypeScanner<Void, Tree> impleme
         if (checker.shouldSkipUses(element))
             return null;
 
-        List<AnnotatedTypeParameterBounds> typevars = atypeFactory.typeVariablesFromUse(type, element);
+        List<AnnotatedTypeParameterBounds> typevars = atypeFactory.typeVariablesFromUse(type, element, tree);
 
         visitor.checkTypeArguments(tree, typevars, type.getTypeArguments(),
                 tree.getTypeArguments());
