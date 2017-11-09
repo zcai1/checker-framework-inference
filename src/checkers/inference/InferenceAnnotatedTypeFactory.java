@@ -107,7 +107,7 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     protected final InferrableChecker realChecker;
     private final InferenceChecker inferenceChecker;
     protected final SlotManager slotManager;
-    private final ConstraintManager constraintManager;
+    protected final ConstraintManager constraintManager;
     private final ExistentialVariableInserter existentialInserter;
     private final BytecodeTypeAnnotator bytecodeTypeAnnotator;
     private final AnnotationMirror realTop;
