@@ -72,6 +72,13 @@ public class InferenceTestExecutor {
         }
 
         final List<String> options = new ArrayList<String>();
+        if ("".equals(configuration.getPathToInferenceScript()) || configuration.getPathToInferenceScript() == null) {
+            return new InferenceResult(configuration, "System property \"path.inference.script\" must be set before running inference, but now is: " + configuration.getPathToInferenceScript(), true);
+        }
+        if ("".equals(configuration.getPathToAfuScripts()) || configuration.getPathToAfuScripts() == null) {
+            return new InferenceResult(
+                    configuration, "System property \"path.afu.scripts\" must be set before inserting inference solutions, but now is: " + configuration.getPathToAfuScripts(), true);
+        }
         options.add(configuration.getPathToInferenceScript());
         options.add("--mode=INFER");
         options.add("--checker=" + initialConfig.getProcessors().get(0));
