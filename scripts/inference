@@ -32,4 +32,6 @@ export LD_LIBRARY_PATH=${libDir}
 
 echo "external_checker_classpath:"
 echo "$external_checker_classpath"
+echo "Using classpath:"
+echo "$classpath"
 eval "java -classpath  "$classpath" checkers.inference.InferenceLauncher " "$@"
