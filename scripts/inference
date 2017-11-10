@@ -30,4 +30,6 @@ fi
 export DYLD_LIBRARY_PATH=${libDir}
 export LD_LIBRARY_PATH=${libDir}
 
+echo "external_checker_classpath:"
+echo "$external_checker_classpath"
 eval "java -classpath  "$classpath" checkers.inference.InferenceLauncher " "$@"
