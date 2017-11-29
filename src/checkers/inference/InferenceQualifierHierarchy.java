@@ -193,7 +193,7 @@ public class InferenceQualifierHierarchy extends MultiGraphQualifierHierarchy {
         final AnnotationMirror lhsVarAnnot = findVarAnnot(lhsAnnos);
 
         if (InferenceMain.isHackMode((rhsVarAnnot == null || lhsAnnos == null))) {
-                InferenceMain.getInstance().logger.warning(
+                InferenceMain.getInstance().logger.info(
                     "Hack:InferenceQualifierHierarchy:165:\n"
                   + "    rhs=" + PluginUtil.join(", ", rhsAnnos) + "\n"
                   + "    lhs=" + PluginUtil.join(", ", lhsAnnos ));
@@ -231,7 +231,7 @@ public class InferenceQualifierHierarchy extends MultiGraphQualifierHierarchy {
     @Override
     public AnnotationMirror leastUpperBound(final AnnotationMirror a1, final AnnotationMirror a2) {
         if (InferenceMain.isHackMode( (a1 == null || a2 == null))) {
-            InferenceMain.getInstance().logger.warning(
+            InferenceMain.getInstance().logger.info(
                     "Hack:InferenceQualifierHierarchy:204\n"
                   + "a1=" + a1 + "\n"
                   + "a2=" + a2);

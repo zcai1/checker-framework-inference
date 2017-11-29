@@ -255,7 +255,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
      *                actual implied tree appended to it.
      * @return A new VariableSlot corresponding to tree
      */
-    private VariableSlot createVariable(final AnnotationLocation location) {
+    protected VariableSlot createVariable(final AnnotationLocation location) {
         final VariableSlot variableSlot = slotManager
                 .createVariableSlot(location);
         return variableSlot;
@@ -537,7 +537,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
      * the type.
      */
     public VariableSlot addImpliedPrimaryVariable(AnnotatedTypeMirror atm, final AnnotationLocation location) {
-        VariableSlot variable = slotManager.createVariableSlot(location);
+        VariableSlot variable = createVariable(location);
         atm.addAnnotation(slotManager.getAnnotation(variable));
 
         AnnotationMirror realAnno = atm.getAnnotationInHierarchy(realTop);
@@ -821,7 +821,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
      */
     private AnnotationLocation createImpliedExtendsLocation(ClassTree classTree) {
         // TODO: THIS CAN BE CREATED ONCE THIS IS FIXED: https://github.com/typetools/annotation-tools/issues/100
-        InferenceMain.getInstance().logger.warning("Hack:VariableAnnotator::createImpliedExtendsLocation(classTree) not implemented");
+        InferenceMain.getInstance().logger.info("Hack:VariableAnnotator::createImpliedExtendsLocation(classTree) not implemented");
         return AnnotationLocation.MISSING_LOCATION;
     }
 

@@ -1,12 +1,11 @@
 package checkers.inference.solver.strategy;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 import javax.lang.model.element.AnnotationMirror;
 
-import checkers.inference.DefaultInferenceSolution;
-import checkers.inference.InferenceSolution;
+import checkers.inference.DefaultInferenceResult;
+import checkers.inference.InferenceResult;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
 import checkers.inference.solver.backend.Solver;
@@ -21,14 +20,14 @@ public class PlainSolvingStrategy extends AbstractSolvingStrategy implements Sol
     }
 
     @Override
-    public InferenceSolution solve(SolverEnvironment solverEnvironment, Collection<Slot> slots,
-            Collection<Constraint> constraints, Lattice lattice) {
+    public InferenceResult solve(SolverEnvironment solverEnvironment, Collection<Slot> slots,
+                                 Collection<Constraint> constraints, Lattice lattice) {
 
         Solver<?> underlyingSolver = solverFactory.createSolver(solverEnvironment, slots, constraints, lattice);
 
         Map<Integer, AnnotationMirror> result = underlyingSolver.solve();
 
-        return new DefaultInferenceSolution(result);
+        return new DefaultInferenceResult(result, !result.isEmpty() ? new LinkedList<>() : underlyingSolver.explainUnsatisfiable());
     }
 
 

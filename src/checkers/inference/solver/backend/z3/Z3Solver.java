@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 
 import org.checkerframework.javacutil.ErrorReporter;
@@ -46,7 +45,7 @@ public class Z3Solver extends Solver<Z3BitVectorFormatTranslator>{
     public Map<Integer, AnnotationMirror> solve() {
         Map<Integer, AnnotationMirror> result = new HashMap<>();
 
-        convertAll();
+        encodeAllConstraints();
 
         switch (solver.Check()) {
             case SATISFIABLE: {
@@ -69,7 +68,12 @@ public class Z3Solver extends Solver<Z3BitVectorFormatTranslator>{
     }
 
     @Override
-    protected void convertAll() {
+    public Collection<Constraint> explainUnsatisfiable() {
+        return null;// Doesn't support right now
+    }
+
+    @Override
+    protected void encodeAllConstraints() {
         for (Constraint constraint : constraints) {
             BoolExpr serializedConstraint = constraint.serialize(formatTranslator);
 

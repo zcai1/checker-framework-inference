@@ -96,7 +96,7 @@ public class InferenceMain {
     private SlotManager slotManager;
 
     // Hold the results of solving.
-    private InferenceSolution solverResult;
+    private InferenceResult solverResult;
 
     // Turn off some of the checks so that more bodies of code pass.
     // Eventually we will get rid of this.
@@ -143,6 +143,12 @@ public class InferenceMain {
         // Start up javac
         startCheckerFramework();
         solve();
+        // solverResult = null covers case when debug solver is used, but in this case
+        // shouldn't exit
+        if (solverResult != null && solverResult.isEmpty()) {
+            // TODO Do something to stop the inferene process
+            System.exit(1);
+        }
         writeJaif();
     }
 

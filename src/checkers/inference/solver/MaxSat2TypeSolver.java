@@ -1,5 +1,6 @@
 package checkers.inference.solver;
 
+import checkers.inference.*;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.javacutil.AnnotationUtils;
 
@@ -14,11 +15,7 @@ import javax.lang.model.element.AnnotationMirror;
 import org.sat4j.core.VecInt;
 import org.sat4j.maxsat.WeightedMaxSatDecorator;
 
-import checkers.inference.DefaultInferenceSolution;
-import checkers.inference.InferenceMain;
-import checkers.inference.InferenceSolution;
-import checkers.inference.InferenceSolver;
-import checkers.inference.SlotManager;
+import checkers.inference.DefaultInferenceResult;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
@@ -27,7 +24,7 @@ import checkers.inference.model.serialization.CnfVecIntSerializer;
 /**
  * This solver is used to convert any constraint set using a type system with only 2 types (Top/Bottom),
  * into a SAT problem.  This SAT problem is then solved by SAT4J and the output is converted back
- * into an InferenceSolution.
+ * into an InferenceResult.
  */
 public class MaxSat2TypeSolver implements InferenceSolver {
 
@@ -42,7 +39,7 @@ public class MaxSat2TypeSolver implements InferenceSolver {
     private SlotManager slotManager;
 
     @Override
-    public InferenceSolution solve(
+    public InferenceResult solve(
             Map<String, String> configuration,
             Collection<Slot> slots,
             Collection<Constraint> constraints,
@@ -68,7 +65,7 @@ public class MaxSat2TypeSolver implements InferenceSolver {
         return solve();
     }
 
-    public InferenceSolution solve() {
+    public InferenceResult solve() {
         final Map<Integer, AnnotationMirror> result = new HashMap<>();
 
         final List<VecInt> clauses = serializer.convertAll(constraints);
@@ -79,7 +76,7 @@ public class MaxSat2TypeSolver implements InferenceSolver {
         // the number of slots but the maximum you might encounter.
         // TODO: this is a workaround as currently when serialize existential constraint we lost the real existential
         // TODO: variable id and create "fake" id stored in existentialToPotentialVar map.
-        // TODO: thus here the value of totalVars is the real slots number stored in slotManager, and plus the 
+        // TODO: thus here the value of totalVars is the real slots number stored in slotManager, and plus the
         // TODO: "fake" slots number stored in existentialToPotentialVar
         final int totalVars = slotManager.getNumberOfSlots() + serializer.getExistentialToPotentialVar().size();
         final int totalClauses =  clauses.size();
@@ -132,6 +129,6 @@ public class MaxSat2TypeSolver implements InferenceSolver {
         }
 
 
-        return new DefaultInferenceSolution(result);
+        return new DefaultInferenceResult(result, null);
     }
 }

@@ -10,22 +10,23 @@ import java.util.logging.Level;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 
+import checkers.inference.AbstractInferenceResult;
 import checkers.inference.InferenceMain;
-import checkers.inference.InferenceSolution;
+import checkers.inference.InferenceResult;
 import sparta.checkers.iflow.util.PFPermission;
 
 /**
  * Created by smillst on 9/21/15.
  */
-public abstract class IFlowSolution implements InferenceSolution {
+public abstract class IFlowResult extends AbstractInferenceResult {
     protected final Map<Integer, Set<PFPermission>> results;
     protected final Map<Integer, Boolean> idToExistance;
-    protected final Map<Integer, AnnotationMirror> annotationResults;
 
-    public IFlowSolution(Collection<PermissionSolution> solutions, ProcessingEnvironment processingEnv) {
+    public IFlowResult(Collection<PermissionSolution> solutions, ProcessingEnvironment processingEnv) {
+        // Class solver doesn't support providing set of unsatisfiable constraints, so set it to null
+        super(new HashMap<>(), null);
         this.results = new HashMap<>();
         this.idToExistance = new HashMap<>();
-        this.annotationResults = new HashMap<>();
 
         merge(solutions);
         createAnnotations(processingEnv);
@@ -98,4 +99,8 @@ public abstract class IFlowSolution implements InferenceSolution {
         return annotationResults.get(varId);
     }
 
+    @Override
+    public boolean isEmpty() {
+        return annotationResults.isEmpty();
+    }
 }

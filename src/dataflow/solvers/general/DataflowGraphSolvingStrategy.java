@@ -11,12 +11,13 @@ import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 
+import checkers.inference.DefaultInferenceResult;
+import com.sun.tools.javac.util.Pair;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 
-import checkers.inference.DefaultInferenceSolution;
 import checkers.inference.InferenceMain;
-import checkers.inference.InferenceSolution;
+import checkers.inference.InferenceResult;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
 import checkers.inference.solver.backend.Solver;
@@ -47,8 +48,8 @@ public class DataflowGraphSolvingStrategy extends GraphSolvingStrategy {
     }
 
     @Override
-    public InferenceSolution solve(SolverEnvironment solverEnvironment, Collection<Slot> slots,
-            Collection<Constraint> constraints, Lattice lattice) {
+    public InferenceResult solve(SolverEnvironment solverEnvironment, Collection<Slot> slots,
+                                 Collection<Constraint> constraints, Lattice lattice) {
         this.processingEnvironment = solverEnvironment.processingEnvironment;
         return super.solve(solverEnvironment, slots, constraints, lattice);
     }
@@ -98,11 +99,12 @@ public class DataflowGraphSolvingStrategy extends GraphSolvingStrategy {
     }
 
     @Override
-    protected InferenceSolution mergeSolution(List<Map<Integer, AnnotationMirror>> inferenceSolutionMaps) {
+    protected InferenceResult mergeInferenceResults(List<Pair<Map<Integer, AnnotationMirror>, Collection<Constraint>>> inferenceResults) {
         Map<Integer, AnnotationMirror> result = new HashMap<>();
         Map<Integer, Set<AnnotationMirror>> dataflowResults = new HashMap<>();
 
-        for (Map<Integer, AnnotationMirror> inferenceSolutionMap : inferenceSolutionMaps) {
+        for (Pair<Map<Integer, AnnotationMirror>, Collection<Constraint>> inferenceResult : inferenceResults) {
+            Map<Integer, AnnotationMirror> inferenceSolutionMap = inferenceResult.fst;
             for (Map.Entry<Integer, AnnotationMirror> entry : inferenceSolutionMap.entrySet()) {
                 Integer id = entry.getKey();
                 AnnotationMirror dataflowAnno = entry.getValue();
@@ -142,6 +144,12 @@ public class DataflowGraphSolvingStrategy extends GraphSolvingStrategy {
 
         PrintUtils.printResult(result);
         StatisticRecorder.record(StatisticKey.ANNOTATOIN_SIZE, (long) result.size());
-        return new DefaultInferenceSolution(result);
+
+        Set<Constraint> explanations = new HashSet<>();
+
+        for (Pair<Map<Integer, AnnotationMirror>, Collection<Constraint>> inferenceResult : inferenceResults) {
+            explanations.addAll(inferenceResult.snd);
+        }
+        return new DefaultInferenceResult(result, explanations);
     }
 }
