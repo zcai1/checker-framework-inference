@@ -3,16 +3,21 @@ package checkers.inference.solver.util;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.lang.model.element.AnnotationMirror;
 
 import checkers.inference.InferenceMain;
+import checkers.inference.model.*;
+import checkers.inference.model.serialization.ToStringSerializer;
 import checkers.inference.solver.util.StatisticRecorder.StatisticKey;
 
 /**
  * PrintUtils contains methods for printing and writing the solved results.
- * 
+ *
  * @author jianchu
  *
  */
@@ -45,7 +50,7 @@ public class PrintUtils {
     }
 
     public static void writeResult(Map<Integer, AnnotationMirror> result) {
-        
+
         final int maxLength = String.valueOf(InferenceMain.getInstance().getSlotManager().getNumberOfSlots()).length();
         StringBuilder printResult = new StringBuilder();
 
@@ -96,7 +101,7 @@ public class PrintUtils {
 
     /**
      * Print the statistics out.
-     * 
+     *
      * @param statistic
      * @param modelRecord
      * @param solverType
@@ -141,5 +146,134 @@ public class PrintUtils {
         statisticsText.append(",");
         statisticsText.append(value);
         statisticsText.append("\n");
+    }
+
+    public static void printUnsolvable(Collection<Constraint> mus) {
+        if (mus == null) {
+            System.out.println("The backend you used doesn't support explanation feature!");
+            return;
+        }
+
+        ToStringSerializer toStringSerializer = new ToStringSerializer(false);
+        SlotPrinter slotPrinter = new SlotPrinter(toStringSerializer);
+        // Print constraints and related slots
+        System.out.println("\n=================================== Explanation Starts=================================\n");
+        System.out.println("------------------ Unsatisfactory Constraints ------------------\n");
+        for (Constraint constraint : mus) {
+            System.out.println("\t" + constraint.serialize(toStringSerializer) + " \n\t    " + constraint.getLocation().toString() + "\n");
+        }
+        System.out.println("------------- Related Slots -------------\n");
+        for (Constraint c : mus) {
+            c.serialize(slotPrinter);
+        }
+        System.out.println("=================================== Explanation Ends Here ================================");
+    }
+
+    /**
+     * Created by mier on 04/08/17.
+     * Transitively prints all non-constant slots in a constraint. Each slot is only
+     * printed once.
+     */
+    public static final class SlotPrinter implements Serializer<Void, Void> {
+
+        /**Delegatee that serializes slots to string representation.*/
+        private final ToStringSerializer toStringSerializer;
+        /**Stores already-printed slots so they won't be printed again.*/
+        private final Set<Slot> printedSlots;
+
+
+        public SlotPrinter(final ToStringSerializer toStringSerializer) {
+            this.toStringSerializer = toStringSerializer;
+            printedSlots = new HashSet<>();
+        }
+
+        private void printSlotIfNotPrinted(Slot slot) {
+            if (printedSlots.add(slot) && !(slot instanceof ConstantSlot)) {
+                System.out.println("\t" + slot.serialize(toStringSerializer) + " \n\t    " + slot.getLocation() + "\n");
+            }
+        }
+
+        @Override
+        public Void serialize(SubtypeConstraint constraint) {
+            constraint.getSubtype().serialize(this);
+            constraint.getSupertype().serialize(this);
+            return null;
+        }
+
+        @Override
+        public Void serialize(EqualityConstraint constraint) {
+            constraint.getFirst().serialize(this);
+            constraint.getSecond().serialize(this);
+            return null;
+        }
+
+        @Override
+        public Void serialize(ExistentialConstraint constraint) {
+            constraint.getPotentialVariable().serialize(this);
+            return null;
+        }
+
+        @Override
+        public Void serialize(InequalityConstraint constraint) {
+            constraint.getFirst().serialize(this);
+            constraint.getSecond().serialize(this);
+            return null;
+        }
+
+        @Override
+        public Void serialize(ComparableConstraint comparableConstraint) {
+            comparableConstraint.getFirst().serialize(this);
+            comparableConstraint.getSecond().serialize(this);
+            return null;
+        }
+
+        @Override
+        public Void serialize(CombineConstraint combineConstraint) {
+            combineConstraint.getResult().serialize(this);
+            combineConstraint.getTarget().serialize(this);
+            combineConstraint.getDeclared().serialize(this);
+            return null;
+        }
+
+        @Override
+        public Void serialize(PreferenceConstraint preferenceConstraint) {
+            preferenceConstraint.getVariable().serialize(this);
+            return null;
+        }
+
+        @Override
+        public Void serialize(VariableSlot slot) {
+            printSlotIfNotPrinted(slot);
+            return null;
+        }
+
+        @Override
+        public Void serialize(ConstantSlot slot) {
+            return null;
+        }
+
+        @Override
+        public Void serialize(ExistentialVariableSlot slot) {
+            slot.getPotentialSlot().serialize(this);
+            slot.getAlternativeSlot().serialize(this);
+            printSlotIfNotPrinted(slot);
+            return null;
+        }
+
+        @Override
+        public Void serialize(RefinementVariableSlot slot) {
+            slot.getRefined().serialize(this);
+            printSlotIfNotPrinted(slot);
+            return null;
+        }
+
+        @Override
+        public Void serialize(CombVariableSlot slot) {
+            slot.getFirst().serialize(this);
+            slot.getSecond().serialize(this);
+            printSlotIfNotPrinted(slot);
+            return null;
+        }
+
     }
 }

@@ -10,24 +10,25 @@ import java.util.logging.Level;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 
+import checkers.inference.AbstractInferenceResult;
 import checkers.inference.InferenceMain;
-import checkers.inference.InferenceSolution;
+import checkers.inference.InferenceResult;
 import checkers.inference.solver.util.PrintUtils;
 import dataflow.DataflowAnnotatedTypeFactory;
 import dataflow.util.DataflowUtils;
 
-public class DataflowSolution implements InferenceSolution {
+public class DataflowResult extends AbstractInferenceResult {
     private final Map<Integer, Set<String>> typeNameResults;
     private final Map<Integer, Set<String>> typeRootResults;
     private final Map<Integer, Boolean> idToExistance;
-    private final Map<Integer, AnnotationMirror> annotationResults;
     private final DataflowAnnotatedTypeFactory realTypeFactory;
 
-    public DataflowSolution(Collection<DatatypeSolution> solutions, ProcessingEnvironment processingEnv) {
+    public DataflowResult(Collection<DatatypeSolution> solutions, ProcessingEnvironment processingEnv) {
+        // Classic solver doesn't support providing set of unsatisfiable constraints, so set it to null
+        super(new HashMap<>(), null);
         this.typeNameResults = new HashMap<>();
         this.typeRootResults = new HashMap<>();
         this.idToExistance = new HashMap<>();
-        this.annotationResults = new HashMap<>();
         this.realTypeFactory = (DataflowAnnotatedTypeFactory)InferenceMain.getInstance().getRealTypeFactory();
         merge(solutions);
         createAnnotations(processingEnv);
@@ -85,7 +86,7 @@ public class DataflowSolution implements InferenceSolution {
             }
             annotationResults.put(slotId, anno);
         }
-        
+
         for (Map.Entry<Integer, Set<String>> entry : typeRootResults.entrySet()) {
             int slotId = entry.getKey();
             Set<String> roots = entry.getValue();
@@ -128,6 +129,11 @@ public class DataflowSolution implements InferenceSolution {
     @Override
     public AnnotationMirror getAnnotation(int varId) {
         return annotationResults.get(varId);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return annotationResults.isEmpty();
     }
 
 }

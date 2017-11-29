@@ -1,6 +1,7 @@
 package checkers.inference.model;
 
 import checkers.inference.util.ConstraintVerifier;
+import com.sun.source.tree.Tree;
 import org.checkerframework.framework.source.Result;
 import org.checkerframework.framework.source.SourceChecker;
 import org.checkerframework.framework.type.QualifierHierarchy;
@@ -80,7 +81,10 @@ public class ConstraintManager {
 
             if (!constraintVerifier.isSubtype(subConstant, superConstant)) {
                 checker.report(Result.failure("subtype.constraint.unsatisfiable", subtype, supertype),
-                        visitorState.getPath().getLeaf());
+                        // visitorState.getPath().getLeaf() caused NullPointerException on some real project
+                        // and doesn't always return correct source tree. Using class tree at least shows which
+                        // Java source class there is such unsatisfiable error and also doesn't throw exception
+                        visitorState.getClassTree());
             }
         }
         return new SubtypeConstraint(subtype, supertype, getCurrentLocation());
@@ -96,7 +100,7 @@ public class ConstraintManager {
             ConstantSlot secondConstant = (ConstantSlot) second;
             if (!constraintVerifier.areEqual(firstConstant, secondConstant)) {
                 checker.report(Result.failure("equality.constraint.unsatisfiable", first, second),
-                        visitorState.getPath().getLeaf());
+                        visitorState.getClassTree());
             }
         }
         return new EqualityConstraint(first, second, getCurrentLocation());
@@ -112,7 +116,7 @@ public class ConstraintManager {
             ConstantSlot secondConstant = (ConstantSlot) second;
             if (constraintVerifier.areEqual(firstConstant, secondConstant)) {
                 checker.report(Result.failure("inequality.constraint.unsatisfiable", first, second),
-                        visitorState.getPath().getLeaf());
+                        visitorState.getClassTree());
             }
         }
         return new InequalityConstraint(first, second, getCurrentLocation());
@@ -128,7 +132,7 @@ public class ConstraintManager {
             ConstantSlot secondConstant = (ConstantSlot) second;
             if (!constraintVerifier.areComparable(firstConstant, secondConstant)) {
                 checker.report(Result.failure("comparable.constraint.unsatisfiable", first, second),
-                        visitorState.getPath().getLeaf());
+                        visitorState.getClassTree());
             }
         }
         return new ComparableConstraint(first, second, getCurrentLocation());

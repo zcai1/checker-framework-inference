@@ -1,5 +1,7 @@
 package sparta.checkers.propagation;
 
+import checkers.inference.DefaultInferenceResult;
+import checkers.inference.InferenceResult;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.javacutil.AnnotationBuilder;
 
@@ -19,8 +21,6 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 
-import checkers.inference.DefaultInferenceSolution;
-import checkers.inference.InferenceSolution;
 import checkers.inference.InferenceSolver;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Constraint;
@@ -75,7 +75,7 @@ public abstract class IFlowSolver implements InferenceSolver {
     // private final Map<String, Set<String>> flowPolicy = new HashMap<>();
 
     @Override
-    public InferenceSolution solve(
+    public InferenceResult solve(
             Map<String, String> configuration,
             Collection<Slot> slots,
             Collection<Constraint> constraints,
@@ -129,7 +129,7 @@ public abstract class IFlowSolver implements InferenceSolver {
 
         Map<Integer, AnnotationMirror> result = createAnnotations();
 
-        return new DefaultInferenceSolution(result);
+        return new DefaultInferenceResult(result, null);
     }
 
     private Map<Integer, AnnotationMirror> createAnnotations() {

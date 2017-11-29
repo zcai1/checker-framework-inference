@@ -202,8 +202,9 @@ public class InferenceValidator extends AnnotatedTypeScanner<Void, Tree> impleme
             // ParameterizedTypeTree));
             break;
         default:
-            System.err.printf("TypeValidator.visitDeclared unhandled tree: %s of kind %s\n",
-                            tree, tree.getKind());
+            // This caused too many error outputs
+//            System.err.printf("TypeValidator.visitDeclared unhandled tree: %s of kind %s\n",
+//                            tree, tree.getKind());
         }
 
         return Pair.of(typeargtree, type);

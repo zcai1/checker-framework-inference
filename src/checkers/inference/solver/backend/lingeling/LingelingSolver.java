@@ -28,7 +28,7 @@ import checkers.inference.solver.util.StatisticRecorder.StatisticKey;
 /**
  * LingelingSolver is also a MaxSatSolver but it calls Lingeling SAT solver to
  * solve the clauses.
- * 
+ *
  * @author jianchu
  *
  */
@@ -55,11 +55,11 @@ public class LingelingSolver extends MaxSatSolver {
         Map<Integer, AnnotationMirror> result = new HashMap<>();
 
         this.serializationStart = System.currentTimeMillis();
-        this.convertAll();
+        this.encodeAllConstraints();
         this.serializationEnd = System.currentTimeMillis();
 
         for (Integer varSlotId : this.varSlotIds) {
-            formatTranslator.generateOneHotClauses(hardClauses, varSlotId);
+            hardClauses.addAll(formatTranslator.generateWellFormednessClauses(varSlotId));
         }
 
         buildCNF();
@@ -89,7 +89,7 @@ public class LingelingSolver extends MaxSatSolver {
 
     /**
      * Create Lingeling process, and read output and error.
-     * 
+     *
      * @param command
      * @return and int array, which stores truth assignment for CNF predicate.
      * @throws IOException

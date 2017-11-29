@@ -23,7 +23,7 @@ import checkers.inference.solver.util.StatisticRecorder.StatisticKey;
  * converts constraint into LogiQL data. With both predicate and data created,
  * it calls LogicBloxRunner that runs logicblox to solve the LogiQL, and reads
  * the output. Finally the output will be sent to DecodingTool and get decoded.
- * 
+ *
  * @author jianchu
  *
  */
@@ -57,7 +57,7 @@ public class LogiQLSolver extends Solver<LogiQLFormatTranslator> {
                 lattice, localNth);
         constraintGenerator.GenerateLogiqlEncoding();
         this.serializationStart = System.currentTimeMillis();
-        this.convertAll();
+        this.encodeAllConstraints();
         this.serializationEnd = System.currentTimeMillis();
         StatisticRecorder.record(StatisticKey.LOGIQL_SERIALIZATION_TIME,
                 (serializationEnd - serializationStart));
@@ -80,7 +80,12 @@ public class LogiQLSolver extends Solver<LogiQLFormatTranslator> {
     }
 
     @Override
-    public void convertAll() {
+    public Collection<Constraint> explainUnsatisfiable() {
+        return null;// Doesn't support right now
+    }
+
+    @Override
+    public void encodeAllConstraints() {
         for (Constraint constraint : constraints) {
             collectVarSlots(constraint);
             String serializedConstrant = constraint.serialize(formatTranslator);

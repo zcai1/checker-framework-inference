@@ -1,12 +1,16 @@
 package checkers.inference;
 
+import checkers.inference.model.Constraint;
+
 import javax.lang.model.element.AnnotationMirror;
+import java.util.Collection;
+import java.util.Set;
 
 /**
- * Returned by InferenceSolvers, InferenceSolution represents the result of
+ * Returned by InferenceSolvers, InferenceResult represents the result of
  * inference.
  */
-public interface InferenceSolution {
+public interface InferenceResult {
     /**
      * Was a solution inferred for the given variable ID? Equivalent to
      * getAnnotation(id) != null.
@@ -18,5 +22,9 @@ public interface InferenceSolution {
      * doesVariableExist(id) is false.
      */
     AnnotationMirror getAnnotation(int varId);
+
+    boolean isEmpty();
+
+    Collection<Constraint> getUnsatisfiableConstraints();
 }
 

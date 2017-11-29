@@ -1,5 +1,6 @@
 package checkers.inference.solver;
 
+import checkers.inference.InferenceResult;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.javacutil.AnnotationUtils;
 
@@ -14,9 +15,8 @@ import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 
-import checkers.inference.DefaultInferenceSolution;
+import checkers.inference.DefaultInferenceResult;
 import checkers.inference.InferenceMain;
-import checkers.inference.InferenceSolution;
 import checkers.inference.InferenceSolver;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Constraint;
@@ -45,7 +45,7 @@ public class PropagationSolver implements InferenceSolver {
     private AnnotationMirror bottom;
 
     @Override
-    public InferenceSolution solve(
+    public InferenceResult solve(
             Map<String, String> configuration,
             Collection<Slot> slots,
             Collection<Constraint> constraints,
@@ -89,7 +89,7 @@ public class PropagationSolver implements InferenceSolver {
      *
      * @return Map of int variable id to its inferred AnnotationMirror value
      */
-    public InferenceSolution solve() {
+    public InferenceResult solve() {
 
         Set<VariableSlot> fixedBottom = new HashSet<VariableSlot>();
         Set<VariableSlot> fixedTop = new HashSet<VariableSlot>();
@@ -196,7 +196,7 @@ public class PropagationSolver implements InferenceSolver {
      *
      * @return
      */
-    private InferenceSolution mergeResults(
+    private InferenceResult mergeResults(
             Set<VariableSlot> fixedBottom, Set<VariableSlot> fixedTop,
             Set<VariableSlot> inferredTop, Set<VariableSlot> inferredBottom) {
 
@@ -222,7 +222,7 @@ public class PropagationSolver implements InferenceSolver {
             }
         }
 
-        return new DefaultInferenceSolution(results);
+        return new DefaultInferenceResult(results, null);
     }
 
     /**
