@@ -177,7 +177,7 @@ import nninf.qual.KeyFor;
         if (right instanceof MethodInvocationTree) {
             MethodInvocationTree invok = (MethodInvocationTree)right;
             if (TreeUtils.isMethodInvocation(invok, mapGet, env)) {
-                Element containsArgument = InternalUtils.symbol(invok.getArguments().get(0));
+                Element containsArgument = TreeUtils.elementFromTree(invok.getArguments().get(0));
                 if (key.equals(containsArgument) && map.equals(getSite(invok)))
                     return true;
             }

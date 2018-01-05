@@ -22,6 +22,7 @@ import checkers.inference.SlotManager;
 import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
+import org.checkerframework.javacutil.TypesUtils;
 
 /**
  * InferenceValue extends CFValue for inference.
@@ -184,8 +185,8 @@ public class InferenceValue extends CFValue {
         // Create new full type (with the same underlying type), and then add
         // the appropriate annotations.
         TypeMirror underlyingType =
-                InternalUtils.leastUpperBound(analysis.getEnv(),
-                        getUnderlyingType(), other.getUnderlyingType());
+                TypesUtils.leastUpperBound(getUnderlyingType(),
+                        other.getUnderlyingType(), analysis.getEnv());
 
         if (underlyingType.getKind() == TypeKind.ERROR
                 || underlyingType.getKind() == TypeKind.NONE) {
@@ -205,8 +206,8 @@ public class InferenceValue extends CFValue {
         // Create new full type (with the same underlying type), and then add
         // the appropriate annotations.
         TypeMirror underlyingType =
-                InternalUtils.greatestLowerBound(analysis.getEnv(),
-                        getUnderlyingType(), other.getUnderlyingType());
+                TypesUtils.leastUpperBound(getUnderlyingType(),
+                        other.getUnderlyingType(), analysis.getEnv());
 
         if (underlyingType.getKind() == TypeKind.ERROR
                 || underlyingType.getKind() == TypeKind.NONE) {

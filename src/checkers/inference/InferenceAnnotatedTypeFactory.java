@@ -412,7 +412,7 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         assert newClassTree != null : "NewClassTree was null when attempting to get constructorFromUse. " +
                                       "Current path:\n" + this.visitorState.getPath();
 
-        final ExecutableElement constructorElem = InternalUtils.constructor(newClassTree);;
+        final ExecutableElement constructorElem = TreeUtils.constructor(newClassTree);;
         final AnnotatedTypeMirror constructorReturnType = fromNewClass(newClassTree);
         addComputedTypeAnnotations(newClassTree, constructorReturnType);
 

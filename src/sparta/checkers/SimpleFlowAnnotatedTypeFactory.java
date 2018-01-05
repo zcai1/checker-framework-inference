@@ -13,10 +13,7 @@ import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotato
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy;
 import org.checkerframework.framework.util.defaults.QualifierDefaults;
-import org.checkerframework.javacutil.AnnotationBuilder;
-import org.checkerframework.javacutil.AnnotationUtils;
-import org.checkerframework.javacutil.ElementUtils;
-import org.checkerframework.javacutil.InternalUtils;
+import org.checkerframework.javacutil.*;
 
 import java.lang.annotation.Annotation;
 import java.util.Collections;
@@ -233,7 +230,7 @@ public class SimpleFlowAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     @Override
     protected void addComputedTypeAnnotations(Tree tree, AnnotatedTypeMirror type,
             boolean useFlow) {
-        Element element = InternalUtils.symbol(tree);
+        Element element = TreeUtils.elementFromTree(tree);
         handleDefaulting(element, type);
         super.addComputedTypeAnnotations(tree, type, useFlow);
     }
@@ -283,8 +280,8 @@ public class SimpleFlowAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
 
             if (iter instanceof PackageElement) {
-                iter = ElementUtils.parentPackage(this.elements,
-                        (PackageElement) iter);
+                iter = ElementUtils.parentPackage((PackageElement) iter,
+                        this.elements);
             } else {
                 iter = iter.getEnclosingElement();
             }
