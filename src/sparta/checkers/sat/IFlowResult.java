@@ -10,15 +10,14 @@ import java.util.logging.Level;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 
-import checkers.inference.AbstractInferenceResult;
+import checkers.inference.BaseInferenceResult;
 import checkers.inference.InferenceMain;
-import checkers.inference.InferenceResult;
 import sparta.checkers.iflow.util.PFPermission;
 
 /**
  * Created by smillst on 9/21/15.
  */
-public abstract class IFlowResult extends AbstractInferenceResult {
+public abstract class IFlowResult extends BaseInferenceResult {
     protected final Map<Integer, Set<PFPermission>> results;
     protected final Map<Integer, Boolean> idToExistance;
 
@@ -68,7 +67,7 @@ public abstract class IFlowResult extends AbstractInferenceResult {
             int id = entry.getKey();
             Set<PFPermission> permissions = entry.getValue();
             AnnotationMirror anno = createAnnotationFromPermissions(processingEnv, permissions);
-            annotationResults.put(id, anno);
+            inferredResults.put(id, anno);
         }
     }
 
@@ -94,13 +93,4 @@ public abstract class IFlowResult extends AbstractInferenceResult {
         return idToExistance.containsKey(varId);
     }
 
-    @Override
-    public AnnotationMirror getAnnotation(int varId) {
-        return annotationResults.get(varId);
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return annotationResults.isEmpty();
-    }
 }

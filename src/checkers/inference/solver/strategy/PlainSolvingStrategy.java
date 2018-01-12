@@ -27,7 +27,7 @@ public class PlainSolvingStrategy extends AbstractSolvingStrategy implements Sol
 
         Map<Integer, AnnotationMirror> result = underlyingSolver.solve();
 
-        return new DefaultInferenceResult(result, !result.isEmpty() ? new LinkedList<>() : underlyingSolver.explainUnsatisfiable());
+        return new DefaultInferenceResult(result, result != null ? new HashSet<>() : underlyingSolver.explainUnsatisfiable());
     }
 
 

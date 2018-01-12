@@ -136,7 +136,7 @@ public class GraphSolvingStrategy extends AbstractSolvingStrategy implements Sol
                 @Override
                 public Pair<Map<Integer, AnnotationMirror>, Collection<Constraint>> call() throws Exception {
                     Map<Integer, AnnotationMirror> solution = underlyingSolver.solve();
-                    if (!solution.isEmpty()) {
+                    if (solution != null) {
                         return new Pair<>(solution, new HashSet<>());
                     } else {
                         return new Pair<>(solution, underlyingSolver.explainUnsatisfiable());
@@ -172,7 +172,7 @@ public class GraphSolvingStrategy extends AbstractSolvingStrategy implements Sol
         long solvingStart = System.currentTimeMillis();
         for (final Solver<?> underlyingSolver : underlyingSolvers) {
             Map<Integer, AnnotationMirror> solution = underlyingSolver.solve();
-            if (!solution.isEmpty()) {
+            if (solution != null) {
                 results.add(new Pair<>(solution, new HashSet<>()));
             } else {
                 results.add(new Pair<>(solution, underlyingSolver.explainUnsatisfiable()));
@@ -196,8 +196,14 @@ public class GraphSolvingStrategy extends AbstractSolvingStrategy implements Sol
         Set<Constraint> explanations = new HashSet<>();
 
         for (Pair<Map<Integer, AnnotationMirror>, Collection<Constraint>> inferenceResult : inferenceResults) {
-            solutions.putAll(inferenceResult.fst);
-            explanations.addAll(inferenceResult.snd);
+            if (inferenceResult.fst != null) {
+                solutions.putAll(inferenceResult.fst);
+            } else {
+                // If one result is unsolvable, whole solution should be null.
+                solutions = null;
+                explanations.addAll(inferenceResult.snd);
+                break;
+            }
         }
         PrintUtils.printResult(solutions);
         StatisticRecorder.record(StatisticKey.ANNOTATOIN_SIZE, (long) solutions.size());

@@ -109,12 +109,14 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
                 // PrintUtils.printResult(result);
             } else {
                 System.out.println("Not solvable!");
+                result = null;
             }
 
         } catch (ContradictionException e) {
             InferenceMain.getInstance().logger.warning("Contradiction exceptin: ");
             // This case indicates that constraints are not solvable, too. This is normal so continue
             // execution and let solver strategy to explain why there is no solution
+            result = null;
         } catch (Exception e) {
             ErrorReporter.errorAbort("Unexpected error occurred!", e);
         }

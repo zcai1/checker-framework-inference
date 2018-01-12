@@ -145,8 +145,9 @@ public class InferenceMain {
         solve();
         // solverResult = null covers case when debug solver is used, but in this case
         // shouldn't exit
-        if (solverResult != null && solverResult.isEmpty()) {
+        if (solverResult != null && !solverResult.hasSolution()) {
             // TODO Do something to stop the inferene process
+            logger.info("No solution, exiting...");
             System.exit(1);
         }
         writeJaif();

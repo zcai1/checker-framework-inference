@@ -4,10 +4,7 @@ import checkers.inference.*;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.javacutil.AnnotationUtils;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -129,6 +126,6 @@ public class MaxSat2TypeSolver implements InferenceSolver {
         }
 
 
-        return new DefaultInferenceResult(result, null);
+        return new DefaultInferenceResult(result, new HashSet<>());
     }
 }

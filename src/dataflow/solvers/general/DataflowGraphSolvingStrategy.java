@@ -102,54 +102,59 @@ public class DataflowGraphSolvingStrategy extends GraphSolvingStrategy {
     protected InferenceResult mergeInferenceResults(List<Pair<Map<Integer, AnnotationMirror>, Collection<Constraint>>> inferenceResults) {
         Map<Integer, AnnotationMirror> result = new HashMap<>();
         Map<Integer, Set<AnnotationMirror>> dataflowResults = new HashMap<>();
-
-        for (Pair<Map<Integer, AnnotationMirror>, Collection<Constraint>> inferenceResult : inferenceResults) {
-            Map<Integer, AnnotationMirror> inferenceSolutionMap = inferenceResult.fst;
-            for (Map.Entry<Integer, AnnotationMirror> entry : inferenceSolutionMap.entrySet()) {
-                Integer id = entry.getKey();
-                AnnotationMirror dataflowAnno = entry.getValue();
-                if (AnnotationUtils.areSameByClass(dataflowAnno, DataFlow.class)) {
-                    Set<AnnotationMirror> datas = dataflowResults.get(id);
-                    if (datas == null) {
-                        datas = AnnotationUtils.createAnnotationSet();
-                        dataflowResults.put(id, datas);
-                    }
-                    datas.add(dataflowAnno);
-                }
-            }
-
-        }
-        for (Map.Entry<Integer, Set<AnnotationMirror>> entry : dataflowResults.entrySet()) {
-            Set<String> dataTypes = new HashSet<String>();
-            Set<String> dataRoots = new HashSet<String>();
-            for (AnnotationMirror anno : entry.getValue()) {
-                String[] dataTypesArr = DataflowUtils.getTypeNames(anno);
-                String[] dataRootsArr = DataflowUtils.getTypeNameRoots(anno);
-                if (dataTypesArr.length == 1) {
-                    dataTypes.add(dataTypesArr[0]);
-                }
-                if (dataRootsArr.length == 1) {
-                    dataRoots.add(dataRootsArr[0]);
-                }
-            }
-            AnnotationMirror dataflowAnno = DataflowUtils.createDataflowAnnotationWithRoots(dataTypes,
-                    dataRoots, processingEnvironment);
-            result.put(entry.getKey(), dataflowAnno);
-        }
-        for (Map.Entry<Integer, AnnotationMirror> entry : result.entrySet()) {
-            AnnotationMirror refinedDataflow = ((DataflowAnnotatedTypeFactory) InferenceMain
-                    .getInstance().getRealTypeFactory()).refineDataflow(entry.getValue());
-            entry.setValue(refinedDataflow);
-        }
-
-        PrintUtils.printResult(result);
-        StatisticRecorder.record(StatisticKey.ANNOTATOIN_SIZE, (long) result.size());
-
         Set<Constraint> explanations = new HashSet<>();
 
         for (Pair<Map<Integer, AnnotationMirror>, Collection<Constraint>> inferenceResult : inferenceResults) {
-            explanations.addAll(inferenceResult.snd);
+            Map<Integer, AnnotationMirror> inferenceSolutionMap = inferenceResult.fst;
+            if (inferenceResult.fst != null) {
+                for (Map.Entry<Integer, AnnotationMirror> entry : inferenceSolutionMap.entrySet()) {
+                    Integer id = entry.getKey();
+                    AnnotationMirror dataflowAnno = entry.getValue();
+                    if (AnnotationUtils.areSameByClass(dataflowAnno, DataFlow.class)) {
+                        Set<AnnotationMirror> datas = dataflowResults.get(id);
+                        if (datas == null) {
+                            datas = AnnotationUtils.createAnnotationSet();
+                            dataflowResults.put(id, datas);
+                        }
+                        datas.add(dataflowAnno);
+                    }
+                }
+            } else {
+                result = null;
+                dataflowResults = null;
+                explanations.addAll(inferenceResult.snd);
+                break;
+            }
         }
+
+        if (result != null && dataflowResults != null) {
+            for (Map.Entry<Integer, Set<AnnotationMirror>> entry : dataflowResults.entrySet()) {
+                Set<String> dataTypes = new HashSet<String>();
+                Set<String> dataRoots = new HashSet<String>();
+                for (AnnotationMirror anno : entry.getValue()) {
+                    String[] dataTypesArr = DataflowUtils.getTypeNames(anno);
+                    String[] dataRootsArr = DataflowUtils.getTypeNameRoots(anno);
+                    if (dataTypesArr.length == 1) {
+                        dataTypes.add(dataTypesArr[0]);
+                    }
+                    if (dataRootsArr.length == 1) {
+                        dataRoots.add(dataRootsArr[0]);
+                    }
+                }
+                AnnotationMirror dataflowAnno = DataflowUtils.createDataflowAnnotationWithRoots(dataTypes,
+                        dataRoots, processingEnvironment);
+                result.put(entry.getKey(), dataflowAnno);
+            }
+            for (Map.Entry<Integer, AnnotationMirror> entry : result.entrySet()) {
+                AnnotationMirror refinedDataflow = ((DataflowAnnotatedTypeFactory) InferenceMain
+                        .getInstance().getRealTypeFactory()).refineDataflow(entry.getValue());
+                entry.setValue(refinedDataflow);
+            }
+
+            PrintUtils.printResult(result);
+            StatisticRecorder.record(StatisticKey.ANNOTATOIN_SIZE, (long) result.size());
+        }
+
         return new DefaultInferenceResult(result, explanations);
     }
 }

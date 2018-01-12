@@ -129,7 +129,7 @@ public abstract class IFlowSolver implements InferenceSolver {
 
         Map<Integer, AnnotationMirror> result = createAnnotations();
 
-        return new DefaultInferenceResult(result, null);
+        return new DefaultInferenceResult(result, new HashSet<>());
     }
 
     private Map<Integer, AnnotationMirror> createAnnotations() {
