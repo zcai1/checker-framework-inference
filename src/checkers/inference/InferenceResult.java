@@ -23,7 +23,7 @@ public interface InferenceResult {
      */
     AnnotationMirror getAnnotation(int varId);
 
-    boolean isEmpty();
+    boolean hasSolution();
 
     Collection<Constraint> getUnsatisfiableConstraints();
 }

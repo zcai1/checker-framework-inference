@@ -10,14 +10,13 @@ import java.util.logging.Level;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 
-import checkers.inference.AbstractInferenceResult;
+import checkers.inference.BaseInferenceResult;
 import checkers.inference.InferenceMain;
-import checkers.inference.InferenceResult;
 import checkers.inference.solver.util.PrintUtils;
 import dataflow.DataflowAnnotatedTypeFactory;
 import dataflow.util.DataflowUtils;
 
-public class DataflowResult extends AbstractInferenceResult {
+public class DataflowResult extends BaseInferenceResult {
     private final Map<Integer, Set<String>> typeNameResults;
     private final Map<Integer, Set<String>> typeRootResults;
     private final Map<Integer, Boolean> idToExistance;
@@ -33,7 +32,7 @@ public class DataflowResult extends AbstractInferenceResult {
         merge(solutions);
         createAnnotations(processingEnv);
         simplifyAnnotation();
-        PrintUtils.printResult(annotationResults);
+        PrintUtils.printResult(inferredResults);
     }
 
     public void merge(Collection<DatatypeSolution> solutions) {
@@ -84,7 +83,7 @@ public class DataflowResult extends AbstractInferenceResult {
             } else {
                 anno = DataflowUtils.createDataflowAnnotation(datatypes, processingEnv);
             }
-            annotationResults.put(slotId, anno);
+            inferredResults.put(slotId, anno);
         }
 
         for (Map.Entry<Integer, Set<String>> entry : typeRootResults.entrySet()) {
@@ -93,14 +92,14 @@ public class DataflowResult extends AbstractInferenceResult {
             Set<String> typeNames = typeNameResults.get(slotId);
             if (typeNames == null) {
                 AnnotationMirror anno = DataflowUtils.createDataflowAnnotationWithoutName(roots, processingEnv);
-                annotationResults.put(slotId, anno);
+                inferredResults.put(slotId, anno);
             }
         }
 
     }
 
     private void simplifyAnnotation() {
-        for (Map.Entry<Integer, AnnotationMirror> entry : annotationResults.entrySet()) {
+        for (Map.Entry<Integer, AnnotationMirror> entry : inferredResults.entrySet()) {
             AnnotationMirror refinedDataflow = this.realTypeFactory.refineDataflow(entry.getValue());
             entry.setValue(refinedDataflow);
         }
@@ -124,16 +123,6 @@ public class DataflowResult extends AbstractInferenceResult {
     @Override
     public boolean doesVariableExist(int varId) {
         return idToExistance.containsKey(varId);
-    }
-
-    @Override
-    public AnnotationMirror getAnnotation(int varId) {
-        return annotationResults.get(varId);
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return annotationResults.isEmpty();
     }
 
 }

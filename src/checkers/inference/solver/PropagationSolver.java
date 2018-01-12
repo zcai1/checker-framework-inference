@@ -222,7 +222,7 @@ public class PropagationSolver implements InferenceSolver {
             }
         }
 
-        return new DefaultInferenceResult(results, null);
+        return new DefaultInferenceResult(results, new HashSet<>());
     }
 
     /**

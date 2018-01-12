@@ -106,7 +106,7 @@ public class SolverEngine implements InferenceSolver {
             ErrorReporter.errorAbort("Solution should never be null, but null solution detected!");
         }
 
-        if (inferenceResult.isEmpty()) {
+        if (!inferenceResult.hasSolution()) {
             PrintUtils.printUnsolvable(inferenceResult.getUnsatisfiableConstraints());
         }
 
