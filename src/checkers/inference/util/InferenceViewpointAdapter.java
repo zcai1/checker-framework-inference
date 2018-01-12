@@ -41,15 +41,4 @@ public class InferenceViewpointAdapter extends ViewpointAdapter<Slot>{
         return slotManager.getAnnotation(slot);
     }
 
-    @Override
-    public boolean shouldBeAdapted(AnnotatedTypeMirror type, Element element) {
-        if (type.getKind() != TypeKind.DECLARED && type.getKind() != TypeKind.ARRAY) {
-            return false;
-        }
-        if (element.getKind() == ElementKind.LOCAL_VARIABLE
-                || element.getKind() == ElementKind.PARAMETER) {
-            return false;
-        }
-        return true;
-    }
 }
