@@ -172,11 +172,15 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
 
 
     public static AnnotationLocation treeToLocation(AnnotatedTypeFactory typeFactory, Tree tree) {
-        final TreePath path = typeFactory.getPath(tree);
+        TreePath path = typeFactory.getPath(tree);
 
         if (path == null) {
-            return AnnotationLocation.MISSING_LOCATION;
-        } // else
+            Element element = TreeUtils.elementFromTree(tree);
+            path = expensiveBackupGetPath(element, tree, (InferenceAnnotatedTypeFactory) typeFactory);
+            if (path == null) {
+                return AnnotationLocation.MISSING_LOCATION;
+            }
+        }
 
         ASTPathUtil.getASTRecordForPath(typeFactory, path);
         if (tree.getKind() == Kind.CLASS || tree.getKind() == Kind.INTERFACE
@@ -334,7 +338,11 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
      */
     public static TreePath expensiveBackupGetPath(final Element element, final Tree tree, final InferenceAnnotatedTypeFactory inferenceTypeFactory) {
         TypeElement typeElement = ElementUtils.enclosingClass(element);
-        CompilationUnitTree compilationUnitTree = inferenceTypeFactory.getTreeUtils().getPath(typeElement).getCompilationUnit();
+        TreePath path = inferenceTypeFactory.getTreeUtils().getPath(typeElement);
+        if (path == null) {
+            return null;
+        }
+        CompilationUnitTree compilationUnitTree = path.getCompilationUnit();
         return inferenceTypeFactory.getTreeUtils().getPath(compilationUnitTree, tree);
     }
 
@@ -761,7 +769,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
     /**
      * Visit the extends, implements, and type parameters of the given class type and tree.
      */
-    private void handleClassDeclaration(AnnotatedDeclaredType classType, ClassTree classTree) {
+    protected void handleClassDeclaration(AnnotatedDeclaredType classType, ClassTree classTree) {
         final Tree extendsTree = classTree.getExtendsClause();
         if (extendsTree == null) {
             // Annotated the implicit extends.
@@ -1586,7 +1594,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
      * @param types A list of types to visit
      * @param trees A list of trees to visit
      */
-    private void visitTogether(final List<? extends AnnotatedTypeMirror> types, final List<? extends Tree> trees) {
+    protected void visitTogether(final List<? extends AnnotatedTypeMirror> types, final List<? extends Tree> trees) {
         assert types.size() == trees.size();
 
         for (int i = 0; i < types.size(); ++i) {
