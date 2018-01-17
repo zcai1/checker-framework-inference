@@ -20,8 +20,6 @@ public class StatisticRecorder {
         GRAPH_SIZE,
         CNF_VARIABLE_SIZE,
         CNF_CLAUSE_SIZE,
-        SAT_VARIABLE_SIZE,
-        SAT_CLAUSE_SIZE,
         LOGIQL_PREDICATE_SIZE,
         LOGIQL_DATA_SIZE,
         ANNOTATOIN_SIZE,
