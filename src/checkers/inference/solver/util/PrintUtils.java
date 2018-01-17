@@ -143,8 +143,8 @@ public class PrintUtils {
         statisticsText.append("\n");
     }
 
-    public static void printUnsolvable(Collection<Constraint> mus) {
-        if (mus == null) {
+    public static void printUnsolvable(Collection<Constraint> unsatisfactoryConstraints) {
+        if (unsatisfactoryConstraints == null) {
             System.out.println("The backend you used doesn't support explanation feature!");
             return;
         }
@@ -154,11 +154,11 @@ public class PrintUtils {
         // Print constraints and related slots
         System.out.println("\n=================================== Explanation Starts=================================\n");
         System.out.println("------------------ Unsatisfactory Constraints ------------------\n");
-        for (Constraint constraint : mus) {
+        for (Constraint constraint : unsatisfactoryConstraints) {
             System.out.println("\t" + constraint.serialize(toStringSerializer) + " \n\t    " + constraint.getLocation().toString() + "\n");
         }
         System.out.println("------------- Related Slots -------------\n");
-        for (Constraint c : mus) {
+        for (Constraint c : unsatisfactoryConstraints) {
             c.serialize(slotPrinter);
         }
         System.out.println("=================================== Explanation Ends Here ================================");

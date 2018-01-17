@@ -81,13 +81,13 @@ public class GraphSolvingStrategy extends AbstractSolvingStrategy {
         }
 
         // Merge solutions.
-        InferenceResult solution = mergeInferenceResults(inferenceResults);
+        InferenceResult result = mergeInferenceResults(inferenceResults);
 
         //TODO: Refactor way of recording Statistics.
         StatisticRecorder.record(StatisticKey.GRAPH_GENERATION_TIME, (graphBuildingEnd - graphBuildingStart));
         StatisticRecorder.record(StatisticKey.GRAPH_SIZE, (long) constraintGraph.getIndependentPath().size());
 
-        return solution;
+        return result;
     }
 
     protected ConstraintGraph generateGraph(Collection<Slot> slots, Collection<Constraint> constraints,
@@ -132,15 +132,12 @@ public class GraphSolvingStrategy extends AbstractSolvingStrategy {
 
         long solvingStart = System.currentTimeMillis();
         for (final Solver<?> underlyingSolver : underlyingSolvers) {
-            Callable<Pair<Map<Integer, AnnotationMirror>, Collection<Constraint>>> callable = new Callable<Pair<Map<Integer, AnnotationMirror>, Collection<Constraint>>>() {
-                @Override
-                public Pair<Map<Integer, AnnotationMirror>, Collection<Constraint>> call() throws Exception {
-                    Map<Integer, AnnotationMirror> solution = underlyingSolver.solve();
-                    if (solution != null) {
-                        return new Pair<>(solution, new HashSet<>());
-                    } else {
-                        return new Pair<>(solution, underlyingSolver.explainUnsatisfiable());
-                    }
+            Callable<Pair<Map<Integer, AnnotationMirror>, Collection<Constraint>>> callable = () -> {
+                Map<Integer, AnnotationMirror> solution = underlyingSolver.solve();
+                if (solution != null) {
+                    return new Pair<>(solution, new HashSet<>());
+                } else {
+                    return new Pair<>(solution, underlyingSolver.explainUnsatisfiable());
                 }
             };
             futures.add(service.submit(callable));

@@ -100,7 +100,7 @@ public class DataflowGraphSolvingStrategy extends GraphSolvingStrategy {
 
     @Override
     protected InferenceResult mergeInferenceResults(List<Pair<Map<Integer, AnnotationMirror>, Collection<Constraint>>> inferenceResults) {
-        Map<Integer, AnnotationMirror> result = new HashMap<>();
+        Map<Integer, AnnotationMirror> solutions = new HashMap<>();
         Map<Integer, Set<AnnotationMirror>> dataflowResults = new HashMap<>();
         Set<Constraint> explanations = new HashSet<>();
 
@@ -120,14 +120,14 @@ public class DataflowGraphSolvingStrategy extends GraphSolvingStrategy {
                     }
                 }
             } else {
-                result = null;
+                solutions = null;
                 dataflowResults = null;
                 explanations.addAll(inferenceResult.snd);
                 break;
             }
         }
 
-        if (result != null && dataflowResults != null) {
+        if (solutions != null && dataflowResults != null) {
             for (Map.Entry<Integer, Set<AnnotationMirror>> entry : dataflowResults.entrySet()) {
                 Set<String> dataTypes = new HashSet<String>();
                 Set<String> dataRoots = new HashSet<String>();
@@ -143,17 +143,17 @@ public class DataflowGraphSolvingStrategy extends GraphSolvingStrategy {
                 }
                 AnnotationMirror dataflowAnno = DataflowUtils.createDataflowAnnotationWithRoots(dataTypes,
                         dataRoots, processingEnvironment);
-                result.put(entry.getKey(), dataflowAnno);
+                solutions.put(entry.getKey(), dataflowAnno);
             }
-            for (Map.Entry<Integer, AnnotationMirror> entry : result.entrySet()) {
+            for (Map.Entry<Integer, AnnotationMirror> entry : solutions.entrySet()) {
                 AnnotationMirror refinedDataflow = ((DataflowAnnotatedTypeFactory) InferenceMain
                         .getInstance().getRealTypeFactory()).refineDataflow(entry.getValue());
                 entry.setValue(refinedDataflow);
             }
 
-            StatisticRecorder.record(StatisticKey.ANNOTATOIN_SIZE, (long) result.size());
+            StatisticRecorder.record(StatisticKey.ANNOTATOIN_SIZE, (long) solutions.size());
         }
 
-        return new DefaultInferenceResult(result, explanations);
+        return new DefaultInferenceResult(solutions, explanations);
     }
 }
