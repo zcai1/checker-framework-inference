@@ -127,14 +127,14 @@ public abstract class IFlowSolver implements InferenceSolver {
             }
         }
 
-        Map<Integer, AnnotationMirror> result = createAnnotations();
+        Map<Integer, AnnotationMirror> solutions = createAnnotations();
 
-        return new DefaultInferenceResult(result, new HashSet<>());
+        return new DefaultInferenceResult(solutions);
     }
 
     private Map<Integer, AnnotationMirror> createAnnotations() {
         // Create annotations of the inferred sets.
-        Map<Integer, AnnotationMirror> result = new HashMap<>();
+        Map<Integer, AnnotationMirror> solutions = new HashMap<>();
         for (Entry<Integer, Set<String>> inferredEntry : inferredValues.entrySet()) {
             Set<String> strings = inferredEntry.getValue();
             if (!(strings.size() == 1 && strings.contains("ANY"))) {
@@ -151,10 +151,10 @@ public abstract class IFlowSolver implements InferenceSolver {
                     }
                     atm = createAnnotationMirror(strings, Source.class);
                 }
-                result.put(inferredEntry.getKey(), atm);
+                solutions.put(inferredEntry.getKey(), atm);
             }
         }
-        return result;
+        return solutions;
     }
 
 

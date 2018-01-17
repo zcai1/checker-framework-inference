@@ -27,7 +27,7 @@ import checkers.inference.solver.util.StatisticRecorder.StatisticKey;
 
 /**
  * LingelingSolver is also a MaxSatSolver but it calls Lingeling SAT solver to
- * solve the clauses.
+ * solve the clauses. It doesn't support soft constraint.
  *
  * @author jianchu
  *
@@ -52,17 +52,14 @@ public class LingelingSolver extends MaxSatSolver {
 
     @Override
     public Map<Integer, AnnotationMirror> solve() {
-        Map<Integer, AnnotationMirror> result = new HashMap<>();
+        Map<Integer, AnnotationMirror> solutions = null;
 
         this.serializationStart = System.currentTimeMillis();
-        this.encodeAllConstraints();
+        encodeAllConstraints();
+        encodeWellFormednessRestriction();
         this.serializationEnd = System.currentTimeMillis();
 
-        for (Integer varSlotId : this.varSlotIds) {
-            hardClauses.addAll(formatTranslator.generateWellFormednessClauses(varSlotId));
-        }
-
-        buildCNF();
+        buildCNFInput();
         collectVals();
         recordData();
         int localNth = nth.incrementAndGet();
@@ -72,7 +69,9 @@ public class LingelingSolver extends MaxSatSolver {
         try {
             int[] resultArray = getOutPut_Error(lingeling + " " + CNFData.getAbsolutePath() + "/cnfdata"
                     + localNth + ".txt");
-            result = decode(resultArray);
+            if (resultArray.length != 0) {
+                solutions = decode(resultArray);
+            } // else means no solution!
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -84,7 +83,7 @@ public class LingelingSolver extends MaxSatSolver {
         StatisticRecorder.recordSingleSerializationTime(serializationTime);
         StatisticRecorder.recordSingleSolvingTime(solvingTime);
 
-        return result;
+        return solutions;
     }
 
     /**

@@ -30,7 +30,7 @@ public class SinkSolver extends IFlowSolver {
     }
 
     @Override
-    protected InferenceResult getMergedSolution(ProcessingEnvironment processingEnvironment, List<PermissionSolution> solutions) {
+    protected InferenceResult getMergedResultFromSolutions(ProcessingEnvironment processingEnvironment, List<PermissionSolution> solutions) {
         return new SinkResult(solutions, processingEnvironment);
     }
 }

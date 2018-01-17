@@ -1,5 +1,6 @@
 package checkers.inference.solver;
 
+import checkers.inference.DefaultInferenceResult;
 import checkers.inference.InferenceResult;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.javacutil.AnnotationUtils;
@@ -15,7 +16,6 @@ import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 
-import checkers.inference.DefaultInferenceResult;
 import checkers.inference.InferenceMain;
 import checkers.inference.InferenceSolver;
 import checkers.inference.model.ConstantSlot;
@@ -103,7 +103,7 @@ public class PropagationSolver implements InferenceSolver {
 
         // Propagate subtype
         Set<VariableSlot> inferredBottom = propagateValues(fixedBottom, subTypePropagation);
-        return mergeResults(fixedBottom, fixedTop, inferredTop, inferredBottom);
+        return mergeToResult(fixedBottom, fixedTop, inferredTop, inferredBottom);
     }
 
     /**
@@ -196,11 +196,11 @@ public class PropagationSolver implements InferenceSolver {
      *
      * @return
      */
-    private InferenceResult mergeResults(
+    private InferenceResult mergeToResult(
             Set<VariableSlot> fixedBottom, Set<VariableSlot> fixedTop,
             Set<VariableSlot> inferredTop, Set<VariableSlot> inferredBottom) {
 
-        Map<Integer, AnnotationMirror> results = new HashMap<Integer, AnnotationMirror>();
+        Map<Integer, AnnotationMirror> solutions = new HashMap<Integer, AnnotationMirror>();
         for (Slot slot : slots) {
             if (slot.isVariable()) {
                 VariableSlot vslot = (VariableSlot) slot;
@@ -217,12 +217,12 @@ public class PropagationSolver implements InferenceSolver {
                     result = defaultValue;
                 }
                 if (result != defaultValue) {
-                    results.put(vslot.getId(), result);
+                    solutions.put(vslot.getId(), result);
                 }
             }
         }
 
-        return new DefaultInferenceResult(results, new HashSet<>());
+        return new DefaultInferenceResult(solutions);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -69,7 +70,7 @@ public class Z3Solver extends Solver<Z3BitVectorFormatTranslator>{
 
     @Override
     public Collection<Constraint> explainUnsatisfiable() {
-        return null;// Doesn't support right now
+        return new HashSet<>();// Doesn't support right now
     }
 
     @Override

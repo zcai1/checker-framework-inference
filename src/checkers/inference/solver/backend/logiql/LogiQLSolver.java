@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -75,13 +76,12 @@ public class LogiQLSolver extends Solver<LogiQLFormatTranslator> {
         //TODO: Refactor this to let Translator take the responsiblity of decoding.
         DecodingTool DecodeTool = new DecodingTool(varSlotIds, logiqldataPath, lattice, localNth);
         result = DecodeTool.decodeResult();
-        // PrintUtils.printResult(result);
         return result;
     }
 
     @Override
     public Collection<Constraint> explainUnsatisfiable() {
-        return null;// Doesn't support right now
+        return new HashSet<>();// Doesn't support right now
     }
 
     @Override

@@ -10,43 +10,43 @@ import java.util.logging.Level;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 
-import checkers.inference.BaseInferenceResult;
+import checkers.inference.DefaultInferenceResult;
 import checkers.inference.InferenceMain;
 import sparta.checkers.iflow.util.PFPermission;
 
 /**
  * Created by smillst on 9/21/15.
  */
-public abstract class IFlowResult extends BaseInferenceResult {
-    protected final Map<Integer, Set<PFPermission>> results;
+public abstract class IFlowResult extends DefaultInferenceResult {
+    protected final Map<Integer, Set<PFPermission>> tempResults;
     protected final Map<Integer, Boolean> idToExistance;
 
     public IFlowResult(Collection<PermissionSolution> solutions, ProcessingEnvironment processingEnv) {
-        // Class solver doesn't support providing set of unsatisfiable constraints, so set it to null
-        super(new HashMap<>(), null);
-        this.results = new HashMap<>();
+        // Legacy solver doesn't support explanation
+        super(new HashMap<>());
+        this.tempResults = new HashMap<>();
         this.idToExistance = new HashMap<>();
 
-        merge(solutions);
+        mergeSolutions(solutions);
         createAnnotations(processingEnv);
     }
 
-    private void merge(Collection<PermissionSolution> solutions) {
+    private void mergeSolutions(Collection<PermissionSolution> solutions) {
         for (PermissionSolution solution : solutions) {
-            mergeResults(solution);
+            mergeSingleSolution(solution);
             mergeIdToExistance(solution);
         }
     }
 
-    private void mergeResults(PermissionSolution solution) {
+    private void mergeSingleSolution(PermissionSolution solution) {
         for (Map.Entry<Integer, Boolean> entry : solution.getResult().entrySet()) {
             boolean shouldContainPermission = shouldContainPermission(entry);
             PFPermission permission = solution.getPermission();
 
-            Set<PFPermission> permissions = results.get(entry.getKey());
+            Set<PFPermission> permissions = tempResults.get(entry.getKey());
             if (permissions == null) {
                 permissions = new TreeSet<>();
-                results.put(entry.getKey(), permissions);
+                tempResults.put(entry.getKey(), permissions);
             }
 
             if (shouldContainPermission) {
@@ -63,11 +63,11 @@ public abstract class IFlowResult extends BaseInferenceResult {
     protected abstract boolean shouldContainPermission(Map.Entry<Integer, Boolean> entry);
 
     private void createAnnotations(ProcessingEnvironment processingEnv) {
-        for (Map.Entry<Integer, Set<PFPermission>> entry : results.entrySet()) {
+        for (Map.Entry<Integer, Set<PFPermission>> entry : tempResults.entrySet()) {
             int id = entry.getKey();
             Set<PFPermission> permissions = entry.getValue();
             AnnotationMirror anno = createAnnotationFromPermissions(processingEnv, permissions);
-            inferredResults.put(id, anno);
+            varIdToAnnotation.put(id, anno);
         }
     }
 
@@ -88,8 +88,11 @@ public abstract class IFlowResult extends BaseInferenceResult {
         }
     }
 
+    // TODO
+    // Mier: I'm worried that this causes inconsistency with getSolutionForVariable(), as it uses
+    // a different map - varIdToAnnotation to store the actual var id to annotation solution.
     @Override
-    public boolean doesVariableExist(int varId) {
+    public boolean containsSolutionForVariable(int varId) {
         return idToExistance.containsKey(varId);
     }
 

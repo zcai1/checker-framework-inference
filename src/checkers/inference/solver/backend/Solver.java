@@ -84,7 +84,7 @@ public abstract class Solver<T extends FormatTranslator<?, ?, ?>> {
      * A concrete solver adapter needs to override this method and implements its own
      * constraint-solving strategy. In general, there will be three steps in this method:
      * 1. Calls {@link #encodeAllConstraints()}, let {@link FormatTranslator} to convert constraints into
-     * the corresponding encoding form.
+     * the corresponding encoding form. Optionally, encode well-formedness restriction if the backend has it.
      * 2. Calls the underlying solver to solve the encoding.
      * 3. Let {@link FormatTranslator} decodes the solution from the underlying solver and create a map between an
      * Integer(Slot Id) and an AnnotationMirror as it's inferred annotation.

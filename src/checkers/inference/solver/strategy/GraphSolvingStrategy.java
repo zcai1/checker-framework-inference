@@ -38,7 +38,7 @@ import com.sun.tools.javac.util.Pair;
  * This solving strategy is useful when solving constraints for a type system with a huge number of qualifers.
  * Normal plain solving strategy meet exponentially increased solving time in this case.
  */
-public class GraphSolvingStrategy extends AbstractSolvingStrategy implements SolvingStrategy {
+public class GraphSolvingStrategy extends AbstractSolvingStrategy {
 
     enum GraphSolveStrategyArg implements SolverArg {
         solveInParallel;
@@ -199,13 +199,12 @@ public class GraphSolvingStrategy extends AbstractSolvingStrategy implements Sol
             if (inferenceResult.fst != null) {
                 solutions.putAll(inferenceResult.fst);
             } else {
-                // If one result is unsolvable, whole solution should be null.
+                // If any one solution is null, whole solutions should be null.
                 solutions = null;
                 explanations.addAll(inferenceResult.snd);
                 break;
             }
         }
-        PrintUtils.printResult(solutions);
         StatisticRecorder.record(StatisticKey.ANNOTATOIN_SIZE, (long) solutions.size());
         return new DefaultInferenceResult(solutions, explanations);
     }

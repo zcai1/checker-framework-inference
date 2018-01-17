@@ -24,27 +24,25 @@ import checkers.inference.solver.util.StatisticRecorder.StatisticKey;
 public class PrintUtils {
 
     /**
-     * Print the solved result out.
-     *
-     * @param result
+     * Print the solved solutions out.
      */
-    public static void printResult(Map<Integer, AnnotationMirror> result) {
+    public static void printSolutions(Map<Integer, AnnotationMirror> solutions) {
 
         final int maxLength = String.valueOf(InferenceMain.getInstance().getSlotManager().getNumberOfSlots()).length();
-        StringBuilder printResult = new StringBuilder();
+        StringBuilder printBuffer = new StringBuilder();
 
         System.out.println("/***********************Results****************************/");
-        for (Integer j : result.keySet()) {
-            printResult.append("SlotID: ");
-            printResult.append(String.valueOf(j));
+        for (Integer j : solutions.keySet()) {
+            printBuffer.append("SlotID: ");
+            printBuffer.append(String.valueOf(j));
             for (int i = 0; i < maxLength + 2 - String.valueOf(j).length(); i++) {
-                printResult.append(" ");
+                printBuffer.append(" ");
             }
-            printResult.append("Annotation: ");
-            printResult.append(result.get(j).toString());
-            printResult.append("\n");
+            printBuffer.append("Annotation: ");
+            printBuffer.append(solutions.get(j).toString());
+            printBuffer.append("\n");
         }
-        System.out.println(printResult.toString());
+        System.out.println(printBuffer.toString());
         System.out.flush();
         System.out.println("/**********************************************************/");
     }
@@ -104,9 +102,6 @@ public class PrintUtils {
      *
      * @param statistic
      * @param modelRecord
-     * @param solverType
-     * @param useGraph
-     * @param solveInParallel
      */
     public static void printStatistic(Map<StatisticKey, Long> statistic,
             Map<String, Integer> modelRecord) {
@@ -170,7 +165,6 @@ public class PrintUtils {
     }
 
     /**
-     * Created by mier on 04/08/17.
      * Transitively prints all non-constant slots in a constraint. Each slot is only
      * printed once.
      */

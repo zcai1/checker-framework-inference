@@ -48,9 +48,9 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
 
     protected final SlotManager slotManager;
     protected final List<VecInt> hardClauses = new LinkedList<>();
-    private List<VecInt> wellFormdnessClauses = new LinkedList<>();
+    private List<VecInt> wellFormednessClauses = new LinkedList<>();
     protected final List<VecInt> softClauses = new LinkedList<>();
-    private final MaxSATUnsatisfiableConstraintExplainer unsatisfiableConstraintExplainer;
+    private MaxSATUnsatisfiableConstraintExplainer unsatisfiableConstraintExplainer;
     protected final File CNFData = new File(new File("").getAbsolutePath() + "/cnfData");
     protected StringBuilder CNFInput = new StringBuilder();
 
@@ -64,7 +64,6 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
         super(solverEnvironment, slots, constraints, formatTranslator,
                 lattice);
         this.slotManager = InferenceMain.getInstance().getSlotManager();
-        this.unsatisfiableConstraintExplainer = new MaxSATUnsatisfiableConstraintExplainer();
 
         if (shouldOutputCNF()) {
             CNFData.mkdir();
@@ -74,18 +73,18 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
     @Override
     public Map<Integer, AnnotationMirror> solve() {
 
-        Map<Integer, AnnotationMirror> result = new HashMap<>();
+        Map<Integer, AnnotationMirror> solutions = null;
         final WeightedMaxSatDecorator solver = new WeightedMaxSatDecorator(
                 org.sat4j.pb.SolverFactory.newBoth());
 
         this.serializationStart = System.currentTimeMillis();
         // Serialization step:
         encodeAllConstraints();
-        encodeWellFormdnessRestriction();
+        encodeWellFormednessRestriction();
         this.serializationEnd = System.currentTimeMillis();
 
         if (shouldOutputCNF()) {
-            buildCNF();
+            buildCNFInput();
             writeCNFInput();
         }
         // printClauses();
@@ -93,6 +92,7 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
 
         try {
             addClausesToSolver(solver);
+            cleanUpClauses();
 
             this.solvingStart = System.currentTimeMillis();
             boolean isSatisfiable = solver.isSatisfiable();
@@ -105,22 +105,22 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
             StatisticRecorder.recordSingleSolvingTime(solvingTime);
 
             if (isSatisfiable) {
-                result = decode(solver.model());
-                // PrintUtils.printResult(result);
+                solutions = decode(solver.model());
             } else {
                 System.out.println("Not solvable!");
-                result = null;
+                // Lazily initialize unsatisfiableConstraintExplainer when there is no solution
+                unsatisfiableConstraintExplainer = new MaxSATUnsatisfiableConstraintExplainer();
             }
 
         } catch (ContradictionException e) {
             InferenceMain.getInstance().logger.warning("Contradiction exceptin: ");
             // This case indicates that constraints are not solvable, too. This is normal so continue
             // execution and let solver strategy to explain why there is no solution
-            result = null;
+            unsatisfiableConstraintExplainer = new MaxSATUnsatisfiableConstraintExplainer();
         } catch (Exception e) {
             ErrorReporter.errorAbort("Unexpected error occurred!", e);
         }
-        return result;
+        return solutions;
     }
 
     /**
@@ -133,7 +133,7 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
             VecInt[] encoding = constraint.serialize(formatTranslator);
             if (encoding == null) {
                 InferenceMain.getInstance().logger.warning(getClass()
-                        + "doesn't support encoding constraint: " + constraint
+                        + " doesn't support encoding constraint: " + constraint
                         + "of class: " + constraint.getClass());
                 continue;
             }
@@ -143,22 +143,16 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
                         softClauses.add(res);
                     } else {
                         hardClauses.add(res);
-                        //System.out.println("Generated hard clause: " + res);
-                        // Add here to avoid second round of iteration over constraints if there's no solution
-                        unsatisfiableConstraintExplainer.addVecIntToConstraintMapping(res, constraint);
                     }
                 }
             }
         }
     }
 
-    private void encodeWellFormdnessRestriction() {
+    protected void encodeWellFormednessRestriction() {
         for (Integer varSlotId : varSlotIds) {
-            List<VecInt> result = formatTranslator.generateWellFormednessClauses(varSlotId);
-//            for (VecInt v : result) {
-//                System.out.println("VariableId: " + varSlotId + " well formdness clause: " + v);
-//            }
-            wellFormdnessClauses.addAll(result);
+            List<VecInt> wfForSingleVariable = formatTranslator.generateWellFormednessClauses(varSlotId);
+            wellFormednessClauses.addAll(wfForSingleVariable);
         }
     }
 
@@ -170,7 +164,7 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
     private void configureSatSolver(WeightedMaxSatDecorator solver) {
 
         final int totalVars = (slotManager.getNumberOfSlots() * lattice.numTypes);
-        final int totalClauses = hardClauses.size() + wellFormdnessClauses.size() + softClauses.size();
+        final int totalClauses = hardClauses.size() + wellFormednessClauses.size() + softClauses.size();
 
         solver.newVar(totalVars);
         solver.setExpectedNumberOfClauses(totalClauses);
@@ -184,13 +178,19 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
             solver.addHardClause(hardClause);
         }
 
-        for (VecInt wellFormdnessClause: wellFormdnessClauses) {
-            solver.addHardClause(wellFormdnessClause);
+        for (VecInt wellFormednessClause: wellFormednessClauses) {
+            solver.addHardClause(wellFormednessClause);
         }
 
         for (VecInt softclause : softClauses) {
             solver.addSoftClause(softclause);
         }
+    }
+
+    private void cleanUpClauses() {
+        hardClauses.clear();
+        wellFormednessClauses.clear();
+        softClauses.clear();
     }
 
     protected Map<Integer, AnnotationMirror> decode(int[] solution) {
@@ -225,9 +225,9 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
     /**
      * Write CNF clauses into a string.
      */
-    protected void buildCNF() {
+    protected void buildCNFInput() {
 
-        final int totalClauses = hardClauses.size();
+        final int totalClauses = hardClauses.size()+ wellFormednessClauses.size();
         final int totalVars = slotManager.getNumberOfSlots() * lattice.numTypes;
 
         CNFInput.append("c This is the CNF input\n");
@@ -237,14 +237,21 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
         CNFInput.append(totalClauses);
         CNFInput.append("\n");
 
-        for (VecInt clause : hardClauses) {
-            int[] literals = clause.toArray();
-            for (int i = 0; i < literals.length; i++) {
-                CNFInput.append(literals[i]);
-                CNFInput.append(" ");
-            }
-            CNFInput.append("0\n");
+        for (VecInt hardClause : hardClauses) {
+            buildCNFInputHelper(hardClause);
         }
+        for (VecInt wellFormedNessClause: wellFormednessClauses) {
+            buildCNFInputHelper(wellFormedNessClause);
+        }
+    }
+
+    private void buildCNFInputHelper(VecInt clause) {
+        int[] literals = clause.toArray();
+        for (int i = 0; i < literals.length; i++) {
+            CNFInput.append(literals[i]);
+            CNFInput.append(" ");
+        }
+        CNFInput.append("0\n");
     }
 
     protected void writeCNFInput() {
@@ -273,6 +280,11 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
             System.out.println(hardClause);
         }
         System.out.println();
+        System.out.println("WellFormedness clauses: ");
+        for (VecInt wellFormednessClause: wellFormednessClauses) {
+            System.out.println(wellFormednessClause);
+        }
+        System.out.println();
         System.out.println("Soft clauses: ");
         for (VecInt softClause : softClauses) {
             System.out.println(softClause);
@@ -293,81 +305,92 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
 
         private final Map<IConstr, VecInt> iConstrVecIntMap;
 
-
         private MaxSATUnsatisfiableConstraintExplainer() {
             // Using IdentityHashMap because different VecInts can share the same hash code,
-            // but VecInt has one-to-one relation to Constraint
+            // one VecInt might be overriden by a different VecInt.But VecInt has one-to-one
+            // relation to Constraint. Therefore, IdentityHashMap is used.
             vecIntConstraintMap = new IdentityHashMap<>();
             iConstrVecIntMap = new IdentityHashMap<>();
+
+            // Fill up hardClauses and wellFormednessClauses again(cleared before) to feed into
+            // explanation solver
+            fillHardClauses();
+            encodeWellFormednessRestriction();
+
         }
 
-        private void addVecIntToConstraintMapping(VecInt encoding, Constraint sourceConstraint) {
-            vecIntConstraintMap.put(encoding, sourceConstraint);
+        // Compared to encodeAllConstrains(), this method doesn't format translate soft clauses,
+        // and additionally stores the mapping from VecInt to Constraint, so that Constraint can
+        // be reversly looked up by VecInt
+        private void fillHardClauses() {
+            // Fill up vecIntConstraintMap to reversely lookup Constraint from VecInt
+            for (Constraint constraint : constraints) {
+                VecInt[] encoding = constraint.serialize(formatTranslator);
+                if (encoding == null) {
+                    // Happens for unsupported Constraints. Already warned in encodeAllConstraints()
+                    continue;
+                }
+                for (VecInt e : encoding) {
+                    if (e != null && e.size() != 0 && !(constraint instanceof PreferenceConstraint)) {
+                        hardClauses.add(e);
+                        vecIntConstraintMap.put(e, constraint);
+                    }
+                }
+            }
         }
 
-        private Collection<Constraint> minimumUnsatisfiableConstraints() {
+        public Collection<Constraint> minimumUnsatisfiableConstraints() {
+            // It's ok to use HashSet for Constraint, because its hashCose() implementation differentiates different
+            // Constraints well.
             Set<Constraint> mus = new HashSet<>();
             // Explainer solver that is used
             Xplain<IPBSolver> explanationSolver = new Xplain<>(SolverFactory.newDefault());
-            configureExplanationSolver(hardClauses, wellFormdnessClauses, slotManager, lattice, explanationSolver);
+            configureExplanationSolver(hardClauses, wellFormednessClauses, slotManager, lattice, explanationSolver);
             try {
-//                System.out.println("Hard Clauses");
-                for (VecInt clause : hardClauses) {
-//                    System.out.println("Adding hard clause: " + clause + " hashCode: " + clause.hashCode());
-//                    System.out.println("Before Constraint: " + vecIntConstraintMap.get(clause));
-                    IConstr iConstr = explanationSolver.addClause(clause);
-                    iConstrVecIntMap.put(iConstr, clause);
-//                    System.out.println("Added hard clause: " + clause + " hashCode: " + clause.hashCode());
-//                    System.out.println("After Constraint: " + vecIntConstraintMap.get(clause));
-
-                }
-//                System.out.println("Well Form Clauses");
-                for (VecInt clause : wellFormdnessClauses) {
-//                    System.out.println("Adding Well Form: " + clause + " hashCode: " + clause.hashCode());
-                    IConstr iConstr = explanationSolver.addClause(clause);
-                    iConstrVecIntMap.put(iConstr, clause);
-//                    System.out.println("Added Well Form: " + clause + " hashCode: " + clause.hashCode());
-                }
+                addClausesToExplanationSolver(explanationSolver);
                 assert !explanationSolver.isSatisfiable();
-                // Get collection of unsatisfiable constraints
+
                 Collection<IConstr> explanation = explanationSolver.explain();
-//                System.out.println("Explanation starts:");
+
                 for (IConstr i : explanation) {
                     VecInt vecInt = iConstrVecIntMap.get(i);
                     if (vecIntConstraintMap.get(vecInt) != null) {
-                        // It's ok to use HashSet since Constraint has a reliable hashCode implementation
+                        // This case is reached if vecInt is from Constraint
                         mus.add(vecIntConstraintMap.get(vecInt));
                     } else {
+                        // This case indicates vecInt is well-formedness restriction
+                        // TODO Instead of printing it, can we have a dedicated type, e.g. WellFormednessConstraint <: Constraint
+                        // TODO so that we can also add it to the result set?
                         System.out.println("Explanation hits well-formedness restriction: " + i);
                     }
                 }
-//                int[] indicies = explanationSolver.minimalExplanation();
-//                for (int clauseIndex : indicies) {
-//                    if (clauseIndex > constraints.size()) {
-//                        System.out.println("Wellformdness mixed in: " + );
-//                        continue;
-//                    }
-//                    // Solver gives 1-based index. Decrement by 1 here to get stored constraint
-//                    Constraint constraint = hardConstraints.get(clauseIndex - 1);
-//                    musSet.add(constraint);
-//                    System.out.println(hardClauses.get(clauseIndex - 1));
-//                }
             } catch (Exception e) {
                 ErrorReporter.errorAbort("Explanation solver encountered not-expected exception: ", e);
             }
             return mus;
         }
 
-        private void configureExplanationSolver(final List<VecInt> hardClauses, final List<VecInt> wellformdness,
-                final SlotManager slotManager,
-                                                final Lattice lattice, final Xplain<IPBSolver> explainer) {
+        private void configureExplanationSolver(final List<VecInt> hardClauses, final List<VecInt> wellformedness,
+                final SlotManager slotManager, final Lattice lattice, final Xplain<IPBSolver> explainer) {
             int numberOfNewVars = slotManager.getNumberOfSlots() * lattice.numTypes;
             System.out.println("Number of variables: " + numberOfNewVars);
-            int numberOfClauses = hardClauses.size() + wellformdness.size();
+            int numberOfClauses = hardClauses.size() + wellformedness.size();
             System.out.println("Number of clauses: " + numberOfClauses);
             explainer.setMinimizationStrategy(new DeletionStrategy());
             explainer.newVar(numberOfNewVars);
             explainer.setExpectedNumberOfClauses(numberOfClauses);
+        }
+
+        private void addClausesToExplanationSolver(Xplain<IPBSolver> explanationSolver) throws ContradictionException {
+            for (VecInt clause : hardClauses) {
+                IConstr iConstr = explanationSolver.addClause(clause);
+                iConstrVecIntMap.put(iConstr, clause);
+
+            }
+            for (VecInt clause : wellFormednessClauses) {
+                IConstr iConstr = explanationSolver.addClause(clause);
+                iConstrVecIntMap.put(iConstr, clause);
+            }
         }
     }
 }

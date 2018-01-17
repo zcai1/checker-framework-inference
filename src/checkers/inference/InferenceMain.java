@@ -146,7 +146,6 @@ public class InferenceMain {
         // solverResult = null covers case when debug solver is used, but in this case
         // shouldn't exit
         if (solverResult != null && !solverResult.hasSolution()) {
-            // TODO Do something to stop the inferene process
             logger.info("No solution, exiting...");
             System.exit(1);
         }
@@ -229,12 +228,12 @@ public class InferenceMain {
             }
             for (VariableSlot slot : varSlots) {
                 if (slot.getLocation() != null && slot.isInsertable()
-                 && (solverResult == null || solverResult.doesVariableExist(slot.getId()))) {
+                 && (solverResult == null || solverResult.containsSolutionForVariable(slot.getId()))) {
                     // TODO: String serialization of annotations.
                     if (solverResult != null) {
                         // Not all VariableSlots will have an inferred value.
                         // This happens for VariableSlots that have no constraints.
-                        AnnotationMirror result = solverResult.getAnnotation(slot.getId());
+                        AnnotationMirror result = solverResult.getSolutionForVariable(slot.getId());
                         if (result != null) {
                             values.put(slot.getLocation(), result.toString());
                         }

@@ -13,7 +13,7 @@ import checkers.inference.solver.backend.SolverFactory;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.util.SolverEnvironment;
 
-public class PlainSolvingStrategy extends AbstractSolvingStrategy implements SolvingStrategy {
+public class PlainSolvingStrategy extends AbstractSolvingStrategy{
 
     public PlainSolvingStrategy(SolverFactory solverFactory) {
         super(solverFactory);
@@ -25,10 +25,12 @@ public class PlainSolvingStrategy extends AbstractSolvingStrategy implements Sol
 
         Solver<?> underlyingSolver = solverFactory.createSolver(solverEnvironment, slots, constraints, lattice);
 
-        Map<Integer, AnnotationMirror> result = underlyingSolver.solve();
+        Map<Integer, AnnotationMirror> solutions = underlyingSolver.solve();
 
-        return new DefaultInferenceResult(result, result != null ? new HashSet<>() : underlyingSolver.explainUnsatisfiable());
+        if (solutions != null) {
+            return new DefaultInferenceResult(solutions);
+        } else {
+            return new DefaultInferenceResult(solutions, underlyingSolver.explainUnsatisfiable());
+        }
     }
-
-
 }

@@ -10,39 +10,39 @@ import java.util.logging.Level;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 
-import checkers.inference.BaseInferenceResult;
+import checkers.inference.DefaultInferenceResult;
 import checkers.inference.InferenceMain;
 import checkers.inference.solver.util.PrintUtils;
 import dataflow.DataflowAnnotatedTypeFactory;
 import dataflow.util.DataflowUtils;
 
-public class DataflowResult extends BaseInferenceResult {
+public class DataflowResult extends DefaultInferenceResult {
     private final Map<Integer, Set<String>> typeNameResults;
     private final Map<Integer, Set<String>> typeRootResults;
     private final Map<Integer, Boolean> idToExistance;
     private final DataflowAnnotatedTypeFactory realTypeFactory;
 
     public DataflowResult(Collection<DatatypeSolution> solutions, ProcessingEnvironment processingEnv) {
-        // Classic solver doesn't support providing set of unsatisfiable constraints, so set it to null
-        super(new HashMap<>(), null);
+        // Legacy solver doesn't support explanation
+        super(new HashMap<>());
         this.typeNameResults = new HashMap<>();
         this.typeRootResults = new HashMap<>();
         this.idToExistance = new HashMap<>();
         this.realTypeFactory = (DataflowAnnotatedTypeFactory)InferenceMain.getInstance().getRealTypeFactory();
-        merge(solutions);
+        mergeSolutions(solutions);
         createAnnotations(processingEnv);
         simplifyAnnotation();
-        PrintUtils.printResult(inferredResults);
+        PrintUtils.printSolutions(varIdToAnnotation);
     }
 
-    public void merge(Collection<DatatypeSolution> solutions) {
+    public void mergeSolutions(Collection<DatatypeSolution> solutions) {
         for (DatatypeSolution solution : solutions) {
-            mergeResults(solution);
+            mergeSingleSolution(solution);
             mergeIdToExistance(solution);
         }
     }
 
-    private void mergeResults(DatatypeSolution solution) {
+    private void mergeSingleSolution(DatatypeSolution solution) {
         for (Map.Entry<Integer, Boolean> entry : solution.getResult().entrySet()) {
             boolean shouldContainDatatype = shouldContainDatatype(entry);
             String datatype = solution.getDatatype();
@@ -83,7 +83,7 @@ public class DataflowResult extends BaseInferenceResult {
             } else {
                 anno = DataflowUtils.createDataflowAnnotation(datatypes, processingEnv);
             }
-            inferredResults.put(slotId, anno);
+            varIdToAnnotation.put(slotId, anno);
         }
 
         for (Map.Entry<Integer, Set<String>> entry : typeRootResults.entrySet()) {
@@ -92,14 +92,14 @@ public class DataflowResult extends BaseInferenceResult {
             Set<String> typeNames = typeNameResults.get(slotId);
             if (typeNames == null) {
                 AnnotationMirror anno = DataflowUtils.createDataflowAnnotationWithoutName(roots, processingEnv);
-                inferredResults.put(slotId, anno);
+                varIdToAnnotation.put(slotId, anno);
             }
         }
 
     }
 
     private void simplifyAnnotation() {
-        for (Map.Entry<Integer, AnnotationMirror> entry : inferredResults.entrySet()) {
+        for (Map.Entry<Integer, AnnotationMirror> entry : varIdToAnnotation.entrySet()) {
             AnnotationMirror refinedDataflow = this.realTypeFactory.refineDataflow(entry.getValue());
             entry.setValue(refinedDataflow);
         }
@@ -120,8 +120,11 @@ public class DataflowResult extends BaseInferenceResult {
         }
     }
 
+    // TODO
+    // Mier: I'm worried that this causes inconsistency with getSolutionForVariable(), as it uses
+    // a different map - varIdToAnnotation to store the actual var id to annotation solution.
     @Override
-    public boolean doesVariableExist(int varId) {
+    public boolean containsSolutionForVariable(int varId) {
         return idToExistance.containsKey(varId);
     }
 

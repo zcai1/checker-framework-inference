@@ -12,7 +12,6 @@ import javax.lang.model.element.AnnotationMirror;
 import org.sat4j.core.VecInt;
 import org.sat4j.maxsat.WeightedMaxSatDecorator;
 
-import checkers.inference.DefaultInferenceResult;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
@@ -63,7 +62,7 @@ public class MaxSat2TypeSolver implements InferenceSolver {
     }
 
     public InferenceResult solve() {
-        final Map<Integer, AnnotationMirror> result = new HashMap<>();
+        final Map<Integer, AnnotationMirror> solutions = new HashMap<>();
 
         final List<VecInt> clauses = serializer.convertAll(constraints);
 
@@ -111,9 +110,9 @@ public class MaxSat2TypeSolver implements InferenceSolver {
                     if (potential != null) {
                         // idToExistence.put(potential, !isTop);
                         // TODO: which AnnotationMirror should be used?
-                        result.put(potential, bottom);
+                        solutions.put(potential, bottom);
                     } else {
-                        result.put(var, isTop ? top : bottom );
+                        solutions.put(var, isTop ? top : bottom );
                     }
 
                 }
@@ -126,6 +125,6 @@ public class MaxSat2TypeSolver implements InferenceSolver {
         }
 
 
-        return new DefaultInferenceResult(result, new HashSet<>());
+        return new DefaultInferenceResult(solutions, new HashSet<>());
     }
 }

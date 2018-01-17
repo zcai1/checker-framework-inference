@@ -39,7 +39,7 @@ public abstract class IFlowSolver implements InferenceSolver {
             solutions.add(solver.solve());
         }
 
-        return getMergedSolution(processingEnvironment, solutions);
+        return getMergedResultFromSolutions(processingEnvironment, solutions);
     }
 
     private Collection<PFPermission> getPermissionsUsed(Collection<Slot> solts) {
@@ -58,7 +58,7 @@ public abstract class IFlowSolver implements InferenceSolver {
 
     protected abstract IFlowSerializer getSerializer(PFPermission permission);
 
-    protected abstract InferenceResult getMergedSolution(ProcessingEnvironment processingEnvironment, List<PermissionSolution> solutions);
+    protected abstract InferenceResult getMergedResultFromSolutions(ProcessingEnvironment processingEnvironment, List<PermissionSolution> solutions);
 
     protected abstract Set<PFPermission> getPermissionList(AnnotationMirror anno);
 

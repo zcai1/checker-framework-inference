@@ -27,7 +27,7 @@ public class SourceSolver extends IFlowSolver {
         return new SourceSerializer(permission);
     }
 
-    protected InferenceResult getMergedSolution(ProcessingEnvironment processingEnvironment, List<PermissionSolution> solutions) {
+    protected InferenceResult getMergedResultFromSolutions(ProcessingEnvironment processingEnvironment, List<PermissionSolution> solutions) {
         return new SourceResult(solutions, processingEnvironment);
     }
 }

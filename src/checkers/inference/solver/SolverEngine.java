@@ -102,11 +102,12 @@ public class SolverEngine implements InferenceSolver {
         InferenceResult inferenceResult = solvingStrategy.solve(solverEnvironment, slots, constraints, lattice);
 
         if (inferenceResult == null) {
-            // Solution should never be null.
-            ErrorReporter.errorAbort("Solution should never be null, but null solution detected!");
+            ErrorReporter.errorAbort("InferenceResult should never be null, but null result detected!");
         }
 
-        if (!inferenceResult.hasSolution()) {
+        if (inferenceResult.hasSolution()) {
+            PrintUtils.printSolutions(inferenceResult.getSolutions());
+        } else {
             PrintUtils.printUnsolvable(inferenceResult.getUnsatisfiableConstraints());
         }
 

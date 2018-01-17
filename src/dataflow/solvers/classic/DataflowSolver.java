@@ -77,7 +77,7 @@ public class DataflowSolver implements InferenceSolver {
             e.printStackTrace();
         }
 
-        return getMergedSolution(processingEnvironment, solutions);
+        return getMergedResultFromSolutions(processingEnvironment, solutions);
     }
 
     private List<DatatypeSolution> solveInparallel(List<DatatypeSolver> dataflowSolvers)
@@ -108,8 +108,8 @@ public class DataflowSolver implements InferenceSolver {
         return new DataflowSerializer(datatype, isRoot);
     }
 
-    protected InferenceResult getMergedSolution(ProcessingEnvironment processingEnvironment,
-                                                List<DatatypeSolution> solutions) {
+    protected InferenceResult getMergedResultFromSolutions(ProcessingEnvironment processingEnvironment,
+                                                           List<DatatypeSolution> solutions) {
         return new DataflowResult(solutions, processingEnvironment);
     }
 }
