@@ -20,7 +20,6 @@ import checkers.inference.solver.backend.SolverFactory;
 import checkers.inference.solver.constraintgraph.ConstraintGraph;
 import checkers.inference.solver.constraintgraph.GraphBuilder;
 import checkers.inference.solver.frontend.Lattice;
-import checkers.inference.solver.util.PrintUtils;
 import checkers.inference.solver.util.SolverArg;
 import checkers.inference.solver.util.SolverEnvironment;
 import checkers.inference.solver.util.StatisticRecorder;
