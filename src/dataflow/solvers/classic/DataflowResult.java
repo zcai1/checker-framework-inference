@@ -24,7 +24,7 @@ public class DataflowResult extends DefaultInferenceResult {
 
     public DataflowResult(Collection<DatatypeSolution> solutions, ProcessingEnvironment processingEnv) {
         // Legacy solver doesn't support explanation
-        super(new HashMap<>());
+        super();
         this.typeNameResults = new HashMap<>();
         this.typeRootResults = new HashMap<>();
         this.idToExistance = new HashMap<>();

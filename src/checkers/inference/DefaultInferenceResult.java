@@ -4,6 +4,7 @@ import checkers.inference.model.Constraint;
 
 import javax.lang.model.element.AnnotationMirror;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -11,6 +12,10 @@ public class DefaultInferenceResult implements InferenceResult {
 
     protected final Map<Integer, AnnotationMirror> varIdToAnnotation;
     protected final Collection<Constraint> unsatisfiableConstraints;
+
+    public DefaultInferenceResult() {
+        this(new HashMap<>());
+    }
 
     public DefaultInferenceResult(Map<Integer, AnnotationMirror> varIdToAnnotation) {
         this(varIdToAnnotation, new HashSet<>());

@@ -23,7 +23,7 @@ public abstract class IFlowResult extends DefaultInferenceResult {
 
     public IFlowResult(Collection<PermissionSolution> solutions, ProcessingEnvironment processingEnv) {
         // Legacy solver doesn't support explanation
-        super(new HashMap<>());
+        super();
         this.tempResults = new HashMap<>();
         this.idToExistance = new HashMap<>();
 
