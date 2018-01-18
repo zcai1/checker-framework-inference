@@ -125,6 +125,6 @@ public class MaxSat2TypeSolver implements InferenceSolver {
         }
 
 
-        return new DefaultInferenceResult(solutions, new HashSet<>());
+        return new DefaultInferenceResult(solutions);
     }
 }
