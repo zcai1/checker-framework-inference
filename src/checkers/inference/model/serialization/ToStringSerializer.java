@@ -189,7 +189,7 @@ public class ToStringSerializer implements Serializer<String, String> {
         }
         sbAssumption.append(implicationConstraint.getAssumptions().get(length - 1).serialize(this));
         indent = prevIndent;
-        String result = indent(sbAssumption.toString() + " ->"
+        String result = indent(sbAssumption.toString() + " -> "
                 + implicationConstraint.getConclusion().serialize(this));
         showVerboseVars = prevShowVerboseVars;
         return result;

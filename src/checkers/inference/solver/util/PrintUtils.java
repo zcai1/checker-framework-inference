@@ -12,7 +12,7 @@ import checkers.inference.solver.util.StatisticRecorder.StatisticKey;
 
 /**
  * PrintUtils contains methods for printing and writing the solved results.
- * 
+ *
  * @author jianchu
  *
  */
@@ -45,7 +45,7 @@ public class PrintUtils {
     }
 
     public static void writeResult(Map<Integer, AnnotationMirror> result) {
-        
+
         final int maxLength = String.valueOf(InferenceMain.getInstance().getSlotManager().getNumberOfSlots()).length();
         StringBuilder printResult = new StringBuilder();
 
@@ -96,7 +96,7 @@ public class PrintUtils {
 
     /**
      * Print the statistics out.
-     * 
+     *
      * @param statistic
      * @param modelRecord
      * @param solverType
