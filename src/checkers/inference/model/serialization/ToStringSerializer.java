@@ -188,9 +188,10 @@ public class ToStringSerializer implements Serializer<String, String> {
             sbAssumption.append(" & ");
         }
         sbAssumption.append(implicationConstraint.getAssumptions().get(length - 1).serialize(this));
+        StringBuilder sbConclustion = new StringBuilder();
+        sbConclustion.append(implicationConstraint.getConclusion().serialize(this));
         indent = prevIndent;
-        String result = indent(sbAssumption.toString() + " -> "
-                + implicationConstraint.getConclusion().serialize(this));
+        String result = indent(sbAssumption.toString() + " -> " + sbConclustion.toString());
         showVerboseVars = prevShowVerboseVars;
         return result;
     }
