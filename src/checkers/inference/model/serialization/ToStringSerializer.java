@@ -15,6 +15,7 @@ import checkers.inference.model.Constraint;
 import checkers.inference.model.EqualityConstraint;
 import checkers.inference.model.ExistentialConstraint;
 import checkers.inference.model.ExistentialVariableSlot;
+import checkers.inference.model.ImplicationConstraint;
 import checkers.inference.model.InequalityConstraint;
 import checkers.inference.model.PreferenceConstraint;
 import checkers.inference.model.RefinementVariableSlot;
@@ -174,6 +175,26 @@ public class ToStringSerializer implements Serializer<String, String> {
         return result;
     }
 
+    @Override
+    public String serialize(ImplicationConstraint implicationConstraint) {
+        boolean prevShowVerboseVars = showVerboseVars;
+        showVerboseVars = false;
+        int prevIndent = indent;
+        indent = 0;
+        StringBuilder sbAssumption = new StringBuilder();
+        int length = implicationConstraint.getAssumptions().size();
+        for (int i = 0; i < length - 1; i++) {
+            sbAssumption.append(implicationConstraint.getAssumptions().get(i).serialize(this));
+            sbAssumption.append(" & ");
+        }
+        sbAssumption.append(implicationConstraint.getAssumptions().get(length - 1).serialize(this));
+        indent = prevIndent;
+        String result = indent(sbAssumption.toString() + " ->"
+                + implicationConstraint.getConclusion().serialize(this));
+        showVerboseVars = prevShowVerboseVars;
+        return result;
+    }
+
     // variables
     @Override
     public String serialize(VariableSlot slot) {
@@ -187,8 +208,7 @@ public class ToStringSerializer implements Serializer<String, String> {
     public String serialize(RefinementVariableSlot slot) {
         final StringBuilder sb = new StringBuilder();
         sb.append(slot.getId());
-        sb.append(": refines ");
-        sb.append(Arrays.asList(slot.getRefined()));
+        sb.append("[ \u21A7 "+ slot.getRefined() + " ]");
         optionallyShowVerbose(slot, sb);
         return sb.toString();
     }

@@ -8,6 +8,7 @@ import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.EqualityConstraint;
 import checkers.inference.model.ExistentialConstraint;
 import checkers.inference.model.ExistentialVariableSlot;
+import checkers.inference.model.ImplicationConstraint;
 import checkers.inference.model.InequalityConstraint;
 import checkers.inference.model.PreferenceConstraint;
 import checkers.inference.model.RefinementVariableSlot;
@@ -21,6 +22,7 @@ import checkers.inference.solver.backend.encoder.binary.InequalityConstraintEnco
 import checkers.inference.solver.backend.encoder.binary.SubtypeConstraintEncoder;
 import checkers.inference.solver.backend.encoder.combine.CombineConstraintEncoder;
 import checkers.inference.solver.backend.encoder.existential.ExistentialConstraintEncoder;
+import checkers.inference.solver.backend.encoder.implication.ImplicationConstraintEncoder;
 import checkers.inference.solver.backend.encoder.preference.PreferenceConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.util.ConstraintVerifier;
@@ -116,6 +118,8 @@ public abstract class AbstractFormatTranslator<SlotEncodingT, ConstraintEncoding
      */
     protected ExistentialConstraintEncoder<ConstraintEncodingT> existentialConstraintEncoder;
 
+    protected ImplicationConstraintEncoder<ConstraintEncodingT> implicationConstraintEncoder;
+
     public AbstractFormatTranslator(Lattice lattice) {
         this.lattice = lattice;
         this.verifier = InferenceMain.getInstance().getConstraintManager().getConstraintVerifier();
@@ -137,6 +141,7 @@ public abstract class AbstractFormatTranslator<SlotEncodingT, ConstraintEncoding
         preferenceConstraintEncoder = encoderFactory.createPreferenceConstraintEncoder();
         combineConstraintEncoder = encoderFactory.createCombineConstraintEncoder();
         existentialConstraintEncoder = encoderFactory.createExistentialConstraintEncoder();
+        implicationConstraintEncoder = encoderFactory.createImplicationConstraintEncoder();
     }
 
     /**
@@ -188,6 +193,12 @@ public abstract class AbstractFormatTranslator<SlotEncodingT, ConstraintEncoding
     public ConstraintEncodingT serialize(ExistentialConstraint constraint) {
         return existentialConstraintEncoder == null ? null :
                 ConstraintEncoderCoordinator.redirect(constraint, existentialConstraintEncoder);
+    }
+
+    @Override
+    public ConstraintEncodingT serialize(ImplicationConstraint constraint) {
+        return implicationConstraintEncoder == null ? null :
+                ConstraintEncoderCoordinator.redirect(constraint, implicationConstraintEncoder);
     }
 
     @Override

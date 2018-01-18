@@ -11,7 +11,7 @@ import checkers.inference.util.ConstraintVerifier;
 
 /**
  * LogiQLFormatTranslator converts constraint into string as logiQL data.
- * 
+ *
  * @author jianchu
  *
  */
@@ -24,7 +24,7 @@ public class LogiQLFormatTranslator extends AbstractFormatTranslator<String, Str
 
     @Override
     protected ConstraintEncoderFactory<String> createConstraintEncoderFactory(ConstraintVerifier verifier) {
-        return new LogiQLConstraintEncoderFactory(lattice, verifier);
+        return new LogiQLConstraintEncoderFactory(lattice, verifier, this);
     }
 
     @Override
