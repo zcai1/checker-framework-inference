@@ -303,6 +303,10 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
          * */
         private final Map<VecInt, Constraint> vecIntConstraintMap;
 
+        /**
+         * A mapping from IConstr to VecInt. IConstr is the result of adding VecInt to solver.
+         */
+
         private final Map<IConstr, VecInt> iConstrVecIntMap;
 
         private MaxSATUnsatisfiableConstraintExplainer() {
@@ -311,7 +315,7 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
             // relation to Constraint. Therefore, IdentityHashMap is used.
             vecIntConstraintMap = new IdentityHashMap<>();
             iConstrVecIntMap = new IdentityHashMap<>();
-
+            cleanUpClauses();
             // Fill up hardClauses and wellFormednessClauses again(cleared before) to feed into
             // explanation solver
             fillHardClauses();

@@ -144,7 +144,7 @@ public class PrintUtils {
     }
 
     public static void printUnsolvable(Collection<Constraint> unsatisfactoryConstraints) {
-        if (unsatisfactoryConstraints == null) {
+        if (unsatisfactoryConstraints == null || unsatisfactoryConstraints.isEmpty()) {
             System.out.println("The backend you used doesn't support explanation feature!");
             return;
         }
