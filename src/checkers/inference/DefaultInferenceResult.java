@@ -34,6 +34,7 @@ public class DefaultInferenceResult implements InferenceResult {
 
     @Override
     public Map<Integer, AnnotationMirror> getSolutions() {
+        if (!hasSolution()) return null;
         return varIdToAnnotation;
     }
 
