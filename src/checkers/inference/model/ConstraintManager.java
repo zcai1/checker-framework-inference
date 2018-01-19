@@ -70,32 +70,90 @@ public class ConstraintManager {
     }
 
     public SubtypeConstraint createSubtypeConstraint(Slot subtype, Slot supertype) {
+        if (subtype == null || supertype == null) {
+            ErrorReporter.errorAbort("Create subtype constraint with null argument. Subtype: " + subtype
+                    + " Supertype: " + supertype);
+        }
+        if (subtype instanceof ConstantSlot && supertype instanceof ConstantSlot) {
+            ConstantSlot subConstant = (ConstantSlot) subtype;
+            ConstantSlot superConstant = (ConstantSlot) supertype;
+
+            if (!constraintVerifier.isSubtype(subConstant, superConstant)) {
+                checker.report(Result.failure("subtype.constraint.unsatisfiable", subtype, supertype),
+                        visitorState.getPath().getLeaf());
+            }
+        }
         return new SubtypeConstraint(subtype, supertype, getCurrentLocation());
     }
 
     public EqualityConstraint createEqualityConstraint(Slot first, Slot second) {
+        if (first == null || second == null) {
+            ErrorReporter.errorAbort("Create equality constraint with null argument. Subtype: " + first
+                    + " Supertype: " + second);
+        }
+        if (first instanceof ConstantSlot && second instanceof ConstantSlot) {
+            ConstantSlot firstConstant = (ConstantSlot) first;
+            ConstantSlot secondConstant = (ConstantSlot) second;
+            if (!constraintVerifier.areEqual(firstConstant, secondConstant)) {
+                checker.report(Result.failure("equality.constraint.unsatisfiable", first, second),
+                        visitorState.getPath().getLeaf());
+            }
+        }
         return new EqualityConstraint(first, second, getCurrentLocation());
     }
 
     public InequalityConstraint createInequalityConstraint(Slot first, Slot second) {
+        if (first == null || second == null) {
+            ErrorReporter.errorAbort("Create inequality constraint with null argument. Subtype: "
+                    + first + " Supertype: " + second);
+        }
+        if (first instanceof ConstantSlot && second instanceof ConstantSlot) {
+            ConstantSlot firstConstant = (ConstantSlot) first;
+            ConstantSlot secondConstant = (ConstantSlot) second;
+            if (constraintVerifier.areEqual(firstConstant, secondConstant)) {
+                checker.report(Result.failure("inequality.constraint.unsatisfiable", first, second),
+                        visitorState.getPath().getLeaf());
+            }
+        }
         return new InequalityConstraint(first, second, getCurrentLocation());
     }
 
     public ComparableConstraint createComparableConstraint(Slot first, Slot second) {
+        if (first == null || second == null) {
+            ErrorReporter.errorAbort("Create comparable constraint with null argument. Subtype: "
+                    + first + " Supertype: " + second);
+        }
+        if (first instanceof ConstantSlot && second instanceof ConstantSlot) {
+            ConstantSlot firstConstant = (ConstantSlot) first;
+            ConstantSlot secondConstant = (ConstantSlot) second;
+            if (!constraintVerifier.areComparable(firstConstant, secondConstant)) {
+                checker.report(Result.failure("comparable.constraint.unsatisfiable", first, second),
+                        visitorState.getPath().getLeaf());
+            }
+        }
         return new ComparableConstraint(first, second, getCurrentLocation());
     }
 
     public CombineConstraint createCombineConstraint(Slot target, Slot decl, Slot result) {
+        if (target == null || decl == null || result == null) {
+            ErrorReporter.errorAbort("Create combine constraint with null argument. Target: " + target
+                    + " Decl: " + decl + " Result: " + result);
+        }
         return new CombineConstraint(target, decl, result, getCurrentLocation());
     }
 
     public PreferenceConstraint createPreferenceConstraint(VariableSlot variable, ConstantSlot goal,
             int weight) {
+        if (variable == null || goal == null) {
+            ErrorReporter.errorAbort("Create preference constraint with null argument. Variable: "
+                    + variable + " Goal: " + goal);
+        }
         return new PreferenceConstraint(variable, goal, weight, getCurrentLocation());
     }
 
     public ExistentialConstraint createExistentialConstraint(Slot slot,
             List<Constraint> ifExistsConstraints, List<Constraint> ifNotExistsConstraints) {
+        // TODO: add null checking for argument.
         return new ExistentialConstraint((VariableSlot) slot,
                 ifExistsConstraints, ifNotExistsConstraints, getCurrentLocation());
     }
@@ -114,101 +172,41 @@ public class ConstraintManager {
     }
 
     public void addSubtypeConstraint(Slot subtype, Slot supertype) {
-        if (subtype == null || supertype == null) {
-            ErrorReporter.errorAbort("Adding subtype constraint with null argument. Subtype: " + subtype
-                    + " Supertype: " + supertype);
-        }
-
         if ((subtype instanceof ConstantSlot)
-                && realQualHierarchy.getTopAnnotations().contains(((ConstantSlot) subtype).getValue())) {
-            addEqualityConstraint(supertype, subtype);
-            return;
+                && this.realQualHierarchy.getTopAnnotations().contains(((ConstantSlot) subtype).getValue())) {
+            this.addEqualityConstraint(supertype, (ConstantSlot) subtype);
         } else if ((supertype instanceof ConstantSlot)
-                && realQualHierarchy.getBottomAnnotations().contains(((ConstantSlot) supertype).getValue())) {
-            addEqualityConstraint(subtype, supertype);
-            return;
+                && this.realQualHierarchy.getBottomAnnotations().contains(
+                        ((ConstantSlot) supertype).getValue())) {
+            this.addEqualityConstraint(subtype, (ConstantSlot) supertype);
+        } else {
+            this.add(this.createSubtypeConstraint(subtype, supertype));
         }
-
-        if (subtype instanceof ConstantSlot && supertype instanceof ConstantSlot) {
-            ConstantSlot subConstant = (ConstantSlot) subtype;
-            ConstantSlot superConstant = (ConstantSlot) supertype;
-
-            if (!constraintVerifier.isSubtype(subConstant, superConstant)) {
-                checker.report(Result.failure("subtype.constraint.unsatisfiable", subtype, supertype),
-                        visitorState.getPath().getLeaf());
-            }
-        }
-        add(createSubtypeConstraint(subtype, supertype));
     }
 
     public void addEqualityConstraint(Slot first, Slot second) {
-        if (first == null || second == null) {
-            ErrorReporter.errorAbort("Adding equality constraint with null argument. Subtype: " + first
-                    + " Supertype: " + second);
-        }
-        if (first instanceof ConstantSlot && second instanceof ConstantSlot) {
-            ConstantSlot firstConstant = (ConstantSlot) first;
-            ConstantSlot secondConstant = (ConstantSlot) second;
-            if (!constraintVerifier.areEqual(firstConstant, secondConstant)) {
-                checker.report(Result.failure("equality.constraint.unsatisfiable", first, second),
-                        visitorState.getPath().getLeaf());
-            }
-        }
-        add(createEqualityConstraint(first, second));
+        this.add(this.createEqualityConstraint(first, second));
     }
 
     public void addInequalityConstraint(Slot first, Slot second) {
-        if (first == null || second == null) {
-            ErrorReporter.errorAbort("Adding inequality constraint with null argument. Subtype: "
-                    + first + " Supertype: " + second);
-        }
-        if (first instanceof ConstantSlot && second instanceof ConstantSlot) {
-            ConstantSlot firstConstant = (ConstantSlot) first;
-            ConstantSlot secondConstant = (ConstantSlot) second;
-            if (constraintVerifier.areEqual(firstConstant, secondConstant)) {
-                checker.report(Result.failure("inequality.constraint.unsatisfiable", first, second),
-                        visitorState.getPath().getLeaf());
-            }
-        }
-        add(createInequalityConstraint(first, second));
+        this.add(this.createInequalityConstraint(first, second));
     }
 
     public void addComparableConstraint(Slot first, Slot second) {
-        if (first == null || second == null) {
-            ErrorReporter.errorAbort("Adding comparable constraint with null argument. Subtype: "
-                    + first + " Supertype: " + second);
-        }
-        if (first instanceof ConstantSlot && second instanceof ConstantSlot) {
-            ConstantSlot firstConstant = (ConstantSlot) first;
-            ConstantSlot secondConstant = (ConstantSlot) second;
-            if (!constraintVerifier.areComparable(firstConstant, secondConstant)) {
-                checker.report(Result.failure("comparable.constraint.unsatisfiable", first, second),
-                        visitorState.getPath().getLeaf());
-            }
-        }
-        add(createComparableConstraint(first, second));
+        this.add(this.createComparableConstraint(first, second));
     }
 
     public void addCombineConstraint(Slot target, Slot decl, Slot result) {
-        if (target == null || decl == null || result == null) {
-            ErrorReporter.errorAbort("Adding combine constraint with null argument. Target: " + target
-                    + " Decl: " + decl + " Result: " + result);
-        }
-        add(createCombineConstraint(target, decl, result));
+        this.add(this.createCombineConstraint(target, decl, result));
     }
 
     public void addPreferenceConstraint(VariableSlot variable, ConstantSlot goal, int weight) {
-        if (variable == null || goal == null) {
-            ErrorReporter.errorAbort("Adding preference constraint with null argument. Variable: "
-                    + variable + " Goal: " + goal);
-        }
-        add(createPreferenceConstraint(variable, goal, weight));
+        this.add(this.createPreferenceConstraint(variable, goal, weight));
     }
 
     public void addExistentialConstraint(Slot slot, List<Constraint> ifExistsConstraints,
             List<Constraint> ifNotExistsConstraints) {
-        // TODO: add null checking for argument
-        add(createExistentialConstraint(slot, ifExistsConstraints, ifNotExistsConstraints));
+        this.add(this.createExistentialConstraint(slot, ifExistsConstraints, ifNotExistsConstraints));
     }
 
     public void addImplicationConstraint(List<Constraint> assumptions, Constraint conclusion) {
