@@ -1,10 +1,14 @@
 package checkers.inference.solver;
 
-import checkers.inference.*;
+import checkers.inference.DefaultInferenceResult;
+import checkers.inference.InferenceResult;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.javacutil.AnnotationUtils;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -12,6 +16,9 @@ import javax.lang.model.element.AnnotationMirror;
 import org.sat4j.core.VecInt;
 import org.sat4j.maxsat.WeightedMaxSatDecorator;
 
+import checkers.inference.InferenceMain;
+import checkers.inference.InferenceSolver;
+import checkers.inference.SlotManager;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;

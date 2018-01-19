@@ -1,6 +1,7 @@
 package checkers.inference.solver.strategy;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 
 import javax.lang.model.element.AnnotationMirror;
 

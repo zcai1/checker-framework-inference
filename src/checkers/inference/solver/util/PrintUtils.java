@@ -11,7 +11,21 @@ import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 
 import checkers.inference.InferenceMain;
-import checkers.inference.model.*;
+import checkers.inference.model.CombVariableSlot;
+import checkers.inference.model.CombineConstraint;
+import checkers.inference.model.ComparableConstraint;
+import checkers.inference.model.ConstantSlot;
+import checkers.inference.model.Constraint;
+import checkers.inference.model.EqualityConstraint;
+import checkers.inference.model.ExistentialConstraint;
+import checkers.inference.model.ExistentialVariableSlot;
+import checkers.inference.model.InequalityConstraint;
+import checkers.inference.model.PreferenceConstraint;
+import checkers.inference.model.RefinementVariableSlot;
+import checkers.inference.model.Serializer;
+import checkers.inference.model.Slot;
+import checkers.inference.model.SubtypeConstraint;
+import checkers.inference.model.VariableSlot;
 import checkers.inference.model.serialization.ToStringSerializer;
 import checkers.inference.solver.util.StatisticRecorder.StatisticKey;
 
