@@ -77,8 +77,8 @@ class InferenceEqualityComparer extends StructuralEqualityComparer {
 
         // TODO: HackMode
         if (InferenceMain.isHackMode((varAnnot1 == null || varAnnot2 == null))) {
-            InferenceMain.getInstance().logger.info(
-                "Hack:InferenceTYpeHierarchy:\n"
+            InferenceMain.getInstance().logger.warning(
+                "Hack:InferenceTYpeHierarchy:66\n"
               + "type1=" + type1 + "\n"
               + "type2=" + type2 + "\n"
             );
