@@ -12,7 +12,6 @@ import checkers.inference.model.Slot;
 import checkers.inference.solver.backend.Solver;
 import checkers.inference.solver.backend.SolverFactory;
 import checkers.inference.solver.frontend.Lattice;
-import checkers.inference.solver.util.PrintUtils;
 import checkers.inference.solver.util.SolverEnvironment;
 
 public class PlainSolvingStrategy extends AbstractSolvingStrategy implements SolvingStrategy {
@@ -28,9 +27,7 @@ public class PlainSolvingStrategy extends AbstractSolvingStrategy implements Sol
         Solver<?> underlyingSolver = solverFactory.createSolver(solverEnvironment, slots, constraints, lattice);
 
         Map<Integer, AnnotationMirror> result = underlyingSolver.solve();
-        if (result != null) {
-            PrintUtils.printResult(result);
-        }
+
         return new DefaultInferenceSolution(result);
     }
 
