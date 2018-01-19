@@ -537,7 +537,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
      * the type.
      */
     public VariableSlot addImpliedPrimaryVariable(AnnotatedTypeMirror atm, final AnnotationLocation location) {
-        VariableSlot variable = createVariable(location);
+        VariableSlot variable = slotManager.createVariableSlot(location);
         atm.addAnnotation(slotManager.getAnnotation(variable));
 
         AnnotationMirror realAnno = atm.getAnnotationInHierarchy(realTop);
