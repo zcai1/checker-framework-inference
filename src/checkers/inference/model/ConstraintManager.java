@@ -6,14 +6,11 @@ import org.checkerframework.framework.source.Result;
 import org.checkerframework.framework.source.SourceChecker;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.VisitorState;
-import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.ErrorReporter;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import javax.lang.model.element.AnnotationMirror;
 
 import checkers.inference.InferenceAnnotatedTypeFactory;
 import checkers.inference.VariableAnnotator;
@@ -81,13 +78,10 @@ public class ConstraintManager {
 
             if (!constraintVerifier.isSubtype(subConstant, superConstant)) {
                 checker.report(Result.failure("subtype.constraint.unsatisfiable", subtype, supertype),
-                        // visitorState.getPath().getLeaf() caused NullPointerException on some real project
-                        // and doesn't always return correct source tree. Using class tree at least shows which
-                        // Java source class there is such unsatisfiable error and also doesn't throw exception
-                        visitorState.getClassTree());
+                        getCurrentTreeLocation());
             }
         }
-        return new SubtypeConstraint(subtype, supertype, getCurrentLocation());
+        return new SubtypeConstraint(subtype, supertype, getCurrentAnnotationLocation());
     }
 
     public EqualityConstraint createEqualityConstraint(Slot first, Slot second) {
@@ -100,10 +94,10 @@ public class ConstraintManager {
             ConstantSlot secondConstant = (ConstantSlot) second;
             if (!constraintVerifier.areEqual(firstConstant, secondConstant)) {
                 checker.report(Result.failure("equality.constraint.unsatisfiable", first, second),
-                        visitorState.getClassTree());
+                        getCurrentTreeLocation());
             }
         }
-        return new EqualityConstraint(first, second, getCurrentLocation());
+        return new EqualityConstraint(first, second, getCurrentAnnotationLocation());
     }
 
     public InequalityConstraint createInequalityConstraint(Slot first, Slot second) {
@@ -116,10 +110,10 @@ public class ConstraintManager {
             ConstantSlot secondConstant = (ConstantSlot) second;
             if (constraintVerifier.areEqual(firstConstant, secondConstant)) {
                 checker.report(Result.failure("inequality.constraint.unsatisfiable", first, second),
-                        visitorState.getClassTree());
+                        getCurrentTreeLocation());
             }
         }
-        return new InequalityConstraint(first, second, getCurrentLocation());
+        return new InequalityConstraint(first, second, getCurrentAnnotationLocation());
     }
 
     public ComparableConstraint createComparableConstraint(Slot first, Slot second) {
@@ -132,10 +126,10 @@ public class ConstraintManager {
             ConstantSlot secondConstant = (ConstantSlot) second;
             if (!constraintVerifier.areComparable(firstConstant, secondConstant)) {
                 checker.report(Result.failure("comparable.constraint.unsatisfiable", first, second),
-                        visitorState.getClassTree());
+                        getCurrentTreeLocation());
             }
         }
-        return new ComparableConstraint(first, second, getCurrentLocation());
+        return new ComparableConstraint(first, second, getCurrentAnnotationLocation());
     }
 
     public CombineConstraint createCombineConstraint(Slot target, Slot decl, Slot result) {
@@ -143,7 +137,7 @@ public class ConstraintManager {
             ErrorReporter.errorAbort("Create combine constraint with null argument. Target: " + target
                     + " Decl: " + decl + " Result: " + result);
         }
-        return new CombineConstraint(target, decl, result, getCurrentLocation());
+        return new CombineConstraint(target, decl, result, getCurrentAnnotationLocation());
     }
 
     public PreferenceConstraint createPreferenceConstraint(VariableSlot variable, ConstantSlot goal,
@@ -152,22 +146,33 @@ public class ConstraintManager {
             ErrorReporter.errorAbort("Create preference constraint with null argument. Variable: "
                     + variable + " Goal: " + goal);
         }
-        return new PreferenceConstraint(variable, goal, weight, getCurrentLocation());
+        return new PreferenceConstraint(variable, goal, weight, getCurrentAnnotationLocation());
     }
 
     public ExistentialConstraint createExistentialConstraint(Slot slot,
             List<Constraint> ifExistsConstraints, List<Constraint> ifNotExistsConstraints) {
         // TODO: add null checking for argument.
         return new ExistentialConstraint((VariableSlot) slot,
-                ifExistsConstraints, ifNotExistsConstraints, getCurrentLocation());
+                ifExistsConstraints, ifNotExistsConstraints, getCurrentAnnotationLocation());
     }
 
-    private AnnotationLocation getCurrentLocation() {
+    private AnnotationLocation getCurrentAnnotationLocation() {
         if (visitorState.getPath() != null) {
             return VariableAnnotator.treeToLocation(inferenceTypeFactory, visitorState.getPath()
                     .getLeaf());
         } else {
             return AnnotationLocation.MISSING_LOCATION;
+        }
+    }
+
+    // visitorState.getPath().getLeaf() caused NullPointerException on some real project
+    // and doesn't always return correct source tree. Using class tree at least shows which
+    // Java source class there is such unsatisfiable error and also doesn't throw exception
+    private Tree getCurrentTreeLocation() {
+        if (visitorState.getPath() != null) {
+            return visitorState.getPath().getLeaf();
+        } else {
+            return visitorState.getClassTree();
         }
     }
 
