@@ -25,6 +25,7 @@ public class MaxSATImplicationConstraintEncoder extends MaxSATAbstractConstraint
         this.formatTranslator = formatTranslator;
     }
 
+    // TODO Add high level documentation
     @Override
     public VecInt[] encode(ImplicationConstraint constraint) {
         // Concatenate with every pair at the end

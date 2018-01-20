@@ -10,14 +10,19 @@ public class ImplicationConstraint extends Constraint {
 
     public ImplicationConstraint(
             List<Constraint> assumptions, Constraint conclusion, AnnotationLocation location) {
-        super(new ArrayList<>(), location);
-        for(Constraint a : assumptions) {
-            getSlots().addAll(a.getSlots());
-        }
-        getSlots().addAll(conclusion.getSlots());
+        super(computeSlots(assumptions, conclusion), location);
 
         this.assumptions = assumptions;
         this.conclusion = conclusion;
+    }
+
+    private static List<Slot> computeSlots(List<Constraint> assumptions, Constraint conclusion) {
+        List<Slot> slots = new ArrayList<>();
+        for(Constraint a : assumptions) {
+            slots.addAll(a.getSlots());
+        }
+        slots.addAll(conclusion.getSlots());
+        return slots;
     }
 
     public List<Constraint> getAssumptions() {

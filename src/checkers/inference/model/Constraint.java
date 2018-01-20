@@ -1,5 +1,6 @@
 package checkers.inference.model;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -42,14 +43,14 @@ public abstract class Constraint {
     public AnnotationLocation getLocation() {
         return location;
     }
-    
+
     public abstract <S, T> T serialize(Serializer<S, T> serializer);
 
     /**
      * @return the list of slots referenced by this constraint
      */
     public List<Slot> getSlots() {
-        return slots;
+        return Collections.unmodifiableList(slots);
     }
 
     @Override

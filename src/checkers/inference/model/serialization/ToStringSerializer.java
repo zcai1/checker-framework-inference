@@ -209,6 +209,7 @@ public class ToStringSerializer implements Serializer<String, String> {
     public String serialize(RefinementVariableSlot slot) {
         final StringBuilder sb = new StringBuilder();
         sb.append(slot.getId());
+        // "↧" sign is \u21A7
         sb.append("[ \u21A7 "+ slot.getRefined() + " ]");
         optionallyShowVerbose(slot, sb);
         return sb.toString();
