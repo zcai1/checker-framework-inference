@@ -120,7 +120,7 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
             }
 
         } catch (ContradictionException e) {
-            InferenceMain.getInstance().logger.warning("Contradiction exceptin: ");
+            InferenceMain.getInstance().logger.warning("Contradiction exception: ");
             // This case indicates that constraints are not solvable, too. This is normal so continue
             // execution and let solver strategy to explain why there is no solution
             unsatisfiableConstraintExplainer = new MaxSATUnsatisfiableConstraintExplainer();

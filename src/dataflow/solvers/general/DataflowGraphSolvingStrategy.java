@@ -154,6 +154,10 @@ public class DataflowGraphSolvingStrategy extends GraphSolvingStrategy {
             StatisticRecorder.record(StatisticKey.ANNOTATOIN_SIZE, (long) solutions.size());
         }
 
-        return new DefaultInferenceResult(solutions, explanations);
+        if (solutions != null) {
+            return new DefaultInferenceResult(solutions);
+        } else {
+            return new DefaultInferenceResult(explanations);
+        }
     }
 }

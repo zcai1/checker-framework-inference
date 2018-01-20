@@ -31,7 +31,7 @@ public class PlainSolvingStrategy extends AbstractSolvingStrategy{
         if (solutions != null) {
             return new DefaultInferenceResult(solutions);
         } else {
-            return new DefaultInferenceResult(solutions, underlyingSolver.explainUnsatisfiable());
+            return new DefaultInferenceResult(underlyingSolver.explainUnsatisfiable());
         }
     }
 }

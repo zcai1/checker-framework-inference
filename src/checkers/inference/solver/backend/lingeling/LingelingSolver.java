@@ -69,9 +69,10 @@ public class LingelingSolver extends MaxSatSolver {
         try {
             int[] resultArray = getOutPut_Error(lingeling + " " + CNFData.getAbsolutePath() + "/cnfdata"
                     + localNth + ".txt");
-            if (resultArray.length != 0) {
-                solutions = decode(resultArray);
-            } // else means no solution!
+            // TODO What's the value of resultArray if there is no solution? Need to adapt this to
+            // changes in the PR: https://github.com/opprop/checker-framework-inference/pull/128
+            // , i.e. set solutions to null if there is no solution
+            solutions = decode(resultArray);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }

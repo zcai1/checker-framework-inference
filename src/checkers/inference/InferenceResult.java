@@ -17,6 +17,7 @@ public interface InferenceResult {
      * @return true if inference result contains valid solutions for variable IDs.
      * Returns false if underlying solver fails to give solution for {@link Constraint}s.
      *
+     * @see #getSolutions()
      * @see #containsSolutionForVariable(int)
      * @see #getSolutionForVariable(int)
      * @see #getUnsatisfiableConstraints()
@@ -40,6 +41,7 @@ public interface InferenceResult {
      * result(implementation detail) contains solution for {@code varId}
      *
      * @see #hasSolution()
+     * @see #getSolutionForVariable(int)
      */
     boolean containsSolutionForVariable(int varId);
 
@@ -51,6 +53,7 @@ public interface InferenceResult {
      * inferred result(implementation detail) contains solution for {@code varId}
      *
      * @see #hasSolution()
+     * @see #containsSolutionForVariable(int)
      */
     AnnotationMirror getSolutionForVariable(int varId);
 
