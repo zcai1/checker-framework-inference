@@ -6,7 +6,8 @@ import org.checkerframework.framework.flow.CFValue;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedTypeVariable;
 import org.checkerframework.framework.type.QualifierHierarchy;
-import org.checkerframework.javacutil.InternalUtils;
+import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.TypesUtils;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -206,7 +207,7 @@ public class InferenceValue extends CFValue {
         // Create new full type (with the same underlying type), and then add
         // the appropriate annotations.
         TypeMirror underlyingType =
-                TypesUtils.leastUpperBound(getUnderlyingType(),
+                TypesUtils.greatestLowerBound(getUnderlyingType(),
                         other.getUnderlyingType(), analysis.getEnv());
 
         if (underlyingType.getKind() == TypeKind.ERROR

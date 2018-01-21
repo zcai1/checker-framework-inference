@@ -162,6 +162,10 @@ public class ConstraintManager {
                 ifExistsConstraints, ifNotExistsConstraints, getCurrentLocation());
     }
 
+    public ImplicationConstraint createImplicationConstraint(List<Constraint> assumptions, Constraint conclusion) {
+        return new ImplicationConstraint(assumptions, conclusion, getCurrentLocation());
+    }
+
     private AnnotationLocation getCurrentLocation() {
         if (visitorState.getPath() != null) {
             return VariableAnnotator.treeToLocation(inferenceTypeFactory, visitorState.getPath()
@@ -207,5 +211,9 @@ public class ConstraintManager {
     public void addExistentialConstraint(Slot slot, List<Constraint> ifExistsConstraints,
             List<Constraint> ifNotExistsConstraints) {
         this.add(this.createExistentialConstraint(slot, ifExistsConstraints, ifNotExistsConstraints));
+    }
+
+    public void addImplicationConstraint(List<Constraint> assumptions, Constraint conclusion) {
+        add(createImplicationConstraint(assumptions, conclusion));
     }
 }

@@ -59,7 +59,7 @@ public class MaxSatFormatTranslator extends AbstractFormatTranslator<VecInt[], V
 
     @Override
     protected ConstraintEncoderFactory<VecInt[]> createConstraintEncoderFactory(ConstraintVerifier verifier) {
-        return new MaxSATConstraintEncoderFactory(lattice, verifier, typeToInt);
+        return new MaxSATConstraintEncoderFactory(lattice, verifier, typeToInt, this);
     }
 
     /**

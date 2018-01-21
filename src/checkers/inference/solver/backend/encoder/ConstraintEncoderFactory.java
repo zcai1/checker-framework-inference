@@ -7,6 +7,7 @@ import checkers.inference.solver.backend.encoder.binary.InequalityConstraintEnco
 import checkers.inference.solver.backend.encoder.binary.SubtypeConstraintEncoder;
 import checkers.inference.solver.backend.encoder.combine.CombineConstraintEncoder;
 import checkers.inference.solver.backend.encoder.existential.ExistentialConstraintEncoder;
+import checkers.inference.solver.backend.encoder.implication.ImplicationConstraintEncoder;
 import checkers.inference.solver.backend.encoder.preference.PreferenceConstraintEncoder;
 
 /**
@@ -22,6 +23,7 @@ import checkers.inference.solver.backend.encoder.preference.PreferenceConstraint
  *     <li>{@link PreferenceConstraintEncoder}</li>
  *     <li>{@link CombineConstraintEncoder}</li>
  *     <li>{@link ExistentialConstraintEncoder}</li>
+ *     <li>{@link ImplicationConstraintEncoder}</li>
  * </ul>
  * <p>
  * User of this interface is {@link checkers.inference.solver.backend.AbstractFormatTranslator}
@@ -44,4 +46,6 @@ public interface ConstraintEncoderFactory<ConstraintEncodingT> {
     CombineConstraintEncoder<ConstraintEncodingT> createCombineConstraintEncoder();
 
     ExistentialConstraintEncoder<ConstraintEncodingT> createExistentialConstraintEncoder();
+
+    ImplicationConstraintEncoder<ConstraintEncodingT> createImplicationConstraintEncoder();
 }

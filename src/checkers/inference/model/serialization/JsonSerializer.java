@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.lang.model.element.AnnotationMirror;
 
+import checkers.inference.model.ImplicationConstraint;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -323,5 +324,11 @@ public class JsonSerializer implements Serializer<String, JSONObject> {
         // TODO: is the int showing up correctly in JSON?
         obj.put(PREFERENCE_WEIGHT, constraint.getWeight());
         return obj;
+    }
+
+    @Override
+    public JSONObject serialize(ImplicationConstraint implicationConstraint) {
+        // TODO Add logic here
+        return null;
     }
 }

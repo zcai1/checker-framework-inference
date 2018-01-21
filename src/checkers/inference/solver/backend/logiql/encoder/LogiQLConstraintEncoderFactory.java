@@ -7,7 +7,9 @@ import checkers.inference.solver.backend.encoder.binary.InequalityConstraintEnco
 import checkers.inference.solver.backend.encoder.binary.SubtypeConstraintEncoder;
 import checkers.inference.solver.backend.encoder.combine.CombineConstraintEncoder;
 import checkers.inference.solver.backend.encoder.existential.ExistentialConstraintEncoder;
+import checkers.inference.solver.backend.encoder.implication.ImplicationConstraintEncoder;
 import checkers.inference.solver.backend.encoder.preference.PreferenceConstraintEncoder;
+import checkers.inference.solver.backend.logiql.LogiQLFormatTranslator;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.util.ConstraintVerifier;
 
@@ -16,10 +18,10 @@ import checkers.inference.util.ConstraintVerifier;
  *
  * @see checkers.inference.solver.backend.encoder.ConstraintEncoderFactory
  */
-public class LogiQLConstraintEncoderFactory extends AbstractConstraintEncoderFactory<String> {
+public class LogiQLConstraintEncoderFactory extends AbstractConstraintEncoderFactory<LogiQLFormatTranslator, String> {
 
-    public LogiQLConstraintEncoderFactory(Lattice lattice, ConstraintVerifier verifier) {
-        super(lattice, verifier);
+    public LogiQLConstraintEncoderFactory(Lattice lattice, ConstraintVerifier verifier, LogiQLFormatTranslator formatTranslator) {
+        super(lattice, verifier, formatTranslator);
     }
 
     @Override
@@ -54,6 +56,11 @@ public class LogiQLConstraintEncoderFactory extends AbstractConstraintEncoderFac
 
     @Override
     public ExistentialConstraintEncoder<String> createExistentialConstraintEncoder() {
+        return null;
+    }
+
+    @Override
+    public ImplicationConstraintEncoder<String> createImplicationConstraintEncoder() {
         return null;
     }
 }
