@@ -275,5 +275,13 @@ public class PrintUtils {
             return null;
         }
 
+        @Override
+        public Void serialize(ImplicationConstraint implicationConstraint) {
+            for (Constraint a : implicationConstraint.getAssumptions()) {
+                a.serialize(this);
+            }
+            implicationConstraint.getConclusion().serialize(this);
+            return null;
+        }
     }
 }
