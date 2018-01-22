@@ -11,12 +11,15 @@ import org.sat4j.core.VecInt;
 import javax.lang.model.element.AnnotationMirror;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 public class MaxSATImplicationConstraintEncoder extends MaxSATAbstractConstraintEncoder implements ImplicationConstraintEncoder<VecInt[]> {
 
+    /**
+     * {@link MaxSatFormatTranslator} instance to delegate format translating base {@link Constraint}({@code
+     * Constraint}s that are not {@link ImplicationConstraint}) to.
+     */
     private final MaxSatFormatTranslator formatTranslator;
 
     public MaxSATImplicationConstraintEncoder(Lattice lattice, ConstraintVerifier verifier,
@@ -45,7 +48,7 @@ public class MaxSATImplicationConstraintEncoder extends MaxSATAbstractConstraint
 
         // Step 1
         // A list of VecInts/clauses from lhs of implication, which are conjuncted together(cnf)
-        List<VecInt> assumptions = new LinkedList<>();
+        List<VecInt> assumptions = new ArrayList<>();
         for (Constraint a : constraint.getAssumptions()) {
             assumptions.addAll(Arrays.asList(a.serialize(formatTranslator)));
         }
@@ -97,6 +100,16 @@ public class MaxSATImplicationConstraintEncoder extends MaxSATAbstractConstraint
         return serializedTemp.toArray(finalSerializedResult);
     }
 
+    /**
+     * Method to get cartesian set of input set.
+     *
+     * For example, if the input is [[1,2], [3,4,5]], this method returns
+     * [[1,3],[1,4],[1,5],[2,3],[2,4],[2,5]]
+     *
+     * @param lists a set of set of elements
+     * @param <T> type of element
+     * @return cartesian set of elements
+     */
     protected <T> List<List<T>> cartesianProduct(List<List<T>> lists) {
         List<List<T>> resultLists = new ArrayList<List<T>>();
         if (lists.size() == 0) {

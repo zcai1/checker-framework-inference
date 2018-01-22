@@ -263,7 +263,8 @@ public abstract class CnfVecIntSerializer implements Serializer<VecInt[], VecInt
 
     @Override
     public VecInt[] serialize(ImplicationConstraint implicationConstraint) {
-        return emptyClauses;
+        throw new UnsupportedOperationException("ImplicationConstraint is supported in more-advanced" +
+                "MaxSAT backend. Use MaxSATSolver instead!");
     }
 
     public List<VecInt> convertAll(Iterable<Constraint> constraints) {
