@@ -56,4 +56,19 @@ public class ImplicationConstraint extends Constraint {
     public <S, T> T serialize(Serializer<S, T> serializer) {
         return serializer.serialize(this);
     }
+
+    @Override
+    public int hashCode() {
+        return computeHashCode(assumptions, conclusion);
+    }
+
+    private static int computeHashCode(List<Constraint> assumptions, Constraint conclusion) {
+        final int prime = 31;
+        int result = 1;
+        for(Constraint a : assumptions) {
+            result = result * prime + a.hashCode();
+        }
+        result = result * prime + conclusion.hashCode();
+        return result;
+    }
 }
