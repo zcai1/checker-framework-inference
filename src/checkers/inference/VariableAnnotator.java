@@ -123,7 +123,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
     /** Key is the NewArray Tree */
     private final Map<Tree, AnnotatedArrayType> newArrayMissingTrees;
     /** Class declarations may (or may not) have annotations that act as bound. */
-    private final Map<Element, VariableSlot> classDeclAnnos;
+    protected final Map<Element, VariableSlot> classDeclAnnos;
 
     /** When inferring the type of polymorphic qualifiers we create one new Variable to
      * represent the call-site value of that qualifier.  This map keeps track of
