@@ -25,23 +25,35 @@ public class MaxSATImplicationConstraintEncoder extends MaxSATAbstractConstraint
         this.formatTranslator = formatTranslator;
     }
 
-    // TODO Add high level documentation
+    // (a  | b ) & (c | d ) => (h | i ) & ( j | k) is equivalent to cnf form:
+    // (~a | ~c | h | i) & (~a | ~c | j | k) & (~a | ~d | h | i) & (~a | ~d | j | k)
+    // & (~b | ~c | h | i) & (~b | ~c | j | k) & (~b | ~d | h | i) & (~b | ~d | j | k)
+    // High level procedures:
+    // 1) Format translate all Constraint from assumptions to a list of VecInt: [(a|b),(c|d)]
+    // 2) Convert the list in step 1 to a list of list. The sublist is essentially a set
+    // (should have no duplicates) of variables: [[a,b], [c,d]]
+    // 3) Get the cartesian set(use list for implementation): [[a,c],[a,d],[b,c],[b,d]]
+    // 4) Iterate over cartesian set in step 3, create a new VecInt, which is composed
+    // by this way: negate each variable from each set from cartesian set, combine it with
+    // every VecInt from conclusion clauses. For example, (~a | ~c | h | i), (~a | ~c | j | k),
+    // (~a | ~d | h | i), (~a | ~d | j | k), (~b | ~c | h | i), (~b | ~c | j | k),
+    // (~b | ~d | h | i), (~b | ~d | j | k)
+    // 5) Convert the list of VecInt in step 4 to array of VecInt and return it as final
+    // format translated result.
     @Override
     public VecInt[] encode(ImplicationConstraint constraint) {
-        // Concatenate with every pair at the end
-        VecInt[] result = constraint.getConclusion().serialize(formatTranslator);
-        VecInt rhs = new VecInt();
-        for (VecInt r : result) {
-            rhs.pushAll(r);
-        }
 
-        // VecInt corresponds to a cnf clause
+        // Step 1
+        // A list of VecInts/clauses from lhs of implication, which are conjuncted together(cnf)
         List<VecInt> assumptions = new LinkedList<>();
         for (Constraint a : constraint.getAssumptions()) {
             assumptions.addAll(Arrays.asList(a.serialize(formatTranslator)));
         }
+
+        // Step 2
+        // l is a set of set, in which each subset contains every variable that a VecInt contains, for example,
+        // l = {{a,b}, {c,d}}
         List<List<Integer>> l = new ArrayList<>();
-        int size = 1;
         for (VecInt clause : assumptions) {
             int[] a = clause.toArray();
             List<Integer> list = new ArrayList<>();
@@ -49,22 +61,40 @@ public class MaxSATImplicationConstraintEncoder extends MaxSATAbstractConstraint
                 list.add(each);
             }
             l.add(list);
-            size *= clause.size();
         }
-        VecInt[] target = new VecInt[size];
 
-        // Get the combinations of
+        // Step 3
+        // cartesian is cartesian set of every variable from different VecInt, for example,
+        // cartesian = {{a,c}, {a,d}, {b,c}, {b,d}}
         List<List<Integer>> cartesian = cartesianProduct(l);// should have the same length as target arrray
-        for (int j=0; j<target.length; j++) {
-            List<Integer> toNegate = cartesian.get(j);
-            VecInt targetClause = new VecInt();
-            for (Integer var : toNegate) {
-                targetClause.push(-var);// Push the negation, of variable because it's from lhs assumption
+
+        // Concatenate with every pair at the end
+        VecInt[] conclusionClauses = constraint.getConclusion().serialize(formatTranslator);
+
+        int expectedSize = cartesian.size() * conclusionClauses.length;;
+
+        List<VecInt> serializedTemp = new ArrayList<>();
+
+        // Step 4
+        for (int i=0; i<cartesian.size(); i++) {
+            for (int j = 0; j < conclusionClauses.length; j++) {
+                List<Integer> toNegate = cartesian.get(i);
+                VecInt targetClause = new VecInt();
+                for (Integer var : toNegate) {
+                    // Push the negation, of variable because it's from lhs assumption
+                    // for example, they are {!a, !c} and {!a,!d} and {!b, !c} and {!b, !d}
+                    targetClause.push(-var);
+                }
+                targetClause.pushAll(conclusionClauses[j]);
+                serializedTemp.add(targetClause);
             }
-            targetClause.pushAll(rhs);
-            target[j] = targetClause;
         }
-        return target;
+
+        assert serializedTemp.size() == expectedSize;
+
+        // Step 5
+        VecInt[] finalSerializedResult = new VecInt[expectedSize];
+        return serializedTemp.toArray(finalSerializedResult);
     }
 
     protected <T> List<List<T>> cartesianProduct(List<List<T>> lists) {
