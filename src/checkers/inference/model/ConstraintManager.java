@@ -216,6 +216,17 @@ public class ConstraintManager {
     }
 
     public void addImplicationConstraint(List<Constraint> assumptions, Constraint conclusion) {
+        if (assumptions == null || conclusion == null) {
+            ErrorReporter.errorAbort("Adding implication constraint with null argument. assumptions: "
+                    + assumptions + " conclusion: " + conclusion);
+        }
+
+        if (assumptions.size() == 0) {
+            // Optimization for trivial cases when there are no preconditions for the conclusion to be true
+            // , meaning conclusion is a hard Constraint that must be satisfied.
+            add(conclusion);
+            return;
+        }
         add(createImplicationConstraint(assumptions, conclusion));
     }
 }

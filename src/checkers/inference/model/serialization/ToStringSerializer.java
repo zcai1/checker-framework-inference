@@ -180,20 +180,27 @@ public class ToStringSerializer implements Serializer<String, String> {
         boolean prevShowVerboseVars = showVerboseVars;
         showVerboseVars = false;
         int prevIndent = indent;
+        // This is to avoid indentation for each sub constraint that comprises the implicationConstraint
         indent = 0;
-        StringBuilder sbAssumption = new StringBuilder();
-        int length = implicationConstraint.getAssumptions().size();
-        for (int i = 0; i < length - 1; i++) {
-            sbAssumption.append(implicationConstraint.getAssumptions().get(i).serialize(this));
-            sbAssumption.append(" & ");
-        }
-        sbAssumption.append(implicationConstraint.getAssumptions().get(length - 1).serialize(this));
-        StringBuilder sbConclustion = new StringBuilder();
-        sbConclustion.append(implicationConstraint.getConclusion().serialize(this));
+        String assumptions = getAssumptionsString(implicationConstraint);
+        String conclusion = implicationConstraint.getConclusion().serialize(this);
+        // Recover the previous indentation to indent the whole implicationConstraint string representation
         indent = prevIndent;
-        String result = indent(sbAssumption.toString() + " -> " + sbConclustion.toString());
+        String result = indent(assumptions + " -> " + conclusion);
         showVerboseVars = prevShowVerboseVars;
         return result;
+    }
+
+    private String getAssumptionsString(ImplicationConstraint implicationConstraint) {
+        StringBuilder sbAssumptions = new StringBuilder();
+        int length = implicationConstraint.getAssumptions().size();
+        if (length == 0) return "[ ]";
+        for (int i = 0; i < length - 1; i++) {
+            sbAssumptions.append(implicationConstraint.getAssumptions().get(i).serialize(this));
+            sbAssumptions.append(" & ");
+        }
+        sbAssumptions.append(implicationConstraint.getAssumptions().get(length - 1).serialize(this));
+        return sbAssumptions.toString();
     }
 
     // variables
