@@ -276,6 +276,11 @@ public class PrintUtils {
         }
 
         @Override
+        public Void serialize(LubVariableSlot slot) {
+            return null;
+        }
+
+        @Override
         public Void serialize(ImplicationConstraint implicationConstraint) {
             for (Constraint a : implicationConstraint.getAssumptions()) {
                 a.serialize(this);
