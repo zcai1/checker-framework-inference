@@ -75,6 +75,6 @@ public class MaxSATComparableConstraintEncoder extends MaxSATAbstractConstraintE
 
     @Override
     public VecInt[] encodeConstant_Constant(ConstantSlot fst, ConstantSlot snd) {
-        return emptyValue;
+        return verifier.areComparable(fst, snd) ? emptyValue : contradictoryValue;
     }
 }
