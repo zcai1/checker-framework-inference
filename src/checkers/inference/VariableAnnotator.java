@@ -133,7 +133,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
     private final Map<Tree, VariableSlot> treeToPolyVar;
 
     // An instance of @VarAnnot
-    private final AnnotationMirror varAnnot;
+    protected final AnnotationMirror varAnnot;
 
     // A single top in the target type system
     private final AnnotationMirror realTop;
@@ -733,7 +733,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
         return null;
     }
 
-    private boolean handleWasRawDeclaredTypes(AnnotatedDeclaredType adt) {
+    protected boolean handleWasRawDeclaredTypes(AnnotatedDeclaredType adt) {
         if (adt.wasRaw() && adt.getTypeArguments().size() != 0) {
             // the type arguments should be wildcards AND if I get the real type of "tree"
             // it corresponds to the declaration of adt.getUnderlyingType
