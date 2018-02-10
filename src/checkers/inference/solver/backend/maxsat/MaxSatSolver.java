@@ -158,8 +158,7 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
 
     protected void encodeWellFormednessRestriction() {
         for (Integer varSlotId : varSlotIds) {
-            List<VecInt> wfForSingleVariable = formatTranslator.generateWellFormednessClauses(varSlotId);
-            wellFormednessClauses.addAll(wfForSingleVariable);
+            formatTranslator.generateWellFormednessClauses(wellFormednessClauses, varSlotId);
         }
     }
 
