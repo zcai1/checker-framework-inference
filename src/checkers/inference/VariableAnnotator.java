@@ -505,7 +505,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
      *            after this method completes
      * @param tree Tree for which we want to create variables
      */
-    private VariableSlot addPrimaryVariable(AnnotatedTypeMirror atm, final Tree tree) {
+    protected VariableSlot addPrimaryVariable(AnnotatedTypeMirror atm, final Tree tree) {
 
         final VariableSlot variable;
         if (treeToVarAnnoPair.containsKey(tree)) {
