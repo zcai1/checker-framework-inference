@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class BaseInferenceResult implements InferenceResult {
 
-    protected final Map<Integer, AnnotationMirror> inferredResults;
+    public final Map<Integer, AnnotationMirror> inferredResults;
     protected final Collection<Constraint> unsatisfiableConstraints;
 
     public BaseInferenceResult(Map<Integer, AnnotationMirror> inferredResults,

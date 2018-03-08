@@ -49,7 +49,7 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
     protected final SlotManager slotManager;
     protected final List<VecInt> hardClauses = new LinkedList<>();
     private List<VecInt> wellFormdnessClauses = new LinkedList<>();
-    protected final List<VecInt> softClauses = new LinkedList<>();
+    protected final Map<VecInt, Integer> softClauses = new HashMap<>();
     private final MaxSATUnsatisfiableConstraintExplainer unsatisfiableConstraintExplainer;
     protected final File CNFData = new File(new File("").getAbsolutePath() + "/cnfData");
     protected StringBuilder CNFInput = new StringBuilder();
@@ -140,7 +140,7 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
             for (VecInt res : encoding) {
                 if (res != null && res.size() != 0) {
                     if (constraint instanceof PreferenceConstraint) {
-                        softClauses.add(res);
+                        softClauses.put(res, ((PreferenceConstraint) constraint).getWeight());
                     } else {
                         hardClauses.add(res);
                         //System.out.println("Generated hard clause: " + res);
@@ -188,8 +188,8 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
             solver.addHardClause(wellFormdnessClause);
         }
 
-        for (VecInt softclause : softClauses) {
-            solver.addSoftClause(softclause);
+        for (Map.Entry<VecInt, Integer> softclause : softClauses.entrySet()) {
+            solver.addSoftClause(softclause.getValue(), softclause.getKey());
         }
     }
 
@@ -274,7 +274,7 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
         }
         System.out.println();
         System.out.println("Soft clauses: ");
-        for (VecInt softClause : softClauses) {
+        for (VecInt softClause : softClauses.keySet()) {
             System.out.println(softClause);
         }
     }
