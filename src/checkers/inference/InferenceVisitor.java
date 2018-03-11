@@ -204,7 +204,12 @@ public class InferenceVisitor<Checker extends InferenceChecker,
 
     public void mainIs(AnnotatedTypeMirror ty, AnnotationMirror mod, String msgkey, Tree node) {
         final SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
-        annoIs(ty, slotManager.getAnnotation(ty), mod, msgkey, node);
+        VariableSlot vs = slotManager.getVariableSlot(ty);
+        if (vs == null) {
+            logger.warning("InferenceVisitor::mainIs: no annotation in type: " + ty);
+        } else {
+            annoIs(ty, slotManager.getAnnotation(vs), mod, msgkey, node);
+        }
     }
 
     public void mainIsSubtype(AnnotatedTypeMirror ty, AnnotationMirror mod, String msgkey, Tree node) {
