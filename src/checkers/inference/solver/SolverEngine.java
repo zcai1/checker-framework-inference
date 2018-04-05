@@ -3,9 +3,13 @@ package checkers.inference.solver;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.AnnotationMirror;
 
+import checkers.inference.BaseInferenceResult;
 import checkers.inference.InferenceResult;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.javacutil.ErrorReporter;
@@ -110,11 +114,7 @@ public class SolverEngine implements InferenceSolver {
             PrintUtils.printUnsolvable(inferenceResult.getUnsatisfiableConstraints());
         }
 
-        if (collectStatistic) {
-            Map<String, Integer> modelRecord = recordSlotConstraintSize(slots, constraints);
-            PrintUtils.printStatistic(StatisticRecorder.getStatistic(), modelRecord);
-            PrintUtils.writeStatistic(StatisticRecorder.getStatistic(), modelRecord);
-        }
+
 
         return inferenceResult;
     }
@@ -158,7 +158,7 @@ public class SolverEngine implements InferenceSolver {
      * @param constraints
      * @return A map between name of constraint/slot and their counts.
      */
-    private Map<String, Integer> recordSlotConstraintSize(final Collection<Slot> slots,
+    protected Map<String, Integer> recordSlotConstraintSize(final Collection<Slot> slots,
             final Collection<Constraint> constraints) {
 
         // Record constraint size

@@ -1,6 +1,7 @@
 package checkers.inference;
 
 
+import checkers.inference.solver.util.StatisticRecorder;
 import org.checkerframework.framework.test.TestUtilities;
 import org.checkerframework.framework.util.CheckerMain;
 import org.checkerframework.framework.util.ExecUtil;
@@ -162,7 +163,7 @@ public class InferenceLauncher {
 
         argList.addAll(
                 Arrays.asList(
-                        "-ea", "-ea:checkers.inference...", 
+                        "-ea", "-ea:checkers.inference...",
                         // TODO: enable assertions.
                         "-da:org.checkerframework.framework.flow...",
                         "checkers.inference.InferenceMain",

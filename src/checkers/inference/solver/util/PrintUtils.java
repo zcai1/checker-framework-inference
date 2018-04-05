@@ -84,19 +84,36 @@ public class PrintUtils {
             Map<String, Integer> modelRecord) {
 
         StringBuilder statisticsText = new StringBuilder();
-        StringBuilder basicInfo = new StringBuilder();
-        StringBuilder timingInfo = new StringBuilder();
+        // slot, constraint, constantslot, variableslot size
+        String s1 = String.join("&", String.valueOf(statistic.get(StatisticKey.SLOTS_SIZE)),
+                String.valueOf(statistic.get(StatisticKey.CONSTRAINT_SIZE)),
+                String.valueOf(modelRecord.get(ConstantSlot.class.getSimpleName())),
+                String.valueOf(modelRecord.get(VariableSlot.class.getSimpleName())));
+        statisticsText.append(s1+"\n");
 
-        // Basic info
-        buildStatisticText(statistic, basicInfo, StatisticKey.SLOTS_SIZE);
-        buildStatisticText(statistic, basicInfo, StatisticKey.CONSTRAINT_SIZE);
-        for (Map.Entry<String, Integer> entry : modelRecord.entrySet()) {
-            buildStatisticText(entry.getKey(), entry.getValue(), basicInfo);
-        }
+        // SATSolver related statistics
+        String s2 = String.join("&", String.valueOf(statistic.get(StatisticKey.CNF_VARIABLE_SIZE)),
+                String.valueOf(statistic.get(StatisticKey.CNF_CLAUSE_SIZE)),
+                String.valueOf(statistic.get(StatisticKey.PARSING_TIME)),
+                String.valueOf(statistic.get(StatisticKey.SAT_SERIALIZATION_TIME)),
+                String.valueOf(statistic.get(StatisticKey.SAT_SOLVING_TIME)));
+        statisticsText.append(s2+"\n");
 
-        statisticsText.append(basicInfo);
-        statisticsText.append(timingInfo);
+        String s3 = String.join("&",
+                String.valueOf(convertNumber(modelRecord, SubtypeConstraint.class.getSimpleName())),
+                String.valueOf(convertNumber(modelRecord, EqualityConstraint.class.getSimpleName())),
+                String.valueOf(convertNumber(modelRecord, InequalityConstraint.class.getSimpleName())),
+                String.valueOf(convertNumber(modelRecord, PreferenceConstraint.class.getSimpleName())),
+                String.valueOf(convertNumber(modelRecord, CombineConstraint.class.getSimpleName())),
+                String.valueOf(convertNumber(modelRecord, ComparableConstraint.class.getSimpleName())),
+                String.valueOf(convertNumber(modelRecord, ImplicationConstraint.class.getSimpleName())));
+        statisticsText.append(s3+"\n");
+
         return statisticsText;
+    }
+
+    static int convertNumber(Map<String, Integer> modelRecord, String key) {
+        return !modelRecord.containsKey(key) ? 0 : modelRecord.get(key);
     }
 
     /**
@@ -118,9 +135,9 @@ public class PrintUtils {
     }
 
     public static void writeStatistic(Map<StatisticKey, Long> statistic,
-            Map<String, Integer> modelRecord) {
+            Map<String, Integer> modelRecord, String fileName) {
         StringBuilder statisticsTest = buildStatistic(statistic, modelRecord);
-        String writePath = new File(new File("").getAbsolutePath()).toString() + "/statistic.txt";
+        String writePath = new File(new File("").getAbsolutePath()).toString() + "/" + fileName;
         try {
             PrintWriter pw = new PrintWriter(writePath);
             pw.write(statisticsTest.toString());

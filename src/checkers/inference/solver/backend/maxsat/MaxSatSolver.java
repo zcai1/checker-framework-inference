@@ -105,7 +105,14 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
             StatisticRecorder.recordSingleSolvingTime(solvingTime);
 
             if (isSatisfiable) {
-                result = decode(solver.model());
+                long t1 = System.currentTimeMillis();
+                int[] solutions = solver.model();
+                long t2 = System.currentTimeMillis();
+                StatisticRecorder.recordSingleSolvingTime(t2 - t1);
+                long t3 = System.currentTimeMillis();
+                result = decode(solutions);
+                long t4 = System.currentTimeMillis();
+                //StatisticRecorder.record(StatisticKey.DECODING_TIME, t4 - t3);
                 // PrintUtils.printResult(result);
             } else {
                 System.out.println("Not solvable!");
@@ -170,11 +177,12 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
     private void configureSatSolver(WeightedMaxSatDecorator solver) {
 
         final int totalVars = (slotManager.getNumberOfSlots() * lattice.numTypes);
+        StatisticRecorder.record(StatisticKey.CNF_VARIABLE_SIZE, (long)totalVars);
         final int totalClauses = hardClauses.size() + wellFormdnessClauses.size() + softClauses.size();
+        StatisticRecorder.record(StatisticKey.CNF_CLAUSE_SIZE, (long)totalClauses);
 
         solver.newVar(totalVars);
         solver.setExpectedNumberOfClauses(totalClauses);
-        StatisticRecorder.record(StatisticKey.CNF_CLAUSE_SIZE, (long) totalClauses);
         countVariables();
         solver.setTimeoutMs(1000000);
     }
@@ -282,6 +290,7 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
     @Override
     public Collection<Constraint> explainUnsatisfiable() {
         return unsatisfiableConstraintExplainer.minimumUnsatisfiableConstraints();
+        // return null;
     }
 
     class MaxSATUnsatisfiableConstraintExplainer {
@@ -339,6 +348,10 @@ public class MaxSatSolver extends Solver<MaxSatFormatTranslator> {
                         mus.add(vecIntConstraintMap.get(vecInt));
                     } else {
                         System.out.println("Explanation hits well-formedness restriction: " + i);
+                        int[] array = vecInt.toArray();
+                        for (int varId : array) {
+                            System.out.println("    Related slot id: " + MathUtils.getSlotId(varId, lattice));
+                        }
                     }
                 }
 //                int[] indicies = explanationSolver.minimalExplanation();

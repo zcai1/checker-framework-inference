@@ -142,6 +142,12 @@ public class ConstraintManager {
                         visitorState.getClassTree());
             }
         }
+        if (((VariableSlot)subtype).getId() == 1425) {
+            new Object();
+        }
+        if (((VariableSlot)subtype).getId() == 527 && ((VariableSlot)supertype).getId() == 528) {
+            new Object();
+        }
         add(createSubtypeConstraint(subtype, supertype));
     }
 
@@ -157,6 +163,9 @@ public class ConstraintManager {
                 checker.report(Result.failure("equality.constraint.unsatisfiable", first, second),
                         visitorState.getClassTree());
             }
+        }
+        if (((VariableSlot)first).getId() == 527 && ((VariableSlot)second).getId() == 1) {
+            new Object();
         }
         add(createEqualityConstraint(first, second));
     }
@@ -197,6 +206,11 @@ public class ConstraintManager {
         if (target == null || decl == null || result == null) {
             ErrorReporter.errorAbort("Adding combine constraint with null argument. Target: " + target
                     + " Decl: " + decl + " Result: " + result);
+        }
+        if (decl instanceof VariableSlot && target instanceof VariableSlot) {
+            if (((VariableSlot) decl).getId() == 1 && ((VariableSlot) target).getId() == 610) {
+                new Object();
+            }
         }
         add(createCombineConstraint(target, decl, result));
     }

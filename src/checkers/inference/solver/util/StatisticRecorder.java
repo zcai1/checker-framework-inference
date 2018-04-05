@@ -20,13 +20,12 @@ public class StatisticRecorder {
         GRAPH_SIZE,
         CNF_VARIABLE_SIZE,
         CNF_CLAUSE_SIZE,
-        SAT_VARIABLE_SIZE,
-        SAT_CLAUSE_SIZE,
         LOGIQL_PREDICATE_SIZE,
         LOGIQL_DATA_SIZE,
         ANNOTATOIN_SIZE,
 
         /* Timing Info*/
+        PARSING_TIME,
         GRAPH_GENERATION_TIME,
         OVERALL_PARALLEL_SOLVING_TIME,
         OVERALL_SEQUENTIAL_SOLVING_TIME,
@@ -35,6 +34,8 @@ public class StatisticRecorder {
         SAT_SOLVING_TIME,
         LOGIQL_SERIALIZATION_TIME,
         LOGIQL_SOLVING_TIME,
+        TOTAL_TIME_FOR_INFERENCE_PROCESS,
+        DECODING_TIME
     }
 
     // Use atomic integer when back ends run in parallel.
@@ -49,11 +50,11 @@ public class StatisticRecorder {
     }
 
     public static synchronized void recordSingleSerializationTime(long value) {
-        satSerializationTime.addAndGet((int) value);
+        record(StatisticKey.SAT_SERIALIZATION_TIME, (long)satSerializationTime.addAndGet((int) value));
     }
 
     public static synchronized void recordSingleSolvingTime(long value) {
-        satSolvingTime.addAndGet((int) value);
+        record(StatisticKey.SAT_SOLVING_TIME, (long)satSolvingTime.addAndGet((int) value));
     }
 
     public static void record(StatisticKey key, Long value) {

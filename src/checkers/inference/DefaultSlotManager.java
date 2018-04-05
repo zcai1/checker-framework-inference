@@ -349,6 +349,9 @@ public class DefaultSlotManager implements SlotManager {
             addToVariables(combVariableSlot);
             combSlotPairCache.put(pair, combVariableSlot.getId());
         }
+        if (combVariableSlot.getId() == 8635) {
+            new Object();
+        }
         return combVariableSlot;
     }
 

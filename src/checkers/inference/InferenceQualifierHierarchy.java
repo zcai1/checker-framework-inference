@@ -328,19 +328,15 @@ public class InferenceQualifierHierarchy extends MultiGraphQualifierHierarchy {
 
     @Override
     public AnnotationMirror getTopAnnotation(final AnnotationMirror am) {
-        if (isVarAnnot(am)) {
-            return varAnnot;
-        } // else
-
-        return inferenceMain.getRealTypeFactory().getQualifierHierarchy().getTopAnnotations().iterator().next();
+        AnnotationMirror realTop
+                = inferenceMain.getRealTypeFactory().getQualifierHierarchy().getTopAnnotations().iterator().next();
+        return isVarAnnot(am) ? slotMgr.getAnnotation(slotMgr.getSlot(realTop)) : realTop;
     }
 
     @Override
     public AnnotationMirror getBottomAnnotation(final AnnotationMirror am) {
-        if (isVarAnnot(am)) {
-            return varAnnot;
-        } // else
-
-        return inferenceMain.getRealTypeFactory().getQualifierHierarchy().getBottomAnnotations().iterator().next();
+        AnnotationMirror realBottom
+                = inferenceMain.getRealTypeFactory().getQualifierHierarchy().getBottomAnnotations().iterator().next();
+        return isVarAnnot(am) ? slotMgr.getAnnotation(slotMgr.getSlot(realBottom)) : realBottom;
     }
 }

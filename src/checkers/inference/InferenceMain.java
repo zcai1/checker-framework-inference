@@ -1,5 +1,6 @@
 package checkers.inference;
 
+import checkers.inference.solver.util.StatisticRecorder;
 import com.sun.tools.javac.main.Main;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 
@@ -141,7 +142,10 @@ public class InferenceMain {
         logger.finer("Starting InferenceMain");
 
         // Start up javac
+        long start = System.currentTimeMillis();
         startCheckerFramework();
+        long end = System.currentTimeMillis();
+        StatisticRecorder.record(StatisticRecorder.StatisticKey.PARSING_TIME, end - start);
         solve();
         // solverResult = null covers case when debug solver is used, but in this case
         // shouldn't exit
