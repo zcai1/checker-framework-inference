@@ -25,7 +25,7 @@ public class InferenceViewpointAdapter extends ViewpointAdapter<Slot>{
     }
 
     @Override
-    protected Slot combineModifierWithModifier(Slot recvModifier, Slot declModifier, AnnotatedTypeFactory f) {
+    protected Slot combineModifierWithModifier(Slot recvModifier, Slot declModifier, AnnotatedTypeFactory atypeFactory) {
         Slot combVariableSlot = slotManager.createCombVariableSlot(recvModifier, declModifier);
         constraintManager.addCombineConstraint(recvModifier, declModifier, combVariableSlot);
         return combVariableSlot;
