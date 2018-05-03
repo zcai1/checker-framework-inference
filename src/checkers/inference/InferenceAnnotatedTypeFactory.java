@@ -287,7 +287,7 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
     @Override
     public void postAsMemberOf(final AnnotatedTypeMirror type,
-                               final AnnotatedTypeMirror owner, final Element element, final Tree tree) {
+                               final AnnotatedTypeMirror owner, final Element element) {
         final TypeKind typeKind = type.getKind();
         if (typeKind != TypeKind.DECLARED && typeKind != TypeKind.ARRAY) {
             return;
@@ -298,7 +298,6 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             return;
         }
 
-        setViewpointAdaptationLocation(tree, viewpointAdapter);
         viewpointAdaptMember(type, owner, element);
         }
 
@@ -328,7 +327,6 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         }
 
         final List<AnnotatedTypeParameterBounds> result = new ArrayList<>();
-        setViewpointAdaptationLocation(tree, viewpointAdapter);
         viewpointAdaptTypeVariableBounds(useType, declaredTypeParameters, mapping, result);
 
         return result;
@@ -365,8 +363,7 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         //TODO: Is the asMemberOf correct, was not in Werner's original implementation but I had added it
         //TODO: It is also what the AnnotatedTypeFactory default implementation does
-        final AnnotatedExecutableType methodOfReceiver = AnnotatedTypes.asMemberOf(types, this, receiverType, methodElem, methodInvocationTree);
-        setViewpointAdaptationLocation(methodInvocationTree, viewpointAdapter);
+        final AnnotatedExecutableType methodOfReceiver = AnnotatedTypes.asMemberOf(types, this, receiverType, methodElem);
         if (!ElementUtils.isStatic(methodElem)) {
             viewpointAdaptMethod(methodElem, receiverType, methodOfReceiver);
         }
@@ -380,14 +377,6 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             adaptGetClassReturnTypeToReceiver(method, receiverType);
         }
         return mfuPair;
-    }
-
-    private void setViewpointAdaptationLocation(Tree tree, ViewpointAdapter viewpointAdaptor) {
-        if (viewpointAdaptor == null) return;;
-        AnnotationLocation location = VariableAnnotator.treeToLocation(this, tree);
-        if (!(viewpointAdaptor instanceof InferenceViewpointAdapter))
-            ErrorReporter.errorAbort("In inference, viewpoint adaptor must be InferenceViewpointAdapter!");
-        ((InferenceViewpointAdapter)viewpointAdaptor).setLocation(location);
     }
 
     private final AnnotatedTypeScanner<Boolean, Void> fullyQualifiedVisitor = new AnnotatedTypeScanner<Boolean, Void>() {
@@ -418,9 +407,8 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         final AnnotatedTypeMirror constructorReturnType = fromNewClass(newClassTree);
         addComputedTypeAnnotations(newClassTree, constructorReturnType);
 
-        AnnotatedExecutableType constructorType = AnnotatedTypes.asMemberOf(types, this, constructorReturnType, constructorElem, newClassTree);
+        AnnotatedExecutableType constructorType = AnnotatedTypes.asMemberOf(types, this, constructorReturnType, constructorElem);
 
-        setViewpointAdaptationLocation(newClassTree, viewpointAdapter);
         constructorType = viewpointAdaptConstructor(constructorReturnType, constructorType);
 
         Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> substitutedPair = substituteTypeArgs(newClassTree, constructorElem, constructorType);
