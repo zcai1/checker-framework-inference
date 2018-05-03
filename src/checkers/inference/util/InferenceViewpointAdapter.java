@@ -18,10 +18,15 @@ public class InferenceViewpointAdapter extends ViewpointAdapter<Slot>{
 
     private final SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
     private final ConstraintManager constraintManager = InferenceMain.getInstance().getConstraintManager();
-    private AnnotationLocation location;
 
-    public void setLocation(AnnotationLocation location) {
-        this.location = location;
+    @Override
+    protected Slot extractModifier(AnnotatedTypeMirror atm, AnnotatedTypeFactory atypeFactory) {
+        return slotManager.getVariableSlot(atm);
+    }
+
+    @Override
+    protected AnnotationMirror extractAnnotationMirror(Slot slot) {
+        return slotManager.getAnnotation(slot);
     }
 
     @Override
@@ -29,16 +34,6 @@ public class InferenceViewpointAdapter extends ViewpointAdapter<Slot>{
         Slot combVariableSlot = slotManager.createCombVariableSlot(recvModifier, declModifier);
         constraintManager.addCombineConstraint(recvModifier, declModifier, combVariableSlot);
         return combVariableSlot;
-    }
-
-    @Override
-    protected Slot getModifier(AnnotatedTypeMirror atm, AnnotatedTypeFactory f) {
-        return slotManager.getVariableSlot(atm);
-    }
-
-    @Override
-    protected AnnotationMirror getAnnotationFromModifier(Slot slot) {
-        return slotManager.getAnnotation(slot);
     }
 
 }
