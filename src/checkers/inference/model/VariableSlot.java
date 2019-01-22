@@ -50,7 +50,7 @@ public class VariableSlot extends Slot {
     private final Set<RefinementVariableSlot> refinedToSlots = new HashSet<>();
 
     public boolean isMergedTo(VariableSlot other) {
-        for (LUBVariableSlot mergedTo: mergedToSlots) {
+        for (LUBVariableSlot mergedTo : mergedToSlots) {
             if (mergedTo.equals(other)) {
                 return true;
             } else {

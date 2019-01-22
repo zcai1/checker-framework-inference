@@ -16,8 +16,8 @@ public class LUBVariableSlot extends Slot {
         this.right = right;
     }
 
-    @Override public <SlotEncodingT> SlotEncodingT serialize(
-            Serializer<SlotEncodingT, ?> serializer) {
+    @Override
+    public <SlotEncodingT> SlotEncodingT serialize(Serializer<SlotEncodingT, ?> serializer) {
         return serializer.serialize(this);
     }
 
@@ -29,11 +29,13 @@ public class LUBVariableSlot extends Slot {
         return right;
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
         return HashCodeUtils.hash(left, right);
     }
 
-    @Override public boolean equals(Object obj) {
+    @Override
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -44,7 +46,8 @@ public class LUBVariableSlot extends Slot {
         return this.left.equals(that.left) && this.right.equals(that.right);
     }
 
-    @Override public int compareTo(Slot other) {
+    @Override
+    public int compareTo(Slot other) {
         if (!(other instanceof LUBVariableSlot)) {
             return super.compareTo(other);
         }

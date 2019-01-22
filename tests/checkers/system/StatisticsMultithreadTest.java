@@ -150,8 +150,7 @@ public class StatisticsMultithreadTest extends TestCase {
         }
 
         @Override
-        public <SlotEncodingT> SlotEncodingT serialize(
-                Serializer<SlotEncodingT, ?> serializer) {
+        public <SlotEncodingT> SlotEncodingT serialize(Serializer<SlotEncodingT, ?> serializer) {
             return null;
         }
     }
@@ -162,8 +161,7 @@ public class StatisticsMultithreadTest extends TestCase {
         }
 
         @Override
-        public <SlotEncodingT> SlotEncodingT serialize(
-                Serializer<SlotEncodingT, ?> serializer) {
+        public <SlotEncodingT> SlotEncodingT serialize(Serializer<SlotEncodingT, ?> serializer) {
             return null;
         }
     }

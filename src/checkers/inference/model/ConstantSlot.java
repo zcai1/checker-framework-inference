@@ -73,8 +73,8 @@ public class ConstantSlot extends Slot {
         this.annotation = annotation;
     }
 
-    @Override public <SlotEncodingT> SlotEncodingT serialize(
-            Serializer<SlotEncodingT, ?> serializer) {
+    @Override
+    public <SlotEncodingT> SlotEncodingT serialize(Serializer<SlotEncodingT, ?> serializer) {
         return serializer.serialize(this);
     }
 
@@ -85,7 +85,8 @@ public class ConstantSlot extends Slot {
         return this.annotation;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return annotation.toString();
     }
 }

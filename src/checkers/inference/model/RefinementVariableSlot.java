@@ -72,8 +72,8 @@ public class RefinementVariableSlot extends Slot {
         return refined;
     }
 
-    @Override public <SlotEncodingT> SlotEncodingT serialize(
-            Serializer<SlotEncodingT, ?> serializer) {
+    @Override
+    public <SlotEncodingT> SlotEncodingT serialize(Serializer<SlotEncodingT, ?> serializer) {
         return serializer.serialize(this);
     }
 }
