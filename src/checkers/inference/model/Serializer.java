@@ -3,28 +3,19 @@ package checkers.inference.model;
 /**
  * Interface for serializing constraints and variables.
  *
- * Serialization will occur for all variables and constraints either
- * before or instead of Constraint solving.
+ * Serialization will occur for all variables and constraints before Constraint
+ * solving.
  *
- * This allows us to avoid re-generating constraints for a piece of
- * source code every time we wish to solve (for instance when a new
- * solver is written or an existing one is modified).
+ * This allows us to avoid re-generating constraints for a piece of source code
+ * every time we wish to solve (for instance when a new solver is written or an
+ * existing one is modified).
  *
- * Type parameters S and T are used to adapt the return type of the
- * XXXSlot visitor methods (S) and the XXXConstraint visitor methods
- * (T).
- * Implementing classes can use the same or different types for these
- * type parameters.
+ * Type parameters SlotEncodingT and ConstraintEncodingT are used to adapt the
+ * return type of the XXXSlot visitor methods (SlotEncodingT) and the
+ * XXXConstraint visitor methods (ConstraintEncodingT). Implementing classes can
+ * use the same or different types for these type parameters.
  */
 public interface Serializer<SlotEncodingT, ConstraintEncodingT> {
-
-    ConstraintEncodingT serialize(SubtypeConstraint constraint);
-
-    ConstraintEncodingT serialize(EqualityConstraint constraint);
-
-    ConstraintEncodingT serialize(ExistentialConstraint constraint);
-
-    ConstraintEncodingT serialize(InequalityConstraint constraint);
 
     SlotEncodingT serialize(VariableSlot slot);
 
@@ -37,8 +28,18 @@ public interface Serializer<SlotEncodingT, ConstraintEncodingT> {
     SlotEncodingT serialize(VPAVariableSlot slot);
 
     SlotEncodingT serialize(LUBVariableSlot slot);
-    
+
     SlotEncodingT serialize(ArithmeticVariableSlot slot);
+
+    SlotEncodingT serialize(PolyInvokeVariableSlot slot);
+
+    ConstraintEncodingT serialize(SubtypeConstraint constraint);
+
+    ConstraintEncodingT serialize(EqualityConstraint constraint);
+
+    ConstraintEncodingT serialize(ExistentialConstraint constraint);
+
+    ConstraintEncodingT serialize(InequalityConstraint constraint);
 
     ConstraintEncodingT serialize(ComparableConstraint comparableConstraint);
 
@@ -49,5 +50,4 @@ public interface Serializer<SlotEncodingT, ConstraintEncodingT> {
     ConstraintEncodingT serialize(ImplicationConstraint implicationConstraint);
 
     ConstraintEncodingT serialize(ArithmeticConstraint arithmeticConstraint);
-
 }
