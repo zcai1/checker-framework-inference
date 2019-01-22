@@ -12,7 +12,7 @@ import org.checkerframework.framework.util.AnnotationFormatter;
 import org.checkerframework.javacutil.PluginUtil;
 import checkers.inference.InferenceMain;
 import checkers.inference.model.ArithmeticConstraint;
-import checkers.inference.model.CombVariableSlot;
+import checkers.inference.model.VPAVariableSlot;
 import checkers.inference.model.CombineConstraint;
 import checkers.inference.model.ComparableConstraint;
 import checkers.inference.model.ConstantSlot;
@@ -22,7 +22,7 @@ import checkers.inference.model.ExistentialConstraint;
 import checkers.inference.model.ExistentialVariableSlot;
 import checkers.inference.model.ImplicationConstraint;
 import checkers.inference.model.InequalityConstraint;
-import checkers.inference.model.LubVariableSlot;
+import checkers.inference.model.LUBVariableSlot;
 import checkers.inference.model.PreferenceConstraint;
 import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Serializer;
@@ -244,7 +244,7 @@ public class ToStringSerializer implements Serializer<String, String> {
         final StringBuilder sb = new StringBuilder();
         sb.append(slot.getId())
           .append(" ")
-          .append(formatter.formatAnnotationMirror(slot.getValue()));
+          .append(formatter.formatAnnotationMirror(slot.getAnnotation()));
         return sb.toString();
     }
 
@@ -334,12 +334,12 @@ public class ToStringSerializer implements Serializer<String, String> {
     }
 
     @Override
-    public String serialize(CombVariableSlot slot) {
+    public String serialize(VPAVariableSlot slot) {
         final StringBuilder sb = new StringBuilder();
         sb.append(slot.getId());
         if (showVerboseVars) {
             sb.append(": combines ")
-              .append(Arrays.asList(slot.getFirst(), slot.getSecond()));
+              .append(Arrays.asList(slot.getReceiver(), slot.getDeclared()));
             formatMerges(slot, sb);
             optionallyFormatAstPath(slot, sb);
         }
@@ -347,7 +347,7 @@ public class ToStringSerializer implements Serializer<String, String> {
     }
 
     @Override
-    public String serialize(LubVariableSlot slot) {
+    public String serialize(LUBVariableSlot slot) {
         final StringBuilder sb = new StringBuilder();
         sb.append(slot.getId());
 

@@ -59,7 +59,7 @@ public class MaxSat2TypeSolver implements InferenceSolver {
         this.serializer = new CnfVecIntSerializer(slotManager) {
             @Override
             protected boolean isTop(ConstantSlot constantSlot) {
-                return AnnotationUtils.areSame(constantSlot.getValue(), top);
+                return AnnotationUtils.areSame(constantSlot.getAnnotation(), top);
             }
         };
         // TODO: This needs to be parameterized based on the type system

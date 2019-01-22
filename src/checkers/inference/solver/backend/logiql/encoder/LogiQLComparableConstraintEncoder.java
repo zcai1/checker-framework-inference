@@ -26,7 +26,7 @@ public class LogiQLComparableConstraintEncoder extends LogiQLAbstractConstraintE
 
     @Override
     public String encodeConstant_Variable(ConstantSlot fst, VariableSlot snd) {
-        String constantName = NameUtils.getSimpleName(fst.getValue());
+        String constantName = NameUtils.getSimpleName(fst.getAnnotation());
         int variableId = snd.getId();
         String logiQLData = "+equalityConstraintContainsConstant(c, v), +constant(c), +hasconstantName[c] = \""
                 + constantName + "\", +variable(v), +hasvariableName[v] = " + variableId + ".\n";

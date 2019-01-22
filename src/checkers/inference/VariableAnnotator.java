@@ -267,7 +267,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
 //            }
 //        }
         Set<AnnotationMirror> annotations = AnnotationUtils.createAnnotationSet();
-        annotations.add(constantSlot.getValue());
+        annotations.add(constantSlot.getAnnotation());
         final Pair<VariableSlot, Set<? extends AnnotationMirror>> varATMPair = Pair
                 .<VariableSlot, Set<? extends AnnotationMirror>> of((VariableSlot) constantSlot,
                         annotations);

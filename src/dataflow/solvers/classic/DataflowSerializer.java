@@ -32,7 +32,7 @@ public class DataflowSerializer extends CnfVecIntSerializer {
 
     @Override
     protected boolean isTop(ConstantSlot constantSlot) {
-        AnnotationMirror anno = constantSlot.getValue();
+        AnnotationMirror anno = constantSlot.getAnnotation();
         return annoIsPresented(anno);
     }
 

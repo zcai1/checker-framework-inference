@@ -1,5 +1,7 @@
 package checkers.inference.model;
 
+import org.checkerframework.dataflow.util.HashCodeUtils;
+
 /**
  * Summary of Shorthand:
  * {@code
@@ -9,15 +11,14 @@ package checkers.inference.model;
  *        IF we have a type parameter <@4 T exntends @5 Object> then
  *            (@3) T is equivalent to <(@3 | @4) T extends (@3 | 5) Object>
  * }
- *
- *
+ * <p>
  * ExistentialVariableSlots represent variables that may or may not exist.  These slots
  * represent parametric locations, locations where there is no annotation you could
  * place that would result in an equivalent meaning to omitting the variable.
- *
+ * <p>
  * Any non-local use of a type variable is a parametric.  In these cases,
  * the type variable will be given an ExistentialVariableSlot
- *
+ * <p>
  * {@code
  * Often in comments, we abbreviate ExistentialVariable slots as either:
  * (@0 | @1) - indicating that if @0 exists then use that otherwise use @1
@@ -31,10 +32,10 @@ package checkers.inference.model;
  *     If T's declaration were <@0 T extends @1 Object> then
  *         (@2) T corresponds to a type:  <(@2 | @0) T extends (@2 | @1) Object></(@2>
  * }
- *
+ * <p>
  * When "normalizing" constraints, we replace ExistentialVariableSlots by translating
  * constraints that contain them into Existential constraints.
- *
+ * <p>
  * {@code
  * That is, if we have a constraint:
  *
@@ -43,12 +44,12 @@ package checkers.inference.model;
  * This really states:
  * if (@0 exists) {
  *     @0 <: @3
- * } e;se {
+ * } else {
  *     @1 <: @3
  * }
  * }
  */
-public class ExistentialVariableSlot extends VariableSlot {
+public class ExistentialVariableSlot extends Slot {
 
     // a variable whose annotation may or may not exist in source code
     private final VariableSlot potentialSlot;
@@ -57,8 +58,7 @@ public class ExistentialVariableSlot extends VariableSlot {
     private final VariableSlot alternativeSlot;
 
     public ExistentialVariableSlot(int id, VariableSlot potentialSlot, VariableSlot alternativeSlot) {
-        super(id);
-        setInsertable(false);
+        super(id, false);
 
         if (potentialSlot == null) {
             throw new IllegalArgumentException("PotentialSlot cannot be null\n"
@@ -76,14 +76,9 @@ public class ExistentialVariableSlot extends VariableSlot {
         this.alternativeSlot = alternativeSlot;
     }
 
-    @Override
-    public <S, T> S serialize(Serializer<S, T> serializer) {
+    @Override public <SlotEncodingT> SlotEncodingT serialize(
+            Serializer<SlotEncodingT, ?> serializer) {
         return serializer.serialize(this);
-    }
-
-    @Override
-    public Kind getKind() {
-        return Kind.EXISTENTIAL_VARIABLE;
     }
 
     public VariableSlot getPotentialSlot() {
@@ -94,25 +89,41 @@ public class ExistentialVariableSlot extends VariableSlot {
         return alternativeSlot;
     }
 
-    @Override
-    public int hashCode() {
-        return 1129 * (potentialSlot.hashCode() + alternativeSlot.hashCode());
+    @Override public String toString() {
+        return "ExistentialVariableSlot(" + this.getId() + ", (" + potentialSlot.getId() + " | "
+                + alternativeSlot.getId() + ")";
+    }
+
+    // TODO: see if it is even necessary to have a specific hashcode, quals, and
+    // compareTo; EVS are cached in slot manager on their component slots
+
+    @Override public int hashCode() {
+        return HashCodeUtils.hash(potentialSlot, alternativeSlot);
     }
 
     @Override
-    public boolean equals(Object thatObj) {
-        if (thatObj == this) return true;
-        if (thatObj == null || !(thatObj instanceof ExistentialVariableSlot)) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof ExistentialVariableSlot)) {
             return false;
         }
-
-        final ExistentialVariableSlot that = (ExistentialVariableSlot) thatObj;
+        final ExistentialVariableSlot that = (ExistentialVariableSlot) obj;
         return this.potentialSlot.equals(that.potentialSlot)
             && this.alternativeSlot.equals(that.alternativeSlot);
     }
 
-    @Override
-    public String toString() {
-        return "ExistentialVariableSlot(" + getId() + ", (" + potentialSlot.getId() + " | " + alternativeSlot.getId() +")";
+    // Comparisons to ExistentialVariableSlot done by the component slots
+    // Comparisons to all other slots done by ID
+    @Override public int compareTo(Slot other) {
+        if (!(other instanceof ExistentialVariableSlot)) {
+            return super.compareTo(other);
+        }
+
+        final ExistentialVariableSlot that = (ExistentialVariableSlot) other;
+        int potentialSlotCompare = this.potentialSlot.compareTo(that.potentialSlot);
+        int alternativeSlotCompare = this.alternativeSlot.compareTo(that.alternativeSlot);
+        return potentialSlotCompare != 0 ? potentialSlotCompare : alternativeSlotCompare;
     }
 }

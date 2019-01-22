@@ -40,9 +40,9 @@ public class MaxSATComparableConstraintEncoder extends MaxSATAbstractConstraintE
 
     @Override
     public VecInt[] encodeVariable_Constant(VariableSlot fst, ConstantSlot snd) {
-        if (lattice.incomparableType.keySet().contains(snd.getValue())) {
+        if (lattice.incomparableType.keySet().contains(snd.getAnnotation())) {
             List<VecInt> resultList = new ArrayList<>();
-            for (AnnotationMirror incomparable : lattice.incomparableType.get(snd.getValue())) {
+            for (AnnotationMirror incomparable : lattice.incomparableType.get(snd.getAnnotation())) {
                 // Should not be equal to incomparable
                 resultList.add(
                     VectorUtils.asVec(

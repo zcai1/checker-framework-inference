@@ -7,12 +7,12 @@ import java.util.Map;
 
 import javax.lang.model.element.AnnotationMirror;
 
-import checkers.inference.model.LubVariableSlot;
+import checkers.inference.model.LUBVariableSlot;
 import checkers.inference.model.ImplicationConstraint;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import checkers.inference.model.ArithmeticConstraint;
-import checkers.inference.model.CombVariableSlot;
+import checkers.inference.model.VPAVariableSlot;
 import checkers.inference.model.CombineConstraint;
 import checkers.inference.model.ComparableConstraint;
 import checkers.inference.model.ConstantSlot;
@@ -230,16 +230,16 @@ public class JsonSerializer implements Serializer<String, JSONObject> {
 
     @Override
     public String serialize(ConstantSlot slot) {
-        return getConstantString(slot.getValue());
+        return getConstantString(slot.getAnnotation());
     }
 
     @Override
-    public String serialize(CombVariableSlot slot) {
+    public String serialize(VPAVariableSlot slot) {
         return serialize((VariableSlot) slot);
     }
 
     @Override
-    public String serialize(LubVariableSlot slot) {
+    public String serialize(LUBVariableSlot slot) {
         return serialize((VariableSlot) slot);
     }
 

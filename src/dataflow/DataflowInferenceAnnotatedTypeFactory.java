@@ -54,7 +54,7 @@ public class DataflowInferenceAnnotatedTypeFactory extends InferenceAnnotatedTyp
         AnnotatedDeclaredType dt = fromElement(typeElt);
         ConstantSlot cs = InferenceMain.getInstance().getSlotManager().createConstantSlot(am);
         dt.addAnnotation(InferenceMain.getInstance().getSlotManager().getAnnotation(cs));
-        dt.addAnnotation(cs.getValue());
+        dt.addAnnotation(cs.getAnnotation());
         return dt;
     }
 
@@ -68,7 +68,7 @@ public class DataflowInferenceAnnotatedTypeFactory extends InferenceAnnotatedTyp
                 primitiveType, this, false);
         ConstantSlot cs = InferenceMain.getInstance().getSlotManager().createConstantSlot(am);
         pt.addAnnotation(InferenceMain.getInstance().getSlotManager().getAnnotation(cs));
-        pt.addAnnotation(cs.getValue());
+        pt.addAnnotation(cs.getAnnotation());
         return pt;
     }
 }

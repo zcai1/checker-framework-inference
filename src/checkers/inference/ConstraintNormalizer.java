@@ -299,7 +299,7 @@ public class ConstraintNormalizer {
                 sb.append("[");
                 sb.append(
                         slot.isVariable() ? ((VariableSlot) slot).getId()
-                                          : ((ConstantSlot) slot).getValue());
+                                          : ((ConstantSlot) slot).getAnnotation());
                 sb.append("]");
             } else {
                 if (!exists) {
@@ -321,8 +321,8 @@ public class ConstraintNormalizer {
             }
             if (o1 instanceof ConstantSlot) {
                 if (o2 instanceof ConstantSlot) {
-                    return ((ConstantSlot) o1).getValue().toString().compareTo(
-                            ((ConstantSlot) o2).getValue().toString()
+                    return ((ConstantSlot) o1).getAnnotation().toString().compareTo(
+                            ((ConstantSlot) o2).getAnnotation().toString()
                     );
                 } else {
                     return 1;

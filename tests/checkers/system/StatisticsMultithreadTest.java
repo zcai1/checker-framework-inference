@@ -125,9 +125,9 @@ public class StatisticsMultithreadTest extends TestCase {
     public void testRecordSlotsStatistics() {
         slots = new ArrayList<>();
 
-        slots.add(new DummyOneSlot());
-        slots.add(new DummyTwoSlot());
-        slots.add(new DummyTwoSlot());
+        slots.add(new DummyOneSlot(0));
+        slots.add(new DummyTwoSlot(1));
+        slots.add(new DummyTwoSlot(2));
 
         runThreads(threadID -> new RecordSlotsTestThread());
 
@@ -145,25 +145,25 @@ public class StatisticsMultithreadTest extends TestCase {
 
     // dummy slots used in this test
     private class DummyOneSlot extends Slot {
-        @Override
-        public <S, T> S serialize(Serializer<S, T> serializer) {
-            return null;
+        public DummyOneSlot(int id) {
+            super(id, false);
         }
 
         @Override
-        public Kind getKind() {
+        public <SlotEncodingT> SlotEncodingT serialize(
+                Serializer<SlotEncodingT, ?> serializer) {
             return null;
         }
     }
 
     private class DummyTwoSlot extends Slot {
-        @Override
-        public <S, T> S serialize(Serializer<S, T> serializer) {
-            return null;
+        public DummyTwoSlot(int id) {
+            super(id, false);
         }
 
         @Override
-        public Kind getKind() {
+        public <SlotEncodingT> SlotEncodingT serialize(
+                Serializer<SlotEncodingT, ?> serializer) {
             return null;
         }
     }

@@ -16,36 +16,38 @@ package checkers.inference.model;
  * Implementing classes can use the same or different types for these
  * type parameters.
  */
-public interface Serializer<S, T> {
+public interface Serializer<SlotEncodingT, ConstraintEncodingT> {
 
-    T serialize(SubtypeConstraint constraint);
+    ConstraintEncodingT serialize(SubtypeConstraint constraint);
 
-    T serialize(EqualityConstraint constraint);
+    ConstraintEncodingT serialize(EqualityConstraint constraint);
 
-    T serialize(ExistentialConstraint constraint);
+    ConstraintEncodingT serialize(ExistentialConstraint constraint);
 
-    T serialize(InequalityConstraint constraint);
+    ConstraintEncodingT serialize(InequalityConstraint constraint);
 
-    S serialize(VariableSlot slot);
+    SlotEncodingT serialize(VariableSlot slot);
 
-    S serialize(ConstantSlot slot);
+    SlotEncodingT serialize(ConstantSlot slot);
 
-    S serialize(ExistentialVariableSlot slot);
+    SlotEncodingT serialize(ExistentialVariableSlot slot);
 
-    S serialize(RefinementVariableSlot slot);
+    SlotEncodingT serialize(RefinementVariableSlot slot);
 
-    S serialize(CombVariableSlot slot);
+    SlotEncodingT serialize(VPAVariableSlot slot);
 
-    S serialize(LubVariableSlot slot);
+    SlotEncodingT serialize(LUBVariableSlot slot);
+    
+    SlotEncodingT serialize(ArithmeticVariableSlot slot);
 
-    T serialize(ComparableConstraint comparableConstraint);
+    ConstraintEncodingT serialize(ComparableConstraint comparableConstraint);
 
-    T serialize(CombineConstraint combineConstraint);
+    ConstraintEncodingT serialize(CombineConstraint combineConstraint);
 
-    T serialize(PreferenceConstraint preferenceConstraint);
+    ConstraintEncodingT serialize(PreferenceConstraint preferenceConstraint);
 
-    T serialize(ImplicationConstraint implicationConstraint);
+    ConstraintEncodingT serialize(ImplicationConstraint implicationConstraint);
 
-    T serialize(ArithmeticConstraint arithmeticConstraint);
+    ConstraintEncodingT serialize(ArithmeticConstraint arithmeticConstraint);
 
 }

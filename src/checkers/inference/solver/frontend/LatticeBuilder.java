@@ -174,7 +174,7 @@ public class LatticeBuilder {
     private void collectConstantAnnotationMirrors(Collection<Slot> slots) {
            for(Slot slot : slots) {
                if (slot instanceof ConstantSlot) {
-                   allAnnotations.add(((ConstantSlot) slot).getValue());
+                   allAnnotations.add(((ConstantSlot) slot).getAnnotation());
                }
            }
        }

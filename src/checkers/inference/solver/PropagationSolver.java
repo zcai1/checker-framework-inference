@@ -136,7 +136,7 @@ public class PropagationSolver implements InferenceSolver {
                 EqualityConstraint equality = (EqualityConstraint) constraint;
                 if (equality.getFirst() instanceof ConstantSlot) {
                     // Equal to a constant forces a constant
-                    AnnotationMirror value = ((ConstantSlot) equality.getFirst()).getValue();
+                    AnnotationMirror value = ((ConstantSlot) equality.getFirst()).getAnnotation();
                     VariableSlot variable = (VariableSlot) equality.getSecond();
                     if (AnnotationUtils.areSame(value, top)) {
                         fixedTop.add(variable);
@@ -145,7 +145,7 @@ public class PropagationSolver implements InferenceSolver {
                     }
                 } else if (equality.getSecond() instanceof ConstantSlot) {
                     // Equal to a constant forces a constant
-                    AnnotationMirror value = ((ConstantSlot) equality.getSecond()).getValue();
+                    AnnotationMirror value = ((ConstantSlot) equality.getSecond()).getAnnotation();
                     VariableSlot variable = (VariableSlot) equality.getFirst();
                     if (AnnotationUtils.areSame(value, top)) {
                         fixedTop.add(variable);
@@ -163,14 +163,14 @@ public class PropagationSolver implements InferenceSolver {
                 SubtypeConstraint subtype = (SubtypeConstraint) constraint;
                 if (subtype.getSubtype() instanceof ConstantSlot) {
                     // If top is a subtype of a variable, that variable is top
-                    AnnotationMirror value = ((ConstantSlot) subtype.getSubtype()).getValue();
+                    AnnotationMirror value = ((ConstantSlot) subtype.getSubtype()).getAnnotation();
                     VariableSlot variable = (VariableSlot) subtype.getSupertype();
                     if (AnnotationUtils.areSame(value, top)) {
                         fixedTop.add(variable);
                     }
                 } else if (subtype.getSupertype() instanceof ConstantSlot) {
                     // If a variable is a subtype of bottom, that variable is bottom
-                    AnnotationMirror value = ((ConstantSlot) subtype.getSupertype()).getValue();
+                    AnnotationMirror value = ((ConstantSlot) subtype.getSupertype()).getAnnotation();
                     VariableSlot variable = (VariableSlot) subtype.getSubtype();
                     if (AnnotationUtils.areSame(value, bottom)) {
                         fixedBottom.add(variable);

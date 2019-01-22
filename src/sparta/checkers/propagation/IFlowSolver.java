@@ -179,7 +179,7 @@ public abstract class IFlowSolver implements InferenceSolver {
         } else if (slot.isConstant()) {
             Set<String> constantSet = new HashSet<>();
             for (Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
-                    ((ConstantSlot) slot).getValue().getElementValues().entrySet()) {
+                    ((ConstantSlot) slot).getAnnotation().getElementValues().entrySet()) {
                 if (entry.getKey().getSimpleName().toString().equals("value")) {
                     List<?> values = (List<?>) entry.getValue().getValue();
                     for (Object elem : values) {

@@ -31,7 +31,7 @@ public class Vertex {
             this.id = vs.getId();
             if (slot instanceof ConstantSlot) {
                 ConstantSlot cs = (ConstantSlot) slot;
-                this.value = cs.getValue();
+                this.value = cs.getAnnotation();
             } else {
                 this.value = null;
             }

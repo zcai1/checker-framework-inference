@@ -42,9 +42,9 @@ public class MaxSATEqualityConstraintEncoder extends MaxSATAbstractConstraintEnc
 
     @Override
     public VecInt[] encodeConstant_Variable(ConstantSlot fst, VariableSlot snd) {
-        if (lattice.allTypes.contains(fst.getValue())) {
+        if (lattice.allTypes.contains(fst.getAnnotation())) {
             return VectorUtils.asVecArray(
-                    MathUtils.mapIdToMatrixEntry(snd.getId(), typeToInt.get(fst.getValue()), lattice));
+                    MathUtils.mapIdToMatrixEntry(snd.getId(), typeToInt.get(fst.getAnnotation()), lattice));
         } else {
             return emptyValue;
         }

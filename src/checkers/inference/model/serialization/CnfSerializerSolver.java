@@ -50,7 +50,7 @@ public class CnfSerializerSolver implements InferenceSolver {
         CnfVecIntSerializer cnfSerializer = new CnfVecIntSerializer(slotManager) {
             @Override
             protected boolean isTop(ConstantSlot constantSlot) {
-                return AnnotationUtils.areSame(constantSlot.getValue(), top);
+                return AnnotationUtils.areSame(constantSlot.getAnnotation(), top);
             }
         };
 

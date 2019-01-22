@@ -5,13 +5,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import checkers.inference.model.LubVariableSlot;
+import checkers.inference.model.LUBVariableSlot;
 import checkers.inference.model.ImplicationConstraint;
 import org.sat4j.core.VecInt;
 
 import checkers.inference.SlotManager;
 import checkers.inference.model.ArithmeticConstraint;
-import checkers.inference.model.CombVariableSlot;
+import checkers.inference.model.VPAVariableSlot;
 import checkers.inference.model.CombineConstraint;
 import checkers.inference.model.ComparableConstraint;
 import checkers.inference.model.ConstantSlot;
@@ -234,13 +234,13 @@ public abstract class CnfVecIntSerializer implements Serializer<VecInt[], VecInt
     }
 
     @Override
-    public VecInt[] serialize(CombVariableSlot slot) {
+    public VecInt[] serialize(VPAVariableSlot slot) {
         // doesn't really mean anything
         return null;
     }
 
     @Override
-    public VecInt[] serialize(LubVariableSlot slot) {
+    public VecInt[] serialize(LUBVariableSlot slot) {
         return null;
     }
 

@@ -1,6 +1,6 @@
 package checkers.inference;
 
-import checkers.inference.model.LubVariableSlot;
+import checkers.inference.model.LUBVariableSlot;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 
 import java.util.List;
@@ -9,7 +9,7 @@ import javax.lang.model.element.AnnotationMirror;
 
 import checkers.inference.model.AnnotationLocation;
 import checkers.inference.model.ArithmeticVariableSlot;
-import checkers.inference.model.CombVariableSlot;
+import checkers.inference.model.VPAVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ExistentialVariableSlot;
 import checkers.inference.model.RefinementVariableSlot;
@@ -84,7 +84,7 @@ public interface SlotManager {
      * @return CombVariableSlot that represents the viewpoint adaptation result
      *         of adapting declared slot to receiver slot
      */
-    CombVariableSlot createCombVariableSlot(Slot receiver, Slot declared);
+    VPAVariableSlot createVPAVariableSlot(Slot receiver, Slot declared);
 
     /**
      * Creates new LubVariableSlot using left slot and right slot, and returns
@@ -99,7 +99,7 @@ public interface SlotManager {
      * @return LubVariableSlot that represents the least upper bound result
      *         of left slot and right slot
      */
-    LubVariableSlot createLubVariableSlot(Slot left, Slot right);
+    LUBVariableSlot createLubVariableSlot(Slot left, Slot right);
 
     /**
      * Create new ExistentialVariableSlot using potential slot and alternative
@@ -158,7 +158,7 @@ public interface SlotManager {
      * If A is the annotation returned by getAnnotation( S ) where is a slot.  Then getSlot( A ) will
      * return S (or an equivalent Slot in case of Constants ).
      * For {@code ConstantSlot}, this method should return the {@code VariableAnnotation} that represents
-     * the underlying constant, and one should use {@link ConstantSlot#getValue()} to get the real annotation.
+     * the underlying constant, and one should use {@link ConstantSlot#getAnnotation()} to get the real annotation.
      * @param slot A slot to convert to an annotation
      * @return An annotation representing the slot
      */

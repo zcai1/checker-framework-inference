@@ -47,7 +47,7 @@ public abstract class IFlowSolver implements InferenceSolver {
         for (Slot slot : solts) {
             if (slot instanceof ConstantSlot) {
                 ConstantSlot constantSlot = (ConstantSlot) slot;
-                AnnotationMirror anno = constantSlot.getValue();
+                AnnotationMirror anno = constantSlot.getAnnotation();
                 permissions.addAll(getPermissionList(anno));
             }
         }

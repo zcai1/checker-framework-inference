@@ -66,7 +66,7 @@ public class SubtypeConstraint extends Constraint implements BinaryConstraint {
             ConstantSlot subConstant = (ConstantSlot) subtype;
             ConstantSlot superConstant = (ConstantSlot) supertype;
 
-            return realQualHierarchy.isSubtype(subConstant.getValue(), superConstant.getValue())
+            return realQualHierarchy.isSubtype(subConstant.getAnnotation(), superConstant.getAnnotation())
                     ? AlwaysTrueConstraint.create()
                     : AlwaysFalseConstraint.create();
         }
@@ -104,11 +104,11 @@ public class SubtypeConstraint extends Constraint implements BinaryConstraint {
     }
 
     private static boolean isTop(QualifierHierarchy realQualHierarchy, ConstantSlot slot) {
-        return realQualHierarchy.getTopAnnotations().contains(slot.getValue());
+        return realQualHierarchy.getTopAnnotations().contains(slot.getAnnotation());
     }
 
     private static boolean isBottom(QualifierHierarchy realQualHierarchy, ConstantSlot slot) {
-        return realQualHierarchy.getBottomAnnotations().contains(slot.getValue());
+        return realQualHierarchy.getBottomAnnotations().contains(slot.getAnnotation());
     }
 
     @Override

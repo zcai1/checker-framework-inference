@@ -24,8 +24,8 @@ public class MaxSATPreferenceConstraintEncoder extends MaxSATAbstractConstraintE
     public VecInt[] encode(PreferenceConstraint constraint) {
         VariableSlot vs = constraint.getVariable();
         ConstantSlot cs = constraint.getGoal();
-        if (lattice.allTypes.contains(cs.getValue())) {
-            return VectorUtils.asVecArray(MathUtils.mapIdToMatrixEntry(vs.getId(), typeToInt.get(cs.getValue()),
+        if (lattice.allTypes.contains(cs.getAnnotation())) {
+            return VectorUtils.asVecArray(MathUtils.mapIdToMatrixEntry(vs.getId(), typeToInt.get(cs.getAnnotation()),
                     lattice));
         } else {
             return emptyValue;

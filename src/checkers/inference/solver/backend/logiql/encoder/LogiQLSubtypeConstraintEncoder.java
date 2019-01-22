@@ -22,7 +22,7 @@ public class LogiQLSubtypeConstraintEncoder extends LogiQLAbstractConstraintEnco
 
     @Override
     public String encodeVariable_Constant(VariableSlot subtype, ConstantSlot supertype) {
-        String supertypeName = NameUtils.getSimpleName(supertype.getValue());
+        String supertypeName = NameUtils.getSimpleName(supertype.getAnnotation());
         int subtypeId = subtype.getId();
         String logiQLData = "+subtypeConstraintRightConstant(v, c), +variable(v), +hasvariableName[v] = "
                 + subtypeId + ", +constant(c), +hasconstantName[c] = \"" + supertypeName + "\" .\n";
@@ -31,7 +31,7 @@ public class LogiQLSubtypeConstraintEncoder extends LogiQLAbstractConstraintEnco
 
     @Override
     public String encodeConstant_Variable(ConstantSlot subtype, VariableSlot supertype) {
-        String subtypeName = NameUtils.getSimpleName(subtype.getValue());
+        String subtypeName = NameUtils.getSimpleName(subtype.getAnnotation());
         int supertypeId = supertype.getId();
         String logiQLData = "+subtypeConstraintLeftConstant(c, v), +constant(c), +hasconstantName[c] = \""
                 + subtypeName + "\", +variable(v), +hasvariableName[v] = " + supertypeId + ".\n";

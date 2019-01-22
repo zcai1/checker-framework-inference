@@ -33,7 +33,7 @@ public class MaxSATSubtypeConstraintEncoder extends MaxSATAbstractConstraintEnco
         List<Integer> resultList = new ArrayList<Integer>();
 
         for (AnnotationMirror sub : mustNotBe) {
-            if (!AnnotationUtils.areSame(sub, cSlot.getValue())) {
+            if (!AnnotationUtils.areSame(sub, cSlot.getAnnotation())) {
                 resultList.add(-MathUtils.mapIdToMatrixEntry(vSlot.getId(), typeToInt.get(sub), lattice));
             }
         }
@@ -95,16 +95,16 @@ public class MaxSATSubtypeConstraintEncoder extends MaxSATAbstractConstraintEnco
     @Override
     public VecInt[] encodeVariable_Constant(VariableSlot subtype, ConstantSlot supertype) {
         final Set<AnnotationMirror> mustNotBe = new HashSet<>();
-        if (AnnotationUtils.areSame(supertype.getValue(), lattice.bottom)) {
+        if (AnnotationUtils.areSame(supertype.getAnnotation(), lattice.bottom)) {
             return VectorUtils.asVecArray(
                     MathUtils.mapIdToMatrixEntry(subtype.getId(), typeToInt.get(lattice.bottom), lattice));
         }
 
-        if (lattice.superType.get(supertype.getValue()) != null) {
-            mustNotBe.addAll(lattice.superType.get(supertype.getValue()));
+        if (lattice.superType.get(supertype.getAnnotation()) != null) {
+            mustNotBe.addAll(lattice.superType.get(supertype.getAnnotation()));
         }
-        if (lattice.incomparableType.keySet().contains(supertype.getValue())) {
-            mustNotBe.addAll(lattice.incomparableType.get(supertype.getValue()));
+        if (lattice.incomparableType.keySet().contains(supertype.getAnnotation())) {
+            mustNotBe.addAll(lattice.incomparableType.get(supertype.getAnnotation()));
         }
         return getMustNotBe(mustNotBe, subtype, supertype);
     }
@@ -112,16 +112,16 @@ public class MaxSATSubtypeConstraintEncoder extends MaxSATAbstractConstraintEnco
     @Override
     public VecInt[] encodeConstant_Variable(ConstantSlot subtype, VariableSlot supertype) {
         final Set<AnnotationMirror> mustNotBe = new HashSet<>();
-        if (AnnotationUtils.areSame(subtype.getValue(), lattice.top)) {
+        if (AnnotationUtils.areSame(subtype.getAnnotation(), lattice.top)) {
             return VectorUtils.asVecArray(
                     MathUtils.mapIdToMatrixEntry(supertype.getId(), typeToInt.get(lattice.top), lattice));
         }
-        if (lattice.subType.get(subtype.getValue()) != null) {
-            mustNotBe.addAll(lattice.subType.get(subtype.getValue()));
+        if (lattice.subType.get(subtype.getAnnotation()) != null) {
+            mustNotBe.addAll(lattice.subType.get(subtype.getAnnotation()));
         }
 
-        if (lattice.incomparableType.keySet().contains(subtype.getValue())) {
-            mustNotBe.addAll(lattice.incomparableType.get(subtype.getValue()));
+        if (lattice.incomparableType.keySet().contains(subtype.getAnnotation())) {
+            mustNotBe.addAll(lattice.incomparableType.get(subtype.getAnnotation()));
         }
         return getMustNotBe(mustNotBe, supertype, subtype);
     }

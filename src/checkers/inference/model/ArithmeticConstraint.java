@@ -49,6 +49,14 @@ public class ArithmeticConstraint extends Constraint {
         }
     }
 
+    // TODO: no longer needs to store operation and operand slots as the result AVS
+    // stores them
+    // TODO: check where this is cached, see whether it is more effective to cache
+    // slots or cache constraints
+    // suppose equality presolving is implemented and result == @constant, then it
+    // is better to keep constraints the same
+    // make AVS dumb.
+
     private final ArithmeticOperationKind operation;
     private final Slot leftOperand; // either a {@link ConstantSlot} or a {@link VariableSlot}
     private final Slot rightOperand; // either a {@link ConstantSlot} or a {@link VariableSlot}

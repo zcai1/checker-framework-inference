@@ -18,13 +18,13 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 
-import checkers.inference.model.LubVariableSlot;
+import checkers.inference.model.LUBVariableSlot;
 
 import com.sun.tools.javac.util.Pair;
 
 import checkers.inference.model.AnnotationLocation;
 import checkers.inference.model.ArithmeticVariableSlot;
-import checkers.inference.model.CombVariableSlot;
+import checkers.inference.model.VPAVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ExistentialVariableSlot;
 import checkers.inference.model.RefinementVariableSlot;
@@ -55,6 +55,7 @@ public class DefaultSlotManager implements SlotManager {
      */
     private final Map<Integer, VariableSlot> variables;
 
+    // TODO: change to map to the ConstantSlot
     /**
      * A map of {@link AnnotationMirror} to {@link Integer} for caching
      * ConstantSlot. Each {@link AnnotationMirror} uniquely identify a
@@ -350,14 +351,14 @@ public class DefaultSlotManager implements SlotManager {
     }
 
     @Override
-    public CombVariableSlot createCombVariableSlot(Slot receiver, Slot declared) {
-        CombVariableSlot combVariableSlot;
+    public VPAVariableSlot createVPAVariableSlot(Slot receiver, Slot declared) {
+        VPAVariableSlot combVariableSlot;
         Pair<Slot, Slot> pair = new Pair<>(receiver, declared);
         if (combSlotPairCache.containsKey(pair)) {
             int id = combSlotPairCache.get(pair);
-            combVariableSlot = (CombVariableSlot) getVariable(id);
+            combVariableSlot = (VPAVariableSlot) getVariable(id);
         } else {
-            combVariableSlot = new CombVariableSlot(null, nextId(), receiver, declared);
+            combVariableSlot = new VPAVariableSlot(null, nextId(), receiver, declared);
             addToVariables(combVariableSlot);
             combSlotPairCache.put(pair, combVariableSlot.getId());
         }
@@ -365,16 +366,16 @@ public class DefaultSlotManager implements SlotManager {
     }
 
     @Override
-    public LubVariableSlot createLubVariableSlot(Slot left, Slot right) {
+    public LUBVariableSlot createLubVariableSlot(Slot left, Slot right) {
         // Order of two ingredient slots doesn't matter, but for simplicity, we still use pair.
-        LubVariableSlot lubVariableSlot;
+        LUBVariableSlot lubVariableSlot;
         Pair<Slot, Slot> pair = new Pair<>(left, right);
         if (lubSlotPairCache.containsKey(pair)) {
             int id = lubSlotPairCache.get(pair);
-            lubVariableSlot = (LubVariableSlot) getVariable(id);
+            lubVariableSlot = (LUBVariableSlot) getVariable(id);
         } else {
             // We need a non-null location in the future for better debugging outputs
-            lubVariableSlot = new LubVariableSlot(null, nextId(), left, right);
+            lubVariableSlot = new LUBVariableSlot(null, nextId(), left, right);
             addToVariables(lubVariableSlot);
             lubSlotPairCache.put(pair, lubVariableSlot.getId());
         }

@@ -13,7 +13,7 @@ import org.checkerframework.framework.type.AnnotatedTypeFactory;
 
 import checkers.inference.InferenceMain;
 import checkers.inference.model.ArithmeticConstraint;
-import checkers.inference.model.CombVariableSlot;
+import checkers.inference.model.VPAVariableSlot;
 import checkers.inference.model.CombineConstraint;
 import checkers.inference.model.ComparableConstraint;
 import checkers.inference.model.ConstantSlot;
@@ -23,7 +23,7 @@ import checkers.inference.model.ExistentialConstraint;
 import checkers.inference.model.ExistentialVariableSlot;
 import checkers.inference.model.ImplicationConstraint;
 import checkers.inference.model.InequalityConstraint;
-import checkers.inference.model.LubVariableSlot;
+import checkers.inference.model.LUBVariableSlot;
 import checkers.inference.model.PreferenceConstraint;
 import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Serializer;
@@ -309,15 +309,15 @@ public class PrintUtils {
         }
 
         @Override
-        public Void serialize(CombVariableSlot slot) {
-            slot.getFirst().serialize(this);
-            slot.getSecond().serialize(this);
+        public Void serialize(VPAVariableSlot slot) {
+            slot.getReceiver().serialize(this);
+            slot.getDeclared().serialize(this);
             addSlotIfNotAdded(slot);
             return null;
         }
 
         @Override
-        public Void serialize(LubVariableSlot slot) {
+        public Void serialize(LUBVariableSlot slot) {
             slot.getLeft().serialize(this);
             slot.getRight().serialize(this);
             addSlotIfNotAdded(slot);

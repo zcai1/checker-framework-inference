@@ -1,6 +1,6 @@
 package checkers.inference;
 
-import checkers.inference.model.LubVariableSlot;
+import checkers.inference.model.LUBVariableSlot;
 import org.checkerframework.framework.qual.PolymorphicQualifier;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy;
@@ -257,8 +257,8 @@ public class InferenceQualifierHierarchy extends MultiGraphQualifierHierarchy {
                 // then return a VarAnnot represent the constant LUB.
                 // (Because we passing in two VarAnnots that represent constant slots, so it is consistent
                 // to also return a VarAnnot that represents the constant LUB of these two constants.)
-                AnnotationMirror realAnno1 = ((ConstantSlot) slot1).getValue();
-                AnnotationMirror realAnno2 = ((ConstantSlot) slot2).getValue();
+                AnnotationMirror realAnno1 = ((ConstantSlot) slot1).getAnnotation();
+                AnnotationMirror realAnno2 = ((ConstantSlot) slot2).getAnnotation();
 
                 AnnotationMirror realLub = realQualifierHierarhcy.leastUpperBound(realAnno1, realAnno2);
                 Slot constantSlot = slotMgr.createConstantSlot(realLub);
@@ -284,7 +284,7 @@ public class InferenceQualifierHierarchy extends MultiGraphQualifierHierarchy {
                     return slotMgr.getAnnotation(var1);
                 } else {
                     // Create a new LubVariable for var1 and var2.
-                    final LubVariableSlot mergeVariableSlot = slotMgr.createLubVariableSlot(var1, var2);
+                    final LUBVariableSlot mergeVariableSlot = slotMgr.createLubVariableSlot(var1, var2);
                     constraintMgr.addSubtypeConstraint(var1, mergeVariableSlot);
                     constraintMgr.addSubtypeConstraint(var2, mergeVariableSlot);
 

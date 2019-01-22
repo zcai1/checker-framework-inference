@@ -19,7 +19,7 @@ public class SourceSerializer extends IFlowSerializer {
 
     @Override
     public boolean isTop(ConstantSlot constantSlot) {
-        AnnotationMirror anno = constantSlot.getValue();
+        AnnotationMirror anno = constantSlot.getAnnotation();
         return annoHasPermission(anno);
     }
 

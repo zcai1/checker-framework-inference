@@ -9,7 +9,7 @@ import checkers.inference.model.VariableSlot;
  * declared} slots.
  *
  * <p>
- * {@code result} is always {@link checkers.inference.model.CombVariableSlot}, which is essentially {@link VariableSlot},
+ * {@code result} is always {@link checkers.inference.model.VPAVariableSlot}, which is essentially {@link VariableSlot},
  * whose {@link VariableSlot#id} is the only interesting knowledge in encoding phase. Therefore there don't exist
  * methods in which {@code result} is {@link ConstantSlot}.
  *
