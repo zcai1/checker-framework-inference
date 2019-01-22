@@ -1,5 +1,9 @@
 package checkers.inference.model;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.checkerframework.dataflow.util.HashCodeUtils;
 
 import checkers.inference.SlotManager;
@@ -14,8 +18,10 @@ import checkers.inference.SlotManager;
  *
  * Slots for known annotations hold the annotation mirror for that annotation.
  * see {@link ConstantSlot}.
+ * 
+ * Slots hold references to slots it is refined by, and slots it is merged to.
  */
-public abstract class Slot implements Comparable<Slot>{
+public abstract class Slot implements Comparable<Slot> {
 
     /**
      * Uniquely identifies this Slot. id's are monotonically increasing in value by
@@ -33,6 +39,12 @@ public abstract class Slot implements Comparable<Slot>{
      * along with the Annotation determined for this slot by the Solver.
      */
     private AnnotationLocation location;
+
+    /** Slots this slot has been merged to. */
+    private final Set<LUBVariableSlot> mergedToSlots = new HashSet<>();
+
+    /** Refinement variables that refine this slot. */
+    private final Set<RefinementVariableSlot> refinedToSlots = new HashSet<>();
 
     /**
      * Create a Slot with the given annotation location.
@@ -87,6 +99,31 @@ public abstract class Slot implements Comparable<Slot>{
         return this instanceof ConstantSlot;
     }
 
+    public boolean isMergedTo(Slot other) {
+        for (LUBVariableSlot mergedTo : mergedToSlots) {
+            if (mergedTo.equals(other)) {
+                return true;
+            } else {
+                if (mergedTo.isMergedTo(other)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public Set<LUBVariableSlot> getMergedToSlots() {
+        return Collections.unmodifiableSet(mergedToSlots);
+    }
+
+    public void addMergedToSlot(LUBVariableSlot mergedSlot) {
+        this.mergedToSlots.add(mergedSlot);
+    }
+
+    public Set<RefinementVariableSlot> getRefinedToSlots() {
+        return refinedToSlots;
+    }
+
     public abstract <SlotEncodingT> SlotEncodingT serialize(
             Serializer<SlotEncodingT, ?> serializer);
 
@@ -100,7 +137,8 @@ public abstract class Slot implements Comparable<Slot>{
         return HashCodeUtils.hash(id);
     }
 
-    @Override public boolean equals(Object obj) {
+    @Override
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }

@@ -131,7 +131,7 @@ public class InferenceVisitor<Checker extends InferenceChecker,
         visited.add(ty);
 
         final SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
-        Slot el = slotManager.getVariableSlot(ty);
+        Slot el = slotManager.getSlot(ty);
 
         if (el == null) {
             // TODO: prims not annotated in UTS, others might
@@ -200,7 +200,7 @@ public class InferenceVisitor<Checker extends InferenceChecker,
         if (infer) {
 
             final SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
-            Slot el = slotManager.getVariableSlot(ty);
+            Slot el = slotManager.getSlot(ty);
 
             if (el == null) {
                 // TODO: prims not annotated in UTS, others might
@@ -226,7 +226,7 @@ public class InferenceVisitor<Checker extends InferenceChecker,
         if (infer) {
 
             final SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
-            Slot el = slotManager.getVariableSlot(ty);
+            Slot el = slotManager.getSlot(ty);
 
             if (el == null) {
                 // TODO: prims not annotated in UTS, others might
@@ -253,7 +253,7 @@ public class InferenceVisitor<Checker extends InferenceChecker,
         if (infer) {
             ConstraintManager cManager = InferenceMain.getInstance().getConstraintManager();
             SlotManager sManager = InferenceMain.getInstance().getSlotManager();
-            VariableSlot vSlot = sManager.getVariableSlot(type);
+            Slot vSlot = sManager.getSlot(type);
             ConstantSlot cSlot = InferenceMain.getInstance().getSlotManager().createConstantSlot(anno);
             cManager.addPreferenceConstraint(vSlot, cSlot, weight);
         }
@@ -319,8 +319,8 @@ public class InferenceVisitor<Checker extends InferenceChecker,
     public void areComparable(AnnotatedTypeMirror ty1, AnnotatedTypeMirror ty2, String msgkey, Tree node) {
         if (infer) {
             final SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
-            Slot el1 = slotManager.getVariableSlot(ty1);
-            Slot el2 = slotManager.getVariableSlot(ty2);
+            Slot el1 = slotManager.getSlot(ty1);
+            Slot el2 = slotManager.getSlot(ty2);
 
             if (el1 == null || el2 == null) {
                 // TODO: prims not annotated in UTS, others might
@@ -341,8 +341,8 @@ public class InferenceVisitor<Checker extends InferenceChecker,
     public void areEqual(AnnotatedTypeMirror ty1, AnnotatedTypeMirror ty2, String msgkey, Tree node) {
         if (infer) {
             final SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
-            Slot el1 = slotManager.getVariableSlot(ty1);
-            Slot el2 = slotManager.getVariableSlot(ty2);
+            Slot el1 = slotManager.getSlot(ty1);
+            Slot el2 = slotManager.getSlot(ty2);
 
             if (el1 == null || el2 == null) {
                 // TODO: prims not annotated in UTS, others might
@@ -567,8 +567,8 @@ public class InferenceVisitor<Checker extends InferenceChecker,
                                                   final AnnotatedTypeMirror valueType,
                                                   final SlotManager slotManager,
                                                   final ConstraintManager constraintManager) {
-        Slot sup = slotManager.getVariableSlot(varType);
-        Slot sub = slotManager.getVariableSlot(valueType);
+        Slot sup = slotManager.getSlot(varType);
+        Slot sub = slotManager.getSlot(valueType);
         logger.fine("InferenceVisitor::commonAssignmentCheck: Equality constraint for qualifiers sub: " + sub + " sup: " + sup);
 
         // Equality between the refvar and the value
@@ -610,8 +610,8 @@ public class InferenceVisitor<Checker extends InferenceChecker,
                     }
                 }
 
-                final Slot upperBoundSlot = slotManager.getVariableSlot(varUpperBoundAtm);
-                final Slot lowerBoundSlot = slotManager.getVariableSlot(varLowerBoundAtm);
+                final Slot upperBoundSlot = slotManager.getSlot(varUpperBoundAtm);
+                final Slot lowerBoundSlot = slotManager.getSlot(varLowerBoundAtm);
                 if (upperBoundSlot instanceof RefinementVariableSlot
                         && lowerBoundSlot instanceof RefinementVariableSlot) {
                     final AnnotatedTypeVariable valueTypeTv = (AnnotatedTypeVariable) valueType;
@@ -630,7 +630,7 @@ public class InferenceVisitor<Checker extends InferenceChecker,
                     addRefinementVariableConstraints(varUpperBoundAtm, valUpperBoundAtm, slotManager, constraintManager);
 
                     constraintManager.addEqualityConstraint(lowerBoundSlot,
-                            slotManager.getVariableSlot(valLowerBoundAtm));
+                            slotManager.getSlot(valLowerBoundAtm));
                     constraintManager.addSubtypeConstraint(lowerBoundSlot, upperBoundSlot);
 
                     inferenceRefinementVariable = true;
@@ -649,7 +649,7 @@ public class InferenceVisitor<Checker extends InferenceChecker,
 
             // TODO: RECONSIDER THIS WHEN WE CONSIDER WILDCARDS
             if (varType.getKind() != TypeKind.WILDCARD) {
-                Slot sup = InferenceMain.getInstance().getSlotManager().getVariableSlot(varType);
+                Slot sup = InferenceMain.getInstance().getSlotManager().getSlot(varType);
                 if (sup instanceof RefinementVariableSlot && !InferenceMain.getInstance().isPerformingFlow()) {
                     inferenceRefinementVariable = true;
 
@@ -660,7 +660,7 @@ public class InferenceVisitor<Checker extends InferenceChecker,
                         upperBound = valueType;
                     }
 
-                    Slot sub = slotManager.getVariableSlot(upperBound);
+                    Slot sub = slotManager.getSlot(upperBound);
                     logger.fine("InferenceVisitor::commonAssignmentCheck: Equality constraint for qualifiers sub: " + sub + " sup: " + sup);
 
                     // Equality between the refvar and the value
@@ -711,7 +711,7 @@ public class InferenceVisitor<Checker extends InferenceChecker,
                 switch (throwType.getKind()) {
                     case NULL:
                     case DECLARED:
-                    constraintManager.addSubtypeConstraint(slotManager.getVariableSlot(throwType),
+                    constraintManager.addSubtypeConstraint(slotManager.getSlot(throwType),
                             slotManager.getSlot(throwBound)
                         );
                         break;

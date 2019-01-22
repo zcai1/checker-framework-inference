@@ -94,7 +94,7 @@ import com.sun.source.tree.Tree;
  */
 public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
-    private final boolean withCombineConstraints;
+    private final boolean withVPAConstraints;
     protected final VariableAnnotator variableAnnotator;
     protected final BaseAnnotatedTypeFactory realTypeFactory;
 
@@ -124,7 +124,7 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
     public InferenceAnnotatedTypeFactory(
             InferenceChecker inferenceChecker,
-            boolean withCombineConstraints,
+            boolean withVPAConstraints,
             BaseAnnotatedTypeFactory realTypeFactory,
             InferrableChecker realChecker,
             SlotManager slotManager,
@@ -132,7 +132,7 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         super(inferenceChecker, true);
 
-        this.withCombineConstraints = withCombineConstraints;
+        this.withVPAConstraints = withVPAConstraints;
         this.realTypeFactory = realTypeFactory;
         this.inferenceChecker = inferenceChecker;
         this.realChecker = realChecker;
@@ -306,7 +306,7 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     /**
      * @see org.checkerframework.checker.type.AnnotatedTypeFactory#methodFromUse(com.sun.source.tree.MethodInvocationTree)
      * TODO: This is essentially the default implementation of AnnotatedTypeFactory.methodFromUse with a space to later
-     * TODO: add comb constraints.  One difference is how the receiver is gotten.  Perhaps we should just
+     * TODO: add VPA constraints.  One difference is how the receiver is gotten.  Perhaps we should just
      * TODO: change getSelfType?  But I am not sure where getSelfType is used yet
      * @param methodInvocationTree
      * @return
@@ -317,7 +317,7 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                                               "Current path:\n" + this.visitorState.getPath();
         final ExecutableElement methodElem = TreeUtils.elementFromUse(methodInvocationTree);
 
-        // TODO: Used in comb constraints, going to leave it in to ensure the element has been visited
+        // TODO: Used in VPA constraints, going to leave it in to ensure the element has been visited
         final AnnotatedExecutableType methodType = getAnnotatedType(methodElem);
 
         final ExpressionTree methodSelectExpression = methodInvocationTree.getMethodSelect();
@@ -362,7 +362,7 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
     /**
      * TODO: Similar but not the same as AnnotatedTypeFactory.constructorFromUse with space set aside from
-     * TODO: comb constraints, track down the differences with constructorFromUse
+     * TODO: VPA constraints, track down the differences with constructorFromUse
      * Note: super() and this() calls
      * @see org.checkerframework.checker.type.AnnotatedTypeFactory#constructorFromUse(com.sun.source.tree.NewClassTree)
      *
@@ -558,7 +558,7 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
     @Override
     protected InferenceViewpointAdapter createViewpointAdapter() {
-        return withCombineConstraints ? new InferenceViewpointAdapter(this) : null;
+        return withVPAConstraints ? new InferenceViewpointAdapter(this) : null;
     }
 }
 

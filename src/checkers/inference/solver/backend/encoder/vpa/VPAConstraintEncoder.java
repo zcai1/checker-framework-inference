@@ -1,10 +1,10 @@
-package checkers.inference.solver.backend.encoder.combine;
+package checkers.inference.solver.backend.encoder.vpa;
 
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.VariableSlot;
 
 /**
- * Interface that defines operations to encode a {@link checkers.inference.model.CombineConstraint}. It has four methods
+ * Interface that defines operations to encode a {@link checkers.inference.model.VPAConstraint}. It has four methods
  * depending on the {@link checkers.inference.solver.backend.encoder.SlotSlotCombo} of {@code target} and {@code
  * declared} slots.
  *
@@ -13,10 +13,10 @@ import checkers.inference.model.VariableSlot;
  * whose {@link VariableSlot#id} is the only interesting knowledge in encoding phase. Therefore there don't exist
  * methods in which {@code result} is {@link ConstantSlot}.
  *
- * @see checkers.inference.model.CombineConstraint
+ * @see checkers.inference.model.VPAConstraint
  * @see checkers.inference.solver.backend.encoder.SlotSlotCombo
  */
-public interface CombineConstraintEncoder<ConstraintEncodingT> {
+public interface VPAConstraintEncoder<ConstraintEncodingT> {
 
     ConstraintEncodingT encodeVariable_Variable(VariableSlot target, VariableSlot declared, VariableSlot result);
 

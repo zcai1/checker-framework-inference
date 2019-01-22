@@ -70,7 +70,7 @@ public abstract class BaseInferrableChecker extends InferenceChecker implements 
     }
 
     @Override
-    public boolean withCombineConstraints() {
+    public boolean withVPAConstraints() {
         return false;
     }
 
@@ -89,7 +89,7 @@ public abstract class BaseInferrableChecker extends InferenceChecker implements 
             InferrableChecker realChecker, BaseAnnotatedTypeFactory realTypeFactory,
             SlotManager slotManager, ConstraintManager constraintManager) {
         InferenceAnnotatedTypeFactory InferenceAFT = new InferenceAnnotatedTypeFactory(
-                inferenceChecker, realChecker.withCombineConstraints(), realTypeFactory, realChecker,
+                inferenceChecker, realChecker.withVPAConstraints(), realTypeFactory, realChecker,
                 slotManager, constraintManager);
         return InferenceAFT;
     }

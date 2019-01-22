@@ -24,6 +24,7 @@ import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ExistentialVariableSlot;
 import checkers.inference.model.LUBVariableSlot;
 import checkers.inference.model.RefinementVariableSlot;
+import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.frontend.Lattice;
 
@@ -83,9 +84,10 @@ public abstract class Z3BitVectorFormatTranslator extends AbstractFormatTranslat
         solver.AssertSoft(constraint, weight, group);
     }
 
-    public BitVecExpr serializeVarSlot(VariableSlot slot) {
-        if (slot instanceof ConstantSlot) {
-            throw new BugInCF("Attempt to serializing ConstantSlot by serializeVarSlot() method. Should use serializeConstantSlot() instead!");
+    public BitVecExpr serializeVarSlot(Slot slot) {
+        if (slot.isConstant()) {
+            throw new BugInCF(
+                    "Attempt to serializing ConstantSlot by serializeVarSlot() method. Should use serializeConstantSlot() instead!");
         }
 
         int slotId = slot.getId();

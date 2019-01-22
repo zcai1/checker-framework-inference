@@ -4,10 +4,10 @@ import checkers.inference.solver.backend.encoder.binary.ComparableConstraintEnco
 import checkers.inference.solver.backend.encoder.binary.EqualityConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.InequalityConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.SubtypeConstraintEncoder;
-import checkers.inference.solver.backend.encoder.combine.CombineConstraintEncoder;
 import checkers.inference.solver.backend.encoder.existential.ExistentialConstraintEncoder;
 import checkers.inference.solver.backend.encoder.implication.ImplicationConstraintEncoder;
 import checkers.inference.solver.backend.encoder.preference.PreferenceConstraintEncoder;
+import checkers.inference.solver.backend.encoder.vpa.VPAConstraintEncoder;
 
 /**
  * Factory that creates constraint encoders.
@@ -20,7 +20,7 @@ import checkers.inference.solver.backend.encoder.preference.PreferenceConstraint
  *     <li>{@link InequalityConstraintEncoder}</li>
  *     <li>{@link ComparableConstraintEncoder}</li>
  *     <li>{@link PreferenceConstraintEncoder}</li>
- *     <li>{@link CombineConstraintEncoder}</li>
+ *     <li>{@link VPAConstraintEncoder}</li>
  *     <li>{@link ExistentialConstraintEncoder}</li>
  *     <li>{@link ImplicationConstraintEncoder}</li>
  *     <li>{@link ArithmeticConstraintEncoder}</li>
@@ -43,7 +43,7 @@ public interface ConstraintEncoderFactory<ConstraintEncodingT> {
 
     PreferenceConstraintEncoder<ConstraintEncodingT> createPreferenceConstraintEncoder();
 
-    CombineConstraintEncoder<ConstraintEncodingT> createCombineConstraintEncoder();
+    VPAConstraintEncoder<ConstraintEncodingT> createVPAConstraintEncoder();
 
     ExistentialConstraintEncoder<ConstraintEncodingT> createExistentialConstraintEncoder();
 

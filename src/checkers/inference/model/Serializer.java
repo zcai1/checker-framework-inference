@@ -43,7 +43,7 @@ public interface Serializer<SlotEncodingT, ConstraintEncodingT> {
 
     ConstraintEncodingT serialize(ComparableConstraint comparableConstraint);
 
-    ConstraintEncodingT serialize(CombineConstraint combineConstraint);
+    ConstraintEncodingT serialize(VPAConstraint combineConstraint);
 
     ConstraintEncodingT serialize(PreferenceConstraint preferenceConstraint);
 

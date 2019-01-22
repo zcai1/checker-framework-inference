@@ -25,8 +25,8 @@ import checkers.inference.InferenceSolver;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.EqualityConstraint;
+import checkers.inference.model.ExistentialVariableSlot;
 import checkers.inference.model.Slot;
-import checkers.inference.model.Slot.Kind;
 import checkers.inference.model.SubtypeConstraint;
 import checkers.inference.model.VariableSlot;
 import sparta.checkers.qual.Sink;
@@ -171,10 +171,10 @@ public abstract class IFlowSolver implements InferenceSolver {
      */
     private Set<String> getInferredSlotPermissions(Slot slot) {
         if (slot.isVariable()) {
-            if (slot.getKind() == Kind.EXISTENTIAL_VARIABLE) {
+            if (slot instanceof ExistentialVariableSlot) {
                 throw new IllegalArgumentException("Unexpected variable type:" + slot);
             }
-            return getFlowSet(((VariableSlot) slot).getId());
+            return getFlowSet(slot.getId());
 
         } else if (slot.isConstant()) {
             Set<String> constantSet = new HashSet<>();

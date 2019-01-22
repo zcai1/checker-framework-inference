@@ -12,8 +12,9 @@ import org.checkerframework.framework.util.AnnotationFormatter;
 import org.checkerframework.javacutil.PluginUtil;
 import checkers.inference.InferenceMain;
 import checkers.inference.model.ArithmeticConstraint;
+import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.VPAVariableSlot;
-import checkers.inference.model.CombineConstraint;
+import checkers.inference.model.VPAConstraint;
 import checkers.inference.model.ComparableConstraint;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Constraint;
@@ -23,6 +24,7 @@ import checkers.inference.model.ExistentialVariableSlot;
 import checkers.inference.model.ImplicationConstraint;
 import checkers.inference.model.InequalityConstraint;
 import checkers.inference.model.LUBVariableSlot;
+import checkers.inference.model.PolyInvokeVariableSlot;
 import checkers.inference.model.PreferenceConstraint;
 import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Serializer;
@@ -207,7 +209,7 @@ public class ToStringSerializer implements Serializer<String, String> {
     }
 
     @Override
-    public String serialize(CombineConstraint constraint) {
+    public String serialize(VPAConstraint constraint) {
         boolean prevShowVerboseVars = showVerboseVars;
         showVerboseVars = false;
         // "\u25B7" is unicode representation of viewpoint adaptation sign |>
@@ -337,12 +339,13 @@ public class ToStringSerializer implements Serializer<String, String> {
     public String serialize(VPAVariableSlot slot) {
         final StringBuilder sb = new StringBuilder();
         sb.append(slot.getId());
-        if (showVerboseVars) {
-            sb.append(": combines ")
-              .append(Arrays.asList(slot.getReceiver(), slot.getDeclared()));
-            formatMerges(slot, sb);
-            optionallyFormatAstPath(slot, sb);
-        }
+        optionallyShowVerbose(slot, sb);
+        // if (showVerboseVars) {
+        // sb.append(": view point adapts ")
+        // .append(Arrays.asList(slot.getReceiver(), slot.getDeclared()));
+        // formatMerges(slot, sb);
+        // optionallyFormatAstPath(slot, sb);
+        // }
         return sb.toString();
     }
 
@@ -360,6 +363,29 @@ public class ToStringSerializer implements Serializer<String, String> {
         return sb.toString();
     }
 
+    @Override
+    public String serialize(ArithmeticVariableSlot slot) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(slot.getId());
+        optionallyShowVerbose(slot, sb);
+        // if (showVerboseVars) {
+        // sb.append(": ");
+        // sb.append(Arrays.asList(slot.getOperation(), slot.getLeft(),
+        // slot.getRight()));
+        // formatMerges(slot, sb);
+        // optionallyFormatAstPath(slot, sb);
+        // }
+        return sb.toString();
+    }
+    
+    @Override
+    public String serialize(PolyInvokeVariableSlot slot) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(slot.getId());
+        optionallyShowVerbose(slot, sb);
+        return sb.toString();
+    }
+    
     /**
      * @return the indent string for the current indentation level as stored in
      *         {@link #indentationLevel}.
@@ -368,29 +394,29 @@ public class ToStringSerializer implements Serializer<String, String> {
         return indentStrings.get(indentationLevel);
     }
 
-    private void formatMerges(final VariableSlot slot, final StringBuilder sb) {
+    private void formatMerges(final Slot slot, final StringBuilder sb) {
         if (!slot.getMergedToSlots().isEmpty()) {
             sb.append(": merged to -> ")
               .append(slot.getMergedToSlots());
         }
     }
 
-    private void optionallyShowVerbose(final VariableSlot varSlot, final StringBuilder sb) {
+    private void optionallyShowVerbose(final Slot slot, final StringBuilder sb) {
         if (showVerboseVars) {
-            formatMerges(varSlot, sb);
-            optionallyFormatAstPath(varSlot, sb);
+            formatMerges(slot, sb);
+            optionallyFormatAstPath(slot, sb);
         }
     }
 
-    private void optionallyFormatAstPath(final VariableSlot varSlot, final StringBuilder sb) {
-        if (showAstPaths && (varSlot.isInsertable() || (varSlot.getLocation() != null))) {
+    private void optionallyFormatAstPath(final Slot slot, final StringBuilder sb) {
+        if (showAstPaths && (slot.isInsertable() || (slot.getLocation() != null))) {
             sb.append("\n")
               .append(getCurrentIndentString())
               .append("AstPath: ");
-            if (varSlot.getLocation() == null) {
+            if (slot.getLocation() == null) {
                 sb.append("<NULL PATH>");
             } else {
-                sb.append(varSlot.getLocation().toString());
+                sb.append(slot.getLocation().toString());
             }
         }
     }

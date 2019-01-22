@@ -6,13 +6,15 @@ import java.util.List;
 import java.util.Map;
 
 import checkers.inference.model.LUBVariableSlot;
+import checkers.inference.model.PolyInvokeVariableSlot;
 import checkers.inference.model.ImplicationConstraint;
 import org.sat4j.core.VecInt;
 
 import checkers.inference.SlotManager;
 import checkers.inference.model.ArithmeticConstraint;
+import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.VPAVariableSlot;
-import checkers.inference.model.CombineConstraint;
+import checkers.inference.model.VPAConstraint;
 import checkers.inference.model.ComparableConstraint;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Constraint;
@@ -251,13 +253,25 @@ public abstract class CnfVecIntSerializer implements Serializer<VecInt[], VecInt
     }
 
     @Override
+    public VecInt[] serialize(ArithmeticVariableSlot slot) {
+        // doesn't really mean anything
+        return null;
+    }
+
+    @Override
+    public VecInt[] serialize(PolyInvokeVariableSlot slot) {
+        // doesn't really mean anything
+        return null;
+    }
+
+    @Override
     public VecInt[] serialize(ComparableConstraint comparableConstraint) {
         // not sure what this means
         return emptyClauses;
     }
 
     @Override
-    public VecInt[] serialize(CombineConstraint combineConstraint) {
+    public VecInt[] serialize(VPAConstraint combineConstraint) {
         // does this just say that the result is a subtype of the other 2?
         // not sure what this means
         return emptyClauses;

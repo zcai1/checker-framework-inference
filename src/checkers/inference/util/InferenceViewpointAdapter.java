@@ -23,12 +23,12 @@ public class InferenceViewpointAdapter extends AbstractViewpointAdapter {
 
     @Override
     protected AnnotationMirror extractAnnotationMirror(AnnotatedTypeMirror atm) {
-        final VariableSlot varSlot = slotManager.getVariableSlot(atm);
-        if (varSlot == null && !InferenceMain.isHackMode()) {
+        final Slot slot = slotManager.getSlot(atm);
+        if (slot == null && !InferenceMain.isHackMode()) {
             throw new BugInCF(atm + " doesn't contain a slot");
         }
 
-        return varSlot == null ? null : slotManager.getAnnotation(varSlot);
+        return slot == null ? null : slotManager.getAnnotation(slot);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class InferenceViewpointAdapter extends AbstractViewpointAdapter {
         final Slot recvSlot = slotManager.getSlot(receiverAnnotation);
         final Slot declSlot = slotManager.getSlot(declaredAnnotation);
         final Slot combVariableSlot = slotManager.createVPAVariableSlot(recvSlot, declSlot);
-        constraintManager.addCombineConstraint(recvSlot, declSlot, combVariableSlot);
+        constraintManager.addVPAConstraint(recvSlot, declSlot, combVariableSlot);
         return slotManager.getAnnotation(combVariableSlot);
     }
 }

@@ -1,18 +1,18 @@
 package checkers.inference.solver.backend.encoder;
 
 import checkers.inference.model.BinaryConstraint;
-import checkers.inference.model.CombineConstraint;
+import checkers.inference.model.VPAConstraint;
 import checkers.inference.model.Slot;
 import checkers.inference.solver.backend.encoder.binary.BinaryConstraintEncoder;
-import  checkers.inference.solver.backend.encoder.combine.CombineConstraintEncoder;
+import checkers.inference.solver.backend.encoder.vpa.VPAConstraintEncoder;
 
 /**
- * Enum that models combination of slots in a {@link BinaryConstraint} and {@link CombineConstraint}
- * (in this case, it's the combination of {@link CombineConstraint#target} and {@link CombineConstraint#decl}).
+ * Enum that models combination of slots in a {@link BinaryConstraint} and {@link VPAConstraint}
+ * (in this case, it's the combination of {@link VPAConstraint#target} and {@link VPAConstraint#decl}).
  * <p>
- * {@link BinaryConstraintEncoder} and {@link CombineConstraintEncoder} need to know the combination of
+ * {@link BinaryConstraintEncoder} and {@link VPAConstraintEncoder} need to know the combination of
  * {@link Slot.Kind} to determine which encodeXXX() method in {@link BinaryConstraintEncoder} and
- * {@link CombineConstraintEncoder} should be called.
+ * {@link VPAConstraintEncoder} should be called.
  * <p>
  * But the {@link Slot.Kind} that's needed here is coarser-grained than its original definition:
  * Only knowing if a {@code Slot} is variable or constant is enough in solver encoding. Because solver
@@ -22,7 +22,7 @@ import  checkers.inference.solver.backend.encoder.combine.CombineConstraintEncod
  * that no inference is needed.
  *
  * @see ConstraintEncoderCoordinator#dispatch(BinaryConstraint, BinaryConstraintEncoder)
- * @see ConstraintEncoderCoordinator#dispatch(CombineConstraint, CombineConstraintEncoder)
+ * @see ConstraintEncoderCoordinator#dispatch(VPAConstraint, VPAConstraintEncoder)
  */
 public enum SlotSlotCombo {
 

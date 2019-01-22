@@ -14,9 +14,6 @@ import org.checkerframework.dataflow.util.HashCodeUtils;
  *
  * VariableSlots are the result of converting @VarAnnot( slot id ) annotations
  * on AnnotatedTypeMirrors.
- *
- * VariableSlots hold references to slots it is refined by, and slots it is
- * merged to.
  */
 public class VariableSlot extends Slot {
 
@@ -41,37 +38,6 @@ public class VariableSlot extends Slot {
      */
     public VariableSlot(int id) {
         super(id, true);
-    }
-
-    // Slots this variable has been merged to.
-    private final Set<LUBVariableSlot> mergedToSlots = new HashSet<>();
-
-    // Refinement variables that refine this slot.
-    private final Set<RefinementVariableSlot> refinedToSlots = new HashSet<>();
-
-    public boolean isMergedTo(VariableSlot other) {
-        for (LUBVariableSlot mergedTo : mergedToSlots) {
-            if (mergedTo.equals(other)) {
-                return true;
-            } else {
-                if (mergedTo.isMergedTo(other)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public Set<LUBVariableSlot> getMergedToSlots() {
-        return Collections.unmodifiableSet(mergedToSlots);
-    }
-
-    public void addMergedToSlot(LUBVariableSlot mergedSlot) {
-        this.mergedToSlots.add(mergedSlot);
-    }
-
-    public Set<RefinementVariableSlot> getRefinedToSlots() {
-        return refinedToSlots;
     }
 
     @Override

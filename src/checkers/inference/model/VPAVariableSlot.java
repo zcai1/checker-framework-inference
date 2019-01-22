@@ -5,8 +5,8 @@ package checkers.inference.model;
  */
 public class VPAVariableSlot extends Slot {
 
-    public VPAVariableSlot(int id, AnnotationLocation location) {
-        super(id, false, location);
+    public VPAVariableSlot(int id) {
+        super(id, false);
     }
 
     @Override

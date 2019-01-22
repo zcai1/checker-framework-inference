@@ -8,12 +8,14 @@ import java.util.Map;
 import javax.lang.model.element.AnnotationMirror;
 
 import checkers.inference.model.LUBVariableSlot;
+import checkers.inference.model.PolyInvokeVariableSlot;
 import checkers.inference.model.ImplicationConstraint;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import checkers.inference.model.ArithmeticConstraint;
+import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.VPAVariableSlot;
-import checkers.inference.model.CombineConstraint;
+import checkers.inference.model.VPAConstraint;
 import checkers.inference.model.ComparableConstraint;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Constraint;
@@ -212,14 +214,18 @@ public class JsonSerializer implements Serializer<String, JSONObject> {
         return annotationSerializer.serialize(value);
     }
 
-    @Override
-    public String serialize(VariableSlot slot) {
+    private String serializeSlot(Slot slot) {
         return VAR_PREFIX + slot.getId();
     }
 
     @Override
+    public String serialize(VariableSlot slot) {
+        return serializeSlot(slot);
+    }
+
+    @Override
     public String serialize(RefinementVariableSlot slot) {
-        return serialize((VariableSlot) slot);
+        return serializeSlot(slot);
     }
 
     @Override
@@ -235,12 +241,22 @@ public class JsonSerializer implements Serializer<String, JSONObject> {
 
     @Override
     public String serialize(VPAVariableSlot slot) {
-        return serialize((VariableSlot) slot);
+        return serializeSlot(slot);
     }
 
     @Override
     public String serialize(LUBVariableSlot slot) {
-        return serialize((VariableSlot) slot);
+        return serializeSlot(slot);
+    }
+    
+    @Override
+    public String serialize(ArithmeticVariableSlot slot) {
+        return serializeSlot(slot);
+    }
+    
+    @Override
+    public String serialize(PolyInvokeVariableSlot slot) {
+        return serializeSlot(slot);
     }
 
     @SuppressWarnings("unchecked")
@@ -313,7 +329,7 @@ public class JsonSerializer implements Serializer<String, JSONObject> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public JSONObject serialize(CombineConstraint constraint) {
+    public JSONObject serialize(VPAConstraint constraint) {
         if (constraint.getTarget() == null || constraint.getDeclared() == null || constraint.getResult() == null) {
             return null;
         }

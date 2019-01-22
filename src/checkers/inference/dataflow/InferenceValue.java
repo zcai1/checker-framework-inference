@@ -77,7 +77,7 @@ public class InferenceValue extends CFValue {
             AnnotatedTypeVariable type =
                     (AnnotatedTypeVariable) analysis.getTypeFactory().getAnnotatedType(typevar.asElement());
             AnnotatedTypeMirror ubType = InferenceUtil.findUpperBoundType(type, InferenceMain.isHackMode());
-            return getInferenceAnalysis().getSlotManager().getVariableSlot(ubType);
+            return getInferenceAnalysis().getSlotManager().getSlot(ubType);
         }
         Iterator<AnnotationMirror> iterator = value.getAnnotations().iterator();
         AnnotationMirror annotationMirror = iterator.next();
@@ -119,8 +119,8 @@ public class InferenceValue extends CFValue {
      */
     public CFValue mostSpecificFromSlot(final Slot thisSlot, final Slot otherSlot, final CFValue other, final CFValue backup) {
            if (thisSlot.isVariable() && otherSlot.isVariable()) {
-               VariableSlot thisVarSlot = (VariableSlot) thisSlot;
-               VariableSlot otherVarSlot = (VariableSlot) otherSlot;
+               Slot thisVarSlot = (VariableSlot) thisSlot;
+               Slot otherVarSlot = (VariableSlot) otherSlot;
                if (thisVarSlot.isMergedTo(otherVarSlot)) {
                    return other;
                } else if (otherVarSlot.isMergedTo(thisVarSlot)) {

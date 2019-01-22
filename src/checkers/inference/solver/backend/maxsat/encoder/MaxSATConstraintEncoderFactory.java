@@ -2,9 +2,9 @@ package checkers.inference.solver.backend.maxsat.encoder;
 
 import checkers.inference.solver.backend.encoder.AbstractConstraintEncoderFactory;
 import checkers.inference.solver.backend.encoder.ArithmeticConstraintEncoder;
-import checkers.inference.solver.backend.encoder.combine.CombineConstraintEncoder;
 import checkers.inference.solver.backend.encoder.existential.ExistentialConstraintEncoder;
 import checkers.inference.solver.backend.encoder.implication.ImplicationConstraintEncoder;
+import checkers.inference.solver.backend.encoder.vpa.VPAConstraintEncoder;
 import checkers.inference.solver.backend.maxsat.MaxSatFormatTranslator;
 import checkers.inference.solver.frontend.Lattice;
 import org.sat4j.core.VecInt;
@@ -58,7 +58,7 @@ public class MaxSATConstraintEncoderFactory extends AbstractConstraintEncoderFac
     }
 
     @Override
-    public CombineConstraintEncoder<VecInt[]> createCombineConstraintEncoder() {
+    public VPAConstraintEncoder<VecInt[]> createVPAConstraintEncoder() {
         return null;
     }
 

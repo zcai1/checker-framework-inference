@@ -39,6 +39,8 @@ import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.util.InferenceUtil;
 
+// TODO: update javadoc in this file regarding "CombVariable" and "comb variable"
+
 /**
  *
  * InferenceTransfer extends CFTransfer for inference.
@@ -204,7 +206,7 @@ public class InferenceTransfer extends CFTransfer {
             Tree assignmentTree, CFStore store,
             AnnotatedTypeMirror atm) {
 
-        Slot slotToRefine = getInferenceAnalysis().getSlotManager().getVariableSlot(atm);
+        Slot slotToRefine = getInferenceAnalysis().getSlotManager().getSlot(atm);
 
         logger.fine("Creating refinement variable for tree: " + assignmentTree);
         RefinementVariableSlot refVar;
@@ -284,8 +286,8 @@ public class InferenceTransfer extends CFTransfer {
 
         SlotManager slotManager = getInferenceAnalysis().getSlotManager();
 
-        final Slot upperBoundBaseSlot = slotManager.getVariableSlot(upperBoundType);
-        final Slot lowerBoundBaseSlot = slotManager.getVariableSlot(lowerBoundType);
+        final Slot upperBoundBaseSlot = slotManager.getSlot(upperBoundType);
+        final Slot lowerBoundBaseSlot = slotManager.getSlot(lowerBoundType);
 
         if (upperBoundBaseSlot == null || lowerBoundBaseSlot == null) {
             if (!InferenceMain.isHackMode()) {

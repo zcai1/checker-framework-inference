@@ -5,10 +5,10 @@ import checkers.inference.solver.backend.encoder.ArithmeticConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.ComparableConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.EqualityConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.InequalityConstraintEncoder;
-import checkers.inference.solver.backend.encoder.combine.CombineConstraintEncoder;
 import checkers.inference.solver.backend.encoder.existential.ExistentialConstraintEncoder;
 import checkers.inference.solver.backend.encoder.implication.ImplicationConstraintEncoder;
 import checkers.inference.solver.backend.encoder.preference.PreferenceConstraintEncoder;
+import checkers.inference.solver.backend.encoder.vpa.VPAConstraintEncoder;
 import checkers.inference.solver.backend.z3.Z3BitVectorFormatTranslator;
 import checkers.inference.solver.frontend.Lattice;
 import com.microsoft.z3.BoolExpr;
@@ -56,7 +56,7 @@ public class Z3BitVectorConstraintEncoderFactory extends AbstractConstraintEncod
     }
 
     @Override
-    public CombineConstraintEncoder<BoolExpr> createCombineConstraintEncoder() {
+    public VPAConstraintEncoder<BoolExpr> createVPAConstraintEncoder() {
         return null;
     }
 

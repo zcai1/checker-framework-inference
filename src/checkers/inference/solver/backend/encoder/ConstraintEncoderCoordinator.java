@@ -3,17 +3,17 @@ package checkers.inference.solver.backend.encoder;
 import org.checkerframework.javacutil.BugInCF;
 import checkers.inference.model.ArithmeticConstraint;
 import checkers.inference.model.BinaryConstraint;
-import checkers.inference.model.CombineConstraint;
+import checkers.inference.model.VPAConstraint;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ExistentialConstraint;
 import checkers.inference.model.ImplicationConstraint;
 import checkers.inference.model.PreferenceConstraint;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.binary.BinaryConstraintEncoder;
-import checkers.inference.solver.backend.encoder.combine.CombineConstraintEncoder;
 import checkers.inference.solver.backend.encoder.existential.ExistentialConstraintEncoder;
 import checkers.inference.solver.backend.encoder.implication.ImplicationConstraintEncoder;
 import checkers.inference.solver.backend.encoder.preference.PreferenceConstraintEncoder;
+import checkers.inference.solver.backend.encoder.vpa.VPAConstraintEncoder;
 
 /**
  * A coordinator class that has the coordinating logic how each encoder encodes its supported
@@ -28,7 +28,7 @@ import checkers.inference.solver.backend.encoder.preference.PreferenceConstraint
  * constraint doesn't need the {@code SlotSlotCombo} information to encode it.
  *
  * @see BinaryConstraintEncoder
- * @see CombineConstraintEncoder
+ * @see VPAConstraintEncoder
  * @see PreferenceConstraintEncoder
  * @see ExistentialConstraintEncoder
  */
@@ -55,8 +55,8 @@ public class ConstraintEncoderCoordinator {
         }
     }
 
-    public static <ConstraintEncodingT> ConstraintEncodingT dispatch(CombineConstraint constraint,
-            CombineConstraintEncoder<ConstraintEncodingT> encoder) {
+    public static <ConstraintEncodingT> ConstraintEncodingT dispatch(VPAConstraint constraint,
+            VPAConstraintEncoder<ConstraintEncodingT> encoder) {
         switch (SlotSlotCombo.valueOf(constraint.getTarget(), constraint.getDeclared())) {
             case VARIABLE_VARIABLE:
                 return encoder.encodeVariable_Variable((VariableSlot) constraint.getTarget(),

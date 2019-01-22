@@ -120,16 +120,16 @@ public class ConstraintManager {
     }
 
     /**
-     * Creates a {@link CombineConstraint} between the three slots.
+     * Creates a {@link VPAConstraint} between the three slots.
      */
-    public CombineConstraint createCombineConstraint(Slot target, Slot decl, Slot result) {
-        return CombineConstraint.create(target, decl, result, getCurrentLocation());
+    public VPAConstraint createVPAConstraint(Slot target, Slot decl, Slot result) {
+        return VPAConstraint.create(target, decl, result, getCurrentLocation());
     }
 
     /**
      * Creates a {@link PreferenceConstraint} for the given slots with the given weight.
      */
-    public PreferenceConstraint createPreferenceConstraint(VariableSlot variable, ConstantSlot goal,
+    public PreferenceConstraint createPreferenceConstraint(Slot variable, ConstantSlot goal,
             int weight) {
         return PreferenceConstraint.create(variable, goal, weight, getCurrentLocation());
     }
@@ -251,16 +251,16 @@ public class ConstraintManager {
     }
 
     /**
-     * Creates and adds a {@link CombineConstraint} to the constraint set.
+     * Creates and adds a {@link VPAConstraint} to the constraint set.
      */
-    public void addCombineConstraint(Slot target, Slot decl, Slot result) {
-        add(createCombineConstraint(target, decl, result));
+    public void addVPAConstraint(Slot target, Slot decl, Slot result) {
+        add(createVPAConstraint(target, decl, result));
     }
 
     /**
      * Creates and adds a {@link PreferenceConstraint} to the constraint set.
      */
-    public void addPreferenceConstraint(VariableSlot variable, ConstantSlot goal, int weight) {
+    public void addPreferenceConstraint(Slot variable, ConstantSlot goal, int weight) {
         add(createPreferenceConstraint(variable, goal, weight));
     }
 

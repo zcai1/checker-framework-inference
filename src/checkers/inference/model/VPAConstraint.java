@@ -6,30 +6,28 @@ import org.checkerframework.javacutil.BugInCF;
 /**
  * Represents a constraint that the viewpoint adaptation between
  * target and decl gives result.
- *
- * TODO: clarify relation to CombVariableSlot. Should we add separate types?
  */
-public class CombineConstraint extends Constraint {
+public class VPAConstraint extends Constraint {
 
     private final Slot target;
     private final Slot decl;
     private final Slot result;
 
-    private CombineConstraint(Slot target, Slot decl, Slot result, AnnotationLocation location) {
+    private VPAConstraint(Slot target, Slot decl, Slot result, AnnotationLocation location) {
         super(Arrays.asList(target, decl, result), location);
         this.target = target;
         this.decl = decl;
         this.result = result;
     }
 
-    protected static CombineConstraint create(Slot target, Slot decl, Slot result,
+    protected static VPAConstraint create(Slot target, Slot decl, Slot result,
             AnnotationLocation location) {
         if (target == null || decl == null || result == null) {
             throw new BugInCF("Create combine constraint with null argument. Target: "
                     + target + " Decl: " + decl + " Result: " + result);
         }
 
-        return new CombineConstraint(target, decl, result, location);
+        return new VPAConstraint(target, decl, result, location);
     }
 
     @Override
@@ -66,7 +64,7 @@ public class CombineConstraint extends Constraint {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        CombineConstraint other = (CombineConstraint) obj;
+        VPAConstraint other = (VPAConstraint) obj;
         if (target.equals(other.target) &&
                 decl.equals(other.decl) &&
                 result.equals(other.result)) {
