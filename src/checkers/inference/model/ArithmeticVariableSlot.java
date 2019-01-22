@@ -2,8 +2,12 @@ package checkers.inference.model;
 
 /**
  * ArithmeticVariableSlot represent the result of an arithmetic operation
- * between two other {@link Slot}s. Note that this slot should be serialized
- * identically to a {@link VariableSlot}.
+ * between two other {@link Slot}s.
+ *
+ * ArithmeticVariableSlots are never inserted into source.
+ *
+ * Note that this slot should be serialized identically to a
+ * {@link VariableSlot}.
  */
 public class ArithmeticVariableSlot extends Slot {
 

@@ -3,7 +3,11 @@ package checkers.inference.model;
 /**
  * PolyInvokeVariableSlot represent the annotation computed as the replacement
  * of a {@code @PolyXXX} qualifier at the invocation of a qualifier-polymorphic
- * method. Note that this slot should be serialized identically to a
+ * method.
+ *
+ * PolyInvokeVariableSlots are never inserted into source.
+ *
+ * Note that this slot should be serialized identically to a
  * {@link VariableSlot}.
  */
 public class PolyInvokeVariableSlot extends Slot {
