@@ -27,10 +27,10 @@ if [ -d $CHECKERFRAMEWORK ] ; then
     git -C $CHECKERFRAMEWORK pull || true
 else
     [ -d /tmp/plume-scripts ] || (cd /tmp && git clone --depth 1 https://github.com/plume-lib/plume-scripts.git)
-    REPO=`/tmp/plume-scripts/git-find-fork ${SLUGOWNER} typetools checker-framework`
+    REPO=https://github.com/jyluo/checker-framework.git
     BRANCH=units_with_enum_fix
     echo "About to execute: (cd .. && git clone -b $BRANCH --single-branch --depth 1 $REPO)"
-    (cd $CHECKERFRAMEWORK/.. && git clone -b ${BRANCH} --single-branch --depth 1 https://github.com/jyluo/checker-framework.git) || (cd .. && git clone -b ${BRANCH} --single-branch --depth 1 ${REPO})
+    (cd $CHECKERFRAMEWORK/.. && git clone -b ${BRANCH} --single-branch --depth 1 ${REPO}) || (cd .. && git clone -b ${BRANCH} --single-branch --depth 1 ${REPO})
 fi
 
 # This also builds annotation-tools and jsr308-langtools
