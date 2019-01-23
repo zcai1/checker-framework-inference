@@ -1,5 +1,25 @@
 package checkers.inference;
 
+import org.checkerframework.framework.type.AnnotatedTypeFactory;
+import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedArrayType;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedIntersectionType;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedNullType;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedPrimitiveType;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedTypeVariable;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedUnionType;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedWildcardType;
+import org.checkerframework.framework.type.visitor.AnnotatedTypeScanner;
+import org.checkerframework.javacutil.AnnotationBuilder;
+import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.ElementUtils;
+import org.checkerframework.javacutil.BugInCF;
+import org.checkerframework.javacutil.Pair;
+import org.checkerframework.javacutil.TreeUtils;
+import org.checkerframework.javacutil.TypesUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,26 +37,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeKind;
-
-import org.checkerframework.framework.type.AnnotatedTypeFactory;
-import org.checkerframework.framework.type.AnnotatedTypeMirror;
-import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedArrayType;
-import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
-import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
-import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedIntersectionType;
-import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedNullType;
-import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedPrimitiveType;
-import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedTypeVariable;
-import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedUnionType;
-import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedWildcardType;
-import org.checkerframework.framework.type.visitor.AnnotatedTypeScanner;
-import org.checkerframework.javacutil.AnnotationBuilder;
-import org.checkerframework.javacutil.AnnotationUtils;
-import org.checkerframework.javacutil.ElementUtils;
-import org.checkerframework.javacutil.ErrorReporter;
-import org.checkerframework.javacutil.Pair;
-import org.checkerframework.javacutil.TreeUtils;
-import org.checkerframework.javacutil.TypesUtils;
 
 import com.sun.source.tree.AnnotatedTypeTree;
 import com.sun.source.tree.ArrayTypeTree;
@@ -60,6 +60,9 @@ import com.sun.tools.javac.code.Symbol.ClassSymbol;
 import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.tree.JCTree;
 
+import scenelib.annotations.io.ASTIndex;
+import scenelib.annotations.io.ASTPath;
+import scenelib.annotations.io.ASTRecord;
 import checkers.inference.model.AnnotationLocation;
 import checkers.inference.model.AnnotationLocation.AstPathLocation;
 import checkers.inference.model.AnnotationLocation.ClassDeclLocation;
@@ -70,12 +73,9 @@ import checkers.inference.model.VariableSlot;
 import checkers.inference.model.tree.ArtificialExtendsBoundTree;
 import checkers.inference.qual.VarAnnot;
 import checkers.inference.util.ASTPathUtil;
-import checkers.inference.util.ConstantToVariableAnnotator;
 import checkers.inference.util.CopyUtil;
 import checkers.inference.util.InferenceUtil;
-import scenelib.annotations.io.ASTIndex;
-import scenelib.annotations.io.ASTPath;
-import scenelib.annotations.io.ASTRecord;
+
 
 /**
  *  VariableAnnotator takes a type and the tree that the type represents.  It determines what locations on the tree
@@ -139,7 +139,6 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
     private final AnnotationMirror realTop;
 
     private final ExistentialVariableInserter existentialInserter;
-    private final ConstantToVariableAnnotator constantToVariableAnnotator;
     private final ImpliedTypeAnnotator impliedTypeAnnotator;
 
     public VariableAnnotator(final InferenceAnnotatedTypeFactory typeFactory,
@@ -166,8 +165,6 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
                                                                    varAnnot, this);
 
         this.impliedTypeAnnotator = new ImpliedTypeAnnotator(inferenceTypeFactory, slotManager, existentialInserter);
-        this.constantToVariableAnnotator = new ConstantToVariableAnnotator(realTop, varAnnot, this,
-                                                                           slotManager);
     }
 
 
@@ -181,9 +178,8 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
         ASTPathUtil.getASTRecordForPath(typeFactory, path);
         if (tree.getKind() == Kind.CLASS || tree.getKind() == Kind.INTERFACE
          || tree.getKind() == Kind.ENUM  || tree.getKind() == Kind.ANNOTATION_TYPE) {
-            ClassSymbol classSymbol = (ClassSymbol) TreeUtils.elementFromDeclaration((ClassTree) tree);
-            return new ClassDeclLocation(classSymbol.packge().getQualifiedName().toString(),
-                                         classSymbol.flatName().toString());
+            TypeElement typeElement = TreeUtils.elementFromDeclaration((ClassTree) tree);
+            return new ClassDeclLocation(((ClassSymbol)typeElement).flatName().toString());
         } // else
 
         ASTRecord record = ASTPathUtil.getASTRecordForPath(typeFactory, path);
@@ -262,7 +258,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
     }
 
     public ConstantSlot createConstant(final AnnotationMirror value, final Tree tree) {
-        final ConstantSlot constantSlot = createConstant(value);
+        final ConstantSlot constantSlot = slotManager.createConstantSlot(value);
 
 //        if (path != null) {
 //            Element element = inferenceTypeFactory.getTreeUtils().getElement(path);
@@ -277,11 +273,6 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
                         annotations);
         treeToVarAnnoPair.put(tree, varATMPair);
         logger.fine("Created variable for tree:\n" + constantSlot.getId() + " => " + tree);
-        return constantSlot;
-    }
-
-    public ConstantSlot createConstant(final AnnotationMirror value) {
-        final ConstantSlot constantSlot = slotManager.createConstantSlot(value);
         return constantSlot;
     }
 
@@ -391,7 +382,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
                 pathToTree = expensiveBackupGetPath(varElem, tree, inferenceTypeFactory).getParentPath();
 
                 if (pathToTree == null) {
-                    ErrorReporter.errorAbort("Could not find path to tree: " + tree + "\n"
+                    throw new BugInCF("Could not find path to tree: " + tree + "\n"
                                            + "typeVar=" + typeVar + "\n"
                                            + "tree=" + tree + "\n"
                                            + "isUpperBoundOfTypeParam=" + isUpperBoundOfTypeParam);
@@ -431,7 +422,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
             // if(tree.getKind() == ) // TODO: GOTTA FIGURE OUT IDENTIFIER STUFF
             if (!typeVar.getAnnotations().isEmpty()) {
                 if (typeVar.getAnnotations().size() > 2) {
-                    ErrorReporter.errorAbort("There should be only 1 or 2 primary annotation on the typevar: \n"
+                    throw new BugInCF("There should be only 1 or 2 primary annotation on the typevar: \n"
                                            + "typeVar=" + typeVar + "\n"
                                            + "tree=" + tree + "\n");
                 }
@@ -513,17 +504,13 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
             AnnotationLocation location = treeToLocation(tree);
             variable = replaceOrCreateEquivalentVarAnno(atm, tree, location);
             final Pair<VariableSlot, Set<? extends AnnotationMirror>> varATMPair = Pair
-                    .<VariableSlot, Set<? extends AnnotationMirror>> of(variable,
+                    .of(variable,
                     AnnotationUtils.createAnnotationSet());
 
             treeToVarAnnoPair.put(tree, varATMPair);
         }
 
         atm.replaceAnnotation(slotManager.getAnnotation(variable));
-
-        if (atm.getEffectiveAnnotationInHierarchy(realTop) == null) {
-            atm.addAnnotation(realTop);
-        }
 
         return variable;
     }
@@ -568,14 +555,14 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
         } else if (!atm.getAnnotations().isEmpty()) {
             realQualifier = atm.getAnnotationInHierarchy(realTop);
             if (realQualifier == null) {
-                ErrorReporter.errorAbort("The annotation(s) on the given type is neither VarAnno nor real qualifier!"
+                throw new BugInCF("The annotation(s) on the given type is neither VarAnno nor real qualifier!"
                         + "Atm is: " + atm + " annotations: " + atm.getAnnotations());
             }
-            varSlot = constantToVariableAnnotator.createConstantSlot(realQualifier);
+            varSlot = slotManager.createConstantSlot(realQualifier);
         } else if (tree != null && realChecker.isConstant(tree) ) {
             // Considered constant by real type system
             realQualifier = realTypeFactory.getAnnotatedType(tree).getAnnotationInHierarchy(realTop);
-            varSlot = constantToVariableAnnotator.createConstantSlot(realQualifier);
+            varSlot = slotManager.createConstantSlot(realQualifier);
         } else {
             varSlot = createVariable(location);
         }
@@ -585,7 +572,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
     }
 
     public VariableSlot getTopConstant() {
-        return constantToVariableAnnotator.createConstantSlot(realTop);
+        return slotManager.createConstantSlot(realTop);
     }
 
     /**
@@ -642,7 +629,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
             if (varElement.getKind() == ElementKind.ENUM_CONSTANT) {
                 AnnotatedTypeMirror realType = realTypeFactory.getAnnotatedType(tree);
                 CopyUtil.copyAnnotations(realType, adt);
-                constantToVariableAnnotator.visit(adt);
+                inferenceTypeFactory.getConstantToVariableAnnotator().visit(adt);
             } else {
                 // calls this method again but with a ParameterizedTypeTree
                 visitDeclared(adt, ((VariableTree) tree).getType());
@@ -710,7 +697,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
                 final List<AnnotatedTypeMirror> typeArgs = newAdt.getTypeArguments();
 
                 if (treeArgs.size() != typeArgs.size()) {
-                    ErrorReporter.errorAbort("Raw type? Tree(" + parameterizedTypeTree + "), Atm(" + newAdt + ")");
+                    throw new BugInCF("Raw type? Tree(" + parameterizedTypeTree + "), Atm(" + newAdt + ")");
                 }
 
                 for (int i = 0; i < typeArgs.size(); i++) {
@@ -1052,7 +1039,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
         if (path == null || enclosedByAnnotation(path)) {
             AnnotatedTypeMirror realType = realTypeFactory.getAnnotatedType(tree);
             CopyUtil.copyAnnotations(realType, type);
-            constantToVariableAnnotator.visit(type);
+            inferenceTypeFactory.getConstantToVariableAnnotator().visit(type);
             return;
         } // else
 
@@ -1066,7 +1053,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
             if (InferenceMain.isHackMode()) {
                 return;
             } else {
-                ErrorReporter.errorAbort("NULL ARRAY RECORD:\n" + tree + "\n\n");
+                throw new BugInCF("NULL ARRAY RECORD:\n" + tree + "\n\n");
             }
         }
         slot.setLocation(new AstPathLocation(astRecord.newArrayLevel(0)));
@@ -1132,8 +1119,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
 
             // The inner most component type, but it has an
             // array tree. Something is wrong.
-            ErrorReporter.errorAbort("Annotate array is broken. Presumably there is a bug.");
-            return; // Dead code
+            throw new BugInCF("Annotate array is broken. Presumably there is a bug.");
         }
         if (type instanceof AnnotatedArrayType) {
             Tree componentTree;
@@ -1418,7 +1404,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
                     }
 
                     if (astRecord == null) {
-                        ErrorReporter.errorAbort("Missing path to receiver: " + methodElem + " => " + methodType);
+                        throw new BugInCF("Missing path to receiver: " + methodElem + " => " + methodType);
                     }
                 }
 
@@ -1462,7 +1448,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
 
         if (variableAnno == null) {
             if (!InferenceMain.isHackMode()) {
-                ErrorReporter.errorAbort("Missing receiver annotation: " + receiverType + "  " + declarationType);
+                throw new BugInCF("Missing receiver annotation: " + receiverType + "  " + declarationType);
             }
         } else {
             receiverType.replaceAnnotation(variableAnno);

@@ -1,6 +1,7 @@
 package checkers.inference;
 
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
+import org.checkerframework.framework.type.AnnotatedTypeFactory.ParameterizedMethodType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedArrayType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
@@ -9,8 +10,7 @@ import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedNoType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedPrimitiveType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedTypeVariable;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
-import org.checkerframework.javacutil.ErrorReporter;
-import org.checkerframework.javacutil.Pair;
+import org.checkerframework.javacutil.BugInCF;
 import org.checkerframework.javacutil.TreeUtils;
 
 import java.util.List;
@@ -217,10 +217,10 @@ public class InferenceTreeAnnotator extends TreeAnnotator {
     private void annotateMethodTypeArgs(final MethodInvocationTree methodInvocationTree) {
 
         if (!methodInvocationTree.getTypeArguments().isEmpty()) {
-            final Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> methodFromUse =
+            final ParameterizedMethodType methodFromUse =
                     atypeFactory.methodFromUse(methodInvocationTree);
 
-            annotateMethodTypeArguments(methodInvocationTree.getTypeArguments(), methodFromUse.second);
+            annotateMethodTypeArguments(methodInvocationTree.getTypeArguments(), methodFromUse.typeArgs);
         } else {
             // TODO: annotate types if there are types but no trees, I think this will be taken care of by
             // TODO: InferenceTypeArgumentInference which is not yet implemented
@@ -230,10 +230,10 @@ public class InferenceTreeAnnotator extends TreeAnnotator {
     private void annotateMethodTypeArgs(final NewClassTree newClassTree) {
 
         if (!newClassTree.getTypeArguments().isEmpty()) {
-            final Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> constructorFromUse =
+            final ParameterizedMethodType constructorFromUse =
                     atypeFactory.constructorFromUse(newClassTree);
 
-            annotateMethodTypeArguments(newClassTree.getTypeArguments(), constructorFromUse.second);
+            annotateMethodTypeArguments(newClassTree.getTypeArguments(), constructorFromUse.typeArgs);
 
         } else {
             // TODO: annotate types if there are types but no trees
@@ -246,7 +246,7 @@ public class InferenceTreeAnnotator extends TreeAnnotator {
         if (!typeArgTrees.isEmpty()) {
 
             if (typeArgs.size() != typeArgTrees.size()) {
-                ErrorReporter.errorAbort(
+                throw new BugInCF(
                     "Number of type argument trees differs from number of types!\n"
                  +  "Type arguments ( " + InferenceUtil.join(typeArgs) + " ) \n"
                  +  "Trees ( " + InferenceUtil.join(typeArgTrees) + " )"
@@ -304,7 +304,7 @@ public class InferenceTreeAnnotator extends TreeAnnotator {
                 break;
 
             default:
-                ErrorReporter.errorAbort("Unexpected element of kind ( " + varElem.getKind() + " ) element ( " + varElem + " ) ");
+                throw new BugInCF("Unexpected element of kind ( " + varElem.getKind() + " ) element ( " + varElem + " ) ");
         }
         return null;
     }
@@ -335,7 +335,7 @@ public class InferenceTreeAnnotator extends TreeAnnotator {
         super.visitInstanceOf(instanceOfTree, atm);
 
         if (atm.getKind() != TypeKind.BOOLEAN) {
-            ErrorReporter.errorAbort("Unexpected type kind for instanceOfTree = " + instanceOfTree
+            throw new BugInCF("Unexpected type kind for instanceOfTree = " + instanceOfTree
                                    + " atm=" + atm);
         }
 
@@ -343,7 +343,7 @@ public class InferenceTreeAnnotator extends TreeAnnotator {
         AnnotatedPrimitiveType instanceOfType = (AnnotatedPrimitiveType) realTypeFactory.getAnnotatedType(instanceOfTree);
         atm.replaceAnnotations(instanceOfType.getAnnotations());
 
-        ConstantToVariableAnnotator constantToVarAnnotator = infTypeFactory.getNewConstantToVariableAnnotator();
+        ConstantToVariableAnnotator constantToVarAnnotator = infTypeFactory.getConstantToVariableAnnotator();
         constantToVarAnnotator.visit(atm);
 
         // atm is always boolean, get actual tested type

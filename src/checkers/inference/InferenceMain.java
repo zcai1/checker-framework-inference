@@ -95,7 +95,7 @@ public class InferenceMain {
     private SlotManager slotManager;
 
     // Hold the results of solving.
-    private InferenceSolution solverResult;
+    private InferenceResult solverResult;
 
     // Turn off some of the checks so that more bodies of code pass.
     // Eventually we will get rid of this.
@@ -142,6 +142,12 @@ public class InferenceMain {
         // Start up javac
         startCheckerFramework();
         solve();
+        // solverResult = null covers case when debug solver is used, but in this case
+        // shouldn't exit
+        if (solverResult != null && !solverResult.hasSolution()) {
+            logger.info("No solution, exiting...");
+            System.exit(1);
+        }
         writeJaif();
     }
 
@@ -153,8 +159,7 @@ public class InferenceMain {
                 "-processor", "checkers.inference.InferenceChecker",
                 "-Xmaxwarns", "1000",
                 "-Xmaxerrs", "1000",
-                "-XDignore.symbol.file",
-                "-AprintErrorStack"));
+                "-XDignore.symbol.file"));
 
         if (InferenceOptions.cfArgs != null) {
             checkerFrameworkArgs.addAll(parseCfArgs());
@@ -217,15 +222,19 @@ public class InferenceMain {
                 for (Class<? extends Annotation> annotation : realTypeFactory.getSupportedTypeQualifiers()) {
                     annotationClasses.add(annotation);
                 }
+                // add any custom annotations that must be inserted to the JAIF header, such as alias annotations 
+                for (Class<? extends Annotation> annotation : realChecker.additionalAnnotationsForJaifHeaderInsertion()) {
+                    annotationClasses.add(annotation);
+                }
             }
             for (VariableSlot slot : varSlots) {
                 if (slot.getLocation() != null && slot.isInsertable()
-                 && (solverResult == null || solverResult.doesVariableExist(slot.getId()))) {
+                 && (solverResult == null || solverResult.containsSolutionForVariable(slot.getId()))) {
                     // TODO: String serialization of annotations.
                     if (solverResult != null) {
                         // Not all VariableSlots will have an inferred value.
                         // This happens for VariableSlots that have no constraints.
-                        AnnotationMirror result = solverResult.getAnnotation(slot.getId());
+                        AnnotationMirror result = solverResult.getSolutionForVariable(slot.getId());
                         if (result != null) {
                             values.put(slot.getLocation(), result.toString());
                         }

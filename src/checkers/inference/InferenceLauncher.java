@@ -1,10 +1,9 @@
 package checkers.inference;
 
 
-import org.checkerframework.framework.test.TestUtilities;
 import org.checkerframework.framework.util.CheckerMain;
 import org.checkerframework.framework.util.ExecUtil;
-import org.checkerframework.framework.util.PluginUtil;
+import org.checkerframework.javacutil.PluginUtil;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -14,6 +13,7 @@ import java.io.PrintStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -124,10 +124,14 @@ public class InferenceLauncher {
         }
 
         options.addAll(InferenceOptions.javacOptions);
+        if (InferenceOptions.cfArgs != null && !InferenceOptions.cfArgs.isEmpty()) {
+            options.add(InferenceOptions.cfArgs);
+        }
         options.addAll(Arrays.asList(javaFiles));
 
         final CheckerMain checkerMain = new CheckerMain(InferenceOptions.checkerJar, options);
         checkerMain.addToRuntimeClasspath(getInferenceRuntimeJars());
+        checkerMain.addToClasspath(getInferenceRuntimeJars());
 
         if (InferenceOptions.printCommands) {
             outStream.println("Running typecheck command:");
@@ -227,19 +231,18 @@ public class InferenceLauncher {
         String insertAnnotationsScript = pathToAfuScripts+"insert-annotations-to-source";
         if (!InferenceOptions.inPlace) {
             final File outputDir = new File(InferenceOptions.afuOutputDir);
-            TestUtilities.ensureDirectoryExists(outputDir);
+            ensureDirectoryExists(outputDir);
 
             String jaifFile = getJaifFilePath (outputDir);
 
+            List<String> options = new ArrayList<>();
+            options.add(insertAnnotationsScript);
+            options.add("-v");
+            options.add("--print-error-stack=true");
+            options.add("--outdir=" + outputDir.getAbsolutePath());
+            options.add(jaifFile);
 
-            String [] options = new String [5 + InferenceOptions.javaFiles.length];
-            options[0] = insertAnnotationsScript;
-            options[1] = "-v";
-            options[2] = "-d";
-            options[3] = outputDir.getAbsolutePath();
-            options[4] = jaifFile;
-
-            System.arraycopy(InferenceOptions.javaFiles, 0, options, 5, InferenceOptions.javaFiles.length);
+            Collections.addAll(options, InferenceOptions.javaFiles);
 
             if (InferenceOptions.printCommands) {
                 outStream.println("Running Insert Annotations Command:");
@@ -249,7 +252,7 @@ public class InferenceLauncher {
             // this can get quite large for large projects and it is not advisable to run
             // roundtripping via the InferenceLauncher for these projects
             ByteArrayOutputStream insertOut = new ByteArrayOutputStream();
-            result = ExecUtil.execute(options, insertOut, errStream);
+            result = ExecUtil.execute(options.toArray(new String[options.size()]), insertOut, errStream);
             outStream.println(insertOut.toString());
 
 
@@ -285,6 +288,14 @@ public class InferenceLauncher {
         outStream.flush();
         exitOnNonZeroStatus(result);
         return outputJavaFiles;
+    }
+
+    public static void ensureDirectoryExists(File path) {
+        if (!path.exists()) {
+            if (!path.mkdirs()) {
+                throw new RuntimeException("Could not make directory: " + path.getAbsolutePath());
+            }
+        }
     }
 
     /**

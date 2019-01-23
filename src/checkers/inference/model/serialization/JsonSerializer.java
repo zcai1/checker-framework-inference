@@ -1,13 +1,17 @@
 package checkers.inference.model.serialization;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.lang.model.element.AnnotationMirror;
 
+import checkers.inference.model.LubVariableSlot;
+import checkers.inference.model.ImplicationConstraint;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-
+import checkers.inference.model.ArithmeticConstraint;
 import checkers.inference.model.CombVariableSlot;
 import checkers.inference.model.CombineConstraint;
 import checkers.inference.model.ComparableConstraint;
@@ -138,6 +142,14 @@ public class JsonSerializer implements Serializer<String, JSONObject> {
     protected static final String EXISTENTIAL_THEN = "then";
     protected static final String EXISTENTIAL_ELSE = "else";
 
+    protected static final String IMPLICATION_CONSTRAINT_KEY = "implication";
+    protected static final String IMPLICATION_ASSUMPTIONS = "assumptions";
+    protected static final String IMPLICATION_CONCLUSTION = "conclusion";
+
+    protected static final String ARITH_LEFT_OPERAND = "left_operand";
+    protected static final String ARITH_RIGHT_OPERAND = "right_operand";
+    protected static final String ARITH_RESULT = "result";
+
     protected static final String VERSION = "2";
 
     protected static final String VAR_PREFIX = "var:";
@@ -223,6 +235,11 @@ public class JsonSerializer implements Serializer<String, JSONObject> {
 
     @Override
     public String serialize(CombVariableSlot slot) {
+        return serialize((VariableSlot) slot);
+    }
+
+    @Override
+    public String serialize(LubVariableSlot slot) {
         return serialize((VariableSlot) slot);
     }
 
@@ -322,6 +339,32 @@ public class JsonSerializer implements Serializer<String, JSONObject> {
         obj.put(PREFERENCE_GOAL, constraint.getGoal().serialize(this));
         // TODO: is the int showing up correctly in JSON?
         obj.put(PREFERENCE_WEIGHT, constraint.getWeight());
+        return obj;
+    }
+
+    @Override
+    public JSONObject serialize(ImplicationConstraint implicationConstraint) {
+        // If either assumptions or conclusion is null, the program would have been terminated
+        // when trying to create that ImplicationConstraint instance.
+        JSONObject obj = new JSONObject();
+        obj.put(CONSTRAINT_KEY, IMPLICATION_CONSTRAINT_KEY);
+        List<JSONObject> serializedAssumptions = new ArrayList<>();
+        for (Constraint assumption : implicationConstraint.getAssumptions()) {
+            serializedAssumptions.add(assumption.serialize(this));
+        }
+        obj.put(IMPLICATION_ASSUMPTIONS, serializedAssumptions);
+        obj.put(IMPLICATION_CONCLUSTION, implicationConstraint.getConclusion().serialize(this));
+        return obj;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public JSONObject serialize(ArithmeticConstraint constraint) {
+        JSONObject obj = new JSONObject();
+        obj.put(CONSTRAINT_KEY, constraint.getOperation().name().toLowerCase());
+        obj.put(ARITH_LEFT_OPERAND, constraint.getLeftOperand().serialize(this));
+        obj.put(ARITH_RIGHT_OPERAND, constraint.getRightOperand().serialize(this));
+        obj.put(ARITH_RESULT, constraint.getResult().serialize(this));
         return obj;
     }
 }

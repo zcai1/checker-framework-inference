@@ -1,12 +1,9 @@
 package checkers.inference;
 
-/*>>>
 import org.checkerframework.checker.compilermsgs.qual.CompilerMessageKey;
-*/
-
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeVisitor;
-import org.checkerframework.framework.qual.Unqualified;
+import org.checkerframework.common.subtyping.qual.Unqualified;
 import org.checkerframework.framework.source.Result;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedArrayType;
@@ -19,7 +16,7 @@ import org.checkerframework.framework.type.AnnotatedTypeParameterBounds;
 import org.checkerframework.framework.util.AnnotatedTypes;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
-import org.checkerframework.javacutil.ErrorReporter;
+import org.checkerframework.javacutil.BugInCF;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
@@ -82,6 +79,7 @@ public class InferenceVisitor<Checker extends InferenceChecker,
         super((infer) ? ichecker : checker, factory);
         this.realChecker = checker;
         this.infer = infer;
+        ((InferenceValidator)typeValidator).setInfer(infer);
     }
 
     @SuppressWarnings("unchecked")
@@ -457,7 +455,7 @@ public class InferenceVisitor<Checker extends InferenceChecker,
      */
     @Override
     protected void commonAssignmentCheck(Tree varTree, ExpressionTree valueExp,
-            /*@CompilerMessageKey*/ String errorKey) {
+            @CompilerMessageKey String errorKey) {
         if (!validateTypeOf(varTree)) {
             return;
         }
@@ -481,7 +479,7 @@ public class InferenceVisitor<Checker extends InferenceChecker,
 
     @Override
     protected void commonAssignmentCheck(AnnotatedTypeMirror varType,
-            AnnotatedTypeMirror valueType, Tree valueTree, /*@CompilerMessageKey*/
+            AnnotatedTypeMirror valueType, Tree valueTree, @CompilerMessageKey
             String errorKey) {
         // ####### Copied Code ########
 
@@ -643,7 +641,7 @@ public class InferenceVisitor<Checker extends InferenceChecker,
 
             } else {
                 if (!InferenceMain.isHackMode()) {
-                    ErrorReporter.errorAbort("Unexpected assignment to type variable"); // TODO: Either more detail, or remove because of type args?
+                    throw new BugInCF("Unexpected assignment to type variable"); // TODO: Either more detail, or remove because of type args?
                     // TODO: OR A DIFFERENT SET OF CONSTRAINTS?
                 }
             }
@@ -746,9 +744,8 @@ public class InferenceVisitor<Checker extends InferenceChecker,
                         break;
 
                     default:
-                        ErrorReporter.errorAbort("Unexpected throw expression type: "
+                        throw new BugInCF("Unexpected throw expression type: "
                                 + throwType.getKind());
-                        break;
                 }
             }
 
@@ -843,14 +840,6 @@ public class InferenceVisitor<Checker extends InferenceChecker,
                 break;
             default:
                 type = atypeFactory.getAnnotatedType(tree);
-        }
-
-        // basic consistency checks
-        if (!AnnotatedTypes.isValidType(atypeFactory.getQualifierHierarchy(), type)) {
-//            checker.report(Result.failure("type.invalid", type.getAnnotations(),
-//                    type.toString()), tree);
-//            return false;
-            return true;
         }
 
         // TODO: THIS MIGHT FAIL

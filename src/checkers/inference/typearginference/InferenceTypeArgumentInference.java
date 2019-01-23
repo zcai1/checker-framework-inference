@@ -1,10 +1,12 @@
 package checkers.inference.typearginference;
 
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
+import org.checkerframework.framework.type.AnnotatedTypeFactory.ParameterizedMethodType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedPrimitiveType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedTypeVariable;
+import org.checkerframework.framework.util.AnnotatedTypes;
 import org.checkerframework.framework.util.typeinference.DefaultTypeArgumentInference;
 import org.checkerframework.framework.util.typeinference.TypeArgInferenceUtil;
 import org.checkerframework.framework.util.typeinference.constraint.A2F;
@@ -14,9 +16,6 @@ import org.checkerframework.framework.util.typeinference.constraint.TIsU;
 import org.checkerframework.framework.util.typeinference.constraint.TSubU;
 import org.checkerframework.framework.util.typeinference.constraint.TSuperU;
 import org.checkerframework.framework.util.typeinference.constraint.TUConstraint;
-import org.checkerframework.javacutil.Pair;
-
-import static org.checkerframework.framework.util.AnnotatedTypes.findEffectiveAnnotationInHierarchy;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -194,7 +193,7 @@ public class InferenceTypeArgumentInference extends DefaultTypeArgumentInference
             AnnotatedTypeMirror lowerBound = typeVariable.getLowerBound();
 
             AnnotationMirror upperBoundAnno =
-                findEffectiveAnnotationInHierarchy(inferenceTypeFactory.getQualifierHierarchy(), upperBound, varAnnot);
+                    AnnotatedTypes.findEffectiveAnnotationInHierarchy(inferenceTypeFactory.getQualifierHierarchy(), upperBound, varAnnot);
             VariableSlot upperBoundVariable = (VariableSlot) slotManager.getSlot(upperBoundAnno);
 
             // handles the cases like <T, E extends T>, the upper bound anno on E will appear as a potential
@@ -232,7 +231,7 @@ public class InferenceTypeArgumentInference extends DefaultTypeArgumentInference
             switch (type.getKind()) {
                 case TYPEVAR:
                 case WILDCARD:
-                    variableAnno = findEffectiveAnnotationInHierarchy(inferenceTypeFactory.getQualifierHierarchy(),
+                    variableAnno = AnnotatedTypes.findEffectiveAnnotationInHierarchy(inferenceTypeFactory.getQualifierHierarchy(),
                                                                       type, varAnnot);
                     break;
 
@@ -264,7 +263,7 @@ public class InferenceTypeArgumentInference extends DefaultTypeArgumentInference
      */
     private List<AnnotatedTypeMirror> getUnannotatedTypeArgs(ExpressionTree expressionTree) {
 
-        Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> fromUseResult;
+        ParameterizedMethodType fromUseResult;
 
         switch (expressionTree.getKind()) {
             case METHOD_INVOCATION:
@@ -280,8 +279,8 @@ public class InferenceTypeArgumentInference extends DefaultTypeArgumentInference
                                                  + "expressionTree=" + expressionTree);
         }
 
-        List<AnnotatedTypeMirror> emptyAnnotatedTypeMirrors = new ArrayList<>(fromUseResult.second.size());
-        for (AnnotatedTypeMirror realAnnotatedType : fromUseResult.second) {
+        List<AnnotatedTypeMirror> emptyAnnotatedTypeMirrors = new ArrayList<>(fromUseResult.typeArgs.size());
+        for (AnnotatedTypeMirror realAnnotatedType : fromUseResult.typeArgs) {
             AnnotatedTypeMirror inferenceType = CrossFactoryAtmCopier.copy(realAnnotatedType, inferenceTypeFactory, false);
             emptyAnnotatedTypeMirrors.add(inferenceType);
         }

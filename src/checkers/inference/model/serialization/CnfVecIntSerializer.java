@@ -5,9 +5,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import checkers.inference.model.LubVariableSlot;
+import checkers.inference.model.ImplicationConstraint;
 import org.sat4j.core.VecInt;
 
 import checkers.inference.SlotManager;
+import checkers.inference.model.ArithmeticConstraint;
 import checkers.inference.model.CombVariableSlot;
 import checkers.inference.model.CombineConstraint;
 import checkers.inference.model.ComparableConstraint;
@@ -237,6 +240,11 @@ public abstract class CnfVecIntSerializer implements Serializer<VecInt[], VecInt
     }
 
     @Override
+    public VecInt[] serialize(LubVariableSlot slot) {
+        return null;
+    }
+
+    @Override
     public VecInt[] serialize(ExistentialVariableSlot slot) {
         // See checkers.inference.ConstraintNormalizer.normalize()
         throw new UnsupportedOperationException("Existential slots should be normalized away before serialization.");
@@ -256,8 +264,20 @@ public abstract class CnfVecIntSerializer implements Serializer<VecInt[], VecInt
     }
 
     @Override
+    public VecInt[] serialize(ArithmeticConstraint arithmeticConstraint) {
+        throw new UnsupportedOperationException(
+                "Serializing ArithmeticConstraint is unsupported in CnfVecIntSerializer");
+    }
+
+    @Override
     public VecInt[] serialize(PreferenceConstraint preferenceConstraint) {
         throw new UnsupportedOperationException("APPLY WEIGHTING FOR WEIGHTED MAX-SAT");
+    }
+
+    @Override
+    public VecInt[] serialize(ImplicationConstraint implicationConstraint) {
+        throw new UnsupportedOperationException("ImplicationConstraint is supported in more-advanced" +
+                "MaxSAT backend. Use MaxSATSolver instead!");
     }
 
     public List<VecInt> convertAll(Iterable<Constraint> constraints) {

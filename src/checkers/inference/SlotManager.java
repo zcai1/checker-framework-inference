@@ -1,5 +1,6 @@
 package checkers.inference;
 
+import checkers.inference.model.LubVariableSlot;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.List;
 import javax.lang.model.element.AnnotationMirror;
 
 import checkers.inference.model.AnnotationLocation;
+import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.CombVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ExistentialVariableSlot;
@@ -85,6 +87,21 @@ public interface SlotManager {
     CombVariableSlot createCombVariableSlot(Slot receiver, Slot declared);
 
     /**
+     * Creates new LubVariableSlot using left slot and right slot, and returns
+     * reference to it if no LubVariableSlot representing least upper bound of
+     * left slot and right slot exists. Otherwise, returns the existing CombVariableSlot.
+     * Left slot and right slot can uniquely identify a LubVariableSlot
+     *
+     * @param left
+     *            left side of least upper bound operation
+     * @param right
+     *            right side of least upper bound operation
+     * @return LubVariableSlot that represents the least upper bound result
+     *         of left slot and right slot
+     */
+    LubVariableSlot createLubVariableSlot(Slot left, Slot right);
+
+    /**
      * Create new ExistentialVariableSlot using potential slot and alternative
      * slot, and return reference to it if no ExistentialVariableSlot that wraps
      * this potentialSlot and alternativeSlot exists. Otherwise, returns the
@@ -101,6 +118,37 @@ public interface SlotManager {
      *         alternativeSlot
      */
     ExistentialVariableSlot createExistentialVariableSlot(VariableSlot potentialSlot, VariableSlot alternativeSlot);
+
+    /**
+     * Create new ArithmeticVariableSlot at the given location and return a reference to it if no
+     * ArithmeticVariableSlots exists for the location. Otherwise, returns the existing
+     * ArithmeticVariableSlot.
+     *
+     * @param location an AnnotationLocation used to locate this variable in code
+     * @return the ArithmeticVariableSlot for the given location
+     */
+    ArithmeticVariableSlot createArithmeticVariableSlot(AnnotationLocation location);
+
+    /**
+     * Retrieves the ArithmeticVariableSlot created for the given location if it has been previously
+     * created, otherwise null is returned.
+     *
+     * This method allows faster retrieval of already created ArithmeticVariableSlots during
+     * traversals of binary trees in an InferenceVisitor subclass, which does not have direct access
+     * to the ATM containing this slot.
+     *
+     * @param location an AnnotationLocation used to locate this variable in code
+     * @return the ArithmeticVariableSlot for the given location, or null if none exists
+     */
+    ArithmeticVariableSlot getArithmeticVariableSlot(AnnotationLocation location);
+
+    /**
+     * Create a VarAnnot equivalent to the given realQualifier.
+     *
+     * @return a VarAnnot equivalent to the given realQualifier.
+     *
+     */
+     AnnotationMirror createEquivalentVarAnno(final AnnotationMirror realQualifier);
 
     /** Return the variable identified by the given id or null if no such variable has been added */
     VariableSlot getVariable( int id );

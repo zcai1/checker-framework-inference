@@ -11,12 +11,13 @@ import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 
+import checkers.inference.DefaultInferenceResult;
+import com.sun.tools.javac.util.Pair;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 
-import checkers.inference.DefaultInferenceSolution;
 import checkers.inference.InferenceMain;
-import checkers.inference.InferenceSolution;
+import checkers.inference.InferenceResult;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
 import checkers.inference.solver.backend.Solver;
@@ -30,8 +31,7 @@ import checkers.inference.solver.frontend.TwoQualifiersLattice;
 import checkers.inference.solver.strategy.GraphSolvingStrategy;
 import checkers.inference.solver.util.PrintUtils;
 import checkers.inference.solver.util.SolverEnvironment;
-import checkers.inference.solver.util.StatisticRecorder;
-import checkers.inference.solver.util.StatisticRecorder.StatisticKey;
+import checkers.inference.solver.util.Statistics;
 import dataflow.DataflowAnnotatedTypeFactory;
 import dataflow.qual.DataFlow;
 import dataflow.qual.DataFlowInferenceBottom;
@@ -47,8 +47,8 @@ public class DataflowGraphSolvingStrategy extends GraphSolvingStrategy {
     }
 
     @Override
-    public InferenceSolution solve(SolverEnvironment solverEnvironment, Collection<Slot> slots,
-            Collection<Constraint> constraints, Lattice lattice) {
+    public InferenceResult solve(SolverEnvironment solverEnvironment, Collection<Slot> slots,
+                                 Collection<Constraint> constraints, Lattice lattice) {
         this.processingEnvironment = solverEnvironment.processingEnvironment;
         return super.solve(solverEnvironment, slots, constraints, lattice);
     }
@@ -61,9 +61,7 @@ public class DataflowGraphSolvingStrategy extends GraphSolvingStrategy {
                 DataFlowInferenceBottom.class);
 
         List<Solver<?>> solvers = new ArrayList<>();
-        //TODO: Refactor statistic part.
-        StatisticRecorder.record(StatisticKey.GRAPH_SIZE, (long) constraintGraph.getConstantPath()
-                .size());
+        Statistics.addOrIncrementEntry("graph_size", constraintGraph.getConstantPath().size());
 
         for (Map.Entry<Vertex, Set<Constraint>> entry : constraintGraph.getConstantPath().entrySet()) {
             AnnotationMirror anno = entry.getKey().getValue();
@@ -98,25 +96,31 @@ public class DataflowGraphSolvingStrategy extends GraphSolvingStrategy {
     }
 
     @Override
-    protected InferenceSolution mergeSolution(List<Map<Integer, AnnotationMirror>> inferenceSolutionMaps) {
-        Map<Integer, AnnotationMirror> result = new HashMap<>();
+    protected InferenceResult mergeInferenceResults(List<Pair<Map<Integer, AnnotationMirror>, Collection<Constraint>>> inferenceResults) {
+        Map<Integer, AnnotationMirror> solutions = new HashMap<>();
         Map<Integer, Set<AnnotationMirror>> dataflowResults = new HashMap<>();
 
-        for (Map<Integer, AnnotationMirror> inferenceSolutionMap : inferenceSolutionMaps) {
-            for (Map.Entry<Integer, AnnotationMirror> entry : inferenceSolutionMap.entrySet()) {
-                Integer id = entry.getKey();
-                AnnotationMirror dataflowAnno = entry.getValue();
-                if (AnnotationUtils.areSameByClass(dataflowAnno, DataFlow.class)) {
-                    Set<AnnotationMirror> datas = dataflowResults.get(id);
-                    if (datas == null) {
-                        datas = AnnotationUtils.createAnnotationSet();
-                        dataflowResults.put(id, datas);
+        for (Pair<Map<Integer, AnnotationMirror>, Collection<Constraint>> inferenceResult : inferenceResults) {
+            Map<Integer, AnnotationMirror> inferenceSolutionMap = inferenceResult.fst;
+            if (inferenceResult.fst != null) {
+                for (Map.Entry<Integer, AnnotationMirror> entry : inferenceSolutionMap.entrySet()) {
+                    Integer id = entry.getKey();
+                    AnnotationMirror dataflowAnno = entry.getValue();
+                    if (AnnotationUtils.areSameByClass(dataflowAnno, DataFlow.class)) {
+                        Set<AnnotationMirror> datas = dataflowResults.get(id);
+                        if (datas == null) {
+                            datas = AnnotationUtils.createAnnotationSet();
+                            dataflowResults.put(id, datas);
+                        }
+                        datas.add(dataflowAnno);
                     }
-                    datas.add(dataflowAnno);
                 }
+            } else {
+                // If any sub solution is null, there is no solution in a whole.
+                return new DefaultInferenceResult(inferenceResult.snd);
             }
-
         }
+
         for (Map.Entry<Integer, Set<AnnotationMirror>> entry : dataflowResults.entrySet()) {
             Set<String> dataTypes = new HashSet<String>();
             Set<String> dataRoots = new HashSet<String>();
@@ -132,16 +136,16 @@ public class DataflowGraphSolvingStrategy extends GraphSolvingStrategy {
             }
             AnnotationMirror dataflowAnno = DataflowUtils.createDataflowAnnotationWithRoots(dataTypes,
                     dataRoots, processingEnvironment);
-            result.put(entry.getKey(), dataflowAnno);
+            solutions.put(entry.getKey(), dataflowAnno);
         }
-        for (Map.Entry<Integer, AnnotationMirror> entry : result.entrySet()) {
+        for (Map.Entry<Integer, AnnotationMirror> entry : solutions.entrySet()) {
             AnnotationMirror refinedDataflow = ((DataflowAnnotatedTypeFactory) InferenceMain
                     .getInstance().getRealTypeFactory()).refineDataflow(entry.getValue());
             entry.setValue(refinedDataflow);
         }
 
-        PrintUtils.printResult(result);
-        StatisticRecorder.record(StatisticKey.ANNOTATOIN_SIZE, (long) result.size());
-        return new DefaultInferenceSolution(result);
+        Statistics.addOrIncrementEntry("annotation_size", solutions.size());
+
+        return new DefaultInferenceResult(solutions);
     }
 }
