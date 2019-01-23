@@ -18,7 +18,6 @@ import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.ExistentialVariableSlot;
 import checkers.inference.model.Slot;
-import checkers.inference.model.VariableSlot;
 
 /**
  * This class currently just removes ExistentialVariables from the set of constraints
@@ -255,7 +254,7 @@ public class ConstraintNormalizer {
             ret.add(InferenceMain
                     .getInstance()
                     .getConstraintManager()
-                    .createExistentialConstraint((VariableSlot) slot, ifExistsConstraints,
+                    .createExistentialConstraint(slot, ifExistsConstraints,
                             ifNotExistsConstraints));
             return ret;
         }
@@ -298,14 +297,14 @@ public class ConstraintNormalizer {
             if (alwaysExists) {
                 sb.append("[");
                 sb.append(
-                        slot.isVariable() ? ((VariableSlot) slot).getId()
+                        slot.isVariable() ? slot.getId()
                                           : ((ConstantSlot) slot).getAnnotation());
                 sb.append("]");
             } else {
                 if (!exists) {
                     sb.append("!");
                 }
-                sb.append(((VariableSlot) slot).getId());
+                sb.append(slot.getId());
             }
             return sb.toString();
         }
@@ -319,8 +318,8 @@ public class ConstraintNormalizer {
             if (o1 == o2) {
                 return 0;
             }
-            if (o1 instanceof ConstantSlot) {
-                if (o2 instanceof ConstantSlot) {
+            if (o1.isConstant()) {
+                if (o2.isConstant()) {
                     return ((ConstantSlot) o1).getAnnotation().toString().compareTo(
                             ((ConstantSlot) o2).getAnnotation().toString()
                     );
@@ -328,12 +327,12 @@ public class ConstraintNormalizer {
                     return 1;
                 }
             } else {
-                if (o2 instanceof ConstantSlot) {
+                if (o2.isConstant()) {
                     return -1;
                 }
             }
 
-            return ((VariableSlot) o1).getId() - ((VariableSlot) o2).getId();
+            return o1.getId() - o2.getId();
         }
     }
 

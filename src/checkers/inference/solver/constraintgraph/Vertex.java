@@ -7,11 +7,10 @@ import javax.lang.model.element.AnnotationMirror;
 
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
-import checkers.inference.model.VariableSlot;
 
 /**
  * Vertex represents a slot. Two vertices are same if they have same slot id.
- * 
+ *
  * @author jianchu
  *
  */
@@ -25,21 +24,17 @@ public class Vertex {
     protected Vertex(Slot slot) {
         this.edges = new HashSet<Edge>();
         this.slot = slot;
-
-        if (slot instanceof VariableSlot) {
-            VariableSlot vs = (VariableSlot) slot;
-            this.id = vs.getId();
-            if (slot instanceof ConstantSlot) {
-                ConstantSlot cs = (ConstantSlot) slot;
-                this.value = cs.getAnnotation();
-            } else {
-                this.value = null;
-            }
+        this.id = slot.getId();
+        if (slot.isConstant()) {
+            ConstantSlot cs = (ConstantSlot) slot;
+            this.value = cs.getAnnotation();
+        } else {
+            this.value = null;
         }
     }
 
     protected boolean isConstant() {
-        return (this.slot instanceof ConstantSlot);
+        return this.slot.isConstant();
     }
 
     protected void addEdge(Edge edge) {

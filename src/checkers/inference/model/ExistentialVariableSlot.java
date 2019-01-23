@@ -1,6 +1,7 @@
 package checkers.inference.model;
 
 import org.checkerframework.dataflow.util.HashCodeUtils;
+import org.checkerframework.javacutil.BugInCF;
 
 /**
  * Summary of Shorthand:
@@ -71,7 +72,10 @@ public class ExistentialVariableSlot extends Slot {
                     + "\n" + "potentialSlot=" + potentialSlot);
         }
         
-        // TODO: should potentialSlot be a non-constant slot? what about alternativeSlot?
+        if (potentialSlot.isConstant()) {
+            throw new BugInCF(
+                    "Creating a ExistentialVariableSlot on a constant slot" + potentialSlot);
+        }
 
         this.potentialSlot = potentialSlot;
         this.alternativeSlot = alternativeSlot;

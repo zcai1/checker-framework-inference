@@ -117,7 +117,7 @@ public class LatticeBuilder {
 
     /**
      * Build a two-qualifier lattice with all fields configured.
-     * 
+     *
      * @param top type qualifier of underling type system.
      * @param bottom type qualifier of underling type system.
      * @return a new TwoQualifiersLattice instance.
@@ -173,7 +173,7 @@ public class LatticeBuilder {
      */
     private void collectConstantAnnotationMirrors(Collection<Slot> slots) {
            for(Slot slot : slots) {
-               if (slot instanceof ConstantSlot) {
+               if (slot .isConstant()) {
                    allAnnotations.add(((ConstantSlot) slot).getAnnotation());
                }
            }

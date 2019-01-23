@@ -62,7 +62,7 @@ public class SubtypeConstraint extends Constraint implements BinaryConstraint {
         // otherwise => CREATE_REAL_SUBTYPE_CONSTRAINT
 
         // C1 <: C2 => TRUE/FALSE depending on relationship
-        if (subtype instanceof ConstantSlot && supertype instanceof ConstantSlot) {
+        if (subtype.isConstant() && supertype.isConstant()) {
             ConstantSlot subConstant = (ConstantSlot) subtype;
             ConstantSlot superConstant = (ConstantSlot) supertype;
 
@@ -72,7 +72,7 @@ public class SubtypeConstraint extends Constraint implements BinaryConstraint {
         }
 
         // C2
-        if (supertype instanceof ConstantSlot) {
+        if (supertype.isConstant()) {
             if (isTop(realQualHierarchy, (ConstantSlot) supertype)) {
                 // V1 <: TOP => TRUE
                 return AlwaysTrueConstraint.create();
@@ -83,7 +83,7 @@ public class SubtypeConstraint extends Constraint implements BinaryConstraint {
         }
 
         // C1
-        if (subtype instanceof ConstantSlot) {
+        if (subtype.isConstant()) {
             if (isBottom(realQualHierarchy, (ConstantSlot) subtype)) {
                 // BOTTOM <: V2 => TRUE
                 return AlwaysTrueConstraint.create();

@@ -139,7 +139,7 @@ public class ConstraintManager {
      */
     public ExistentialConstraint createExistentialConstraint(Slot slot,
             List<Constraint> ifExistsConstraints, List<Constraint> ifNotExistsConstraints) {
-        return ExistentialConstraint.create((VariableSlot) slot, ifExistsConstraints,
+        return ExistentialConstraint.create(slot, ifExistsConstraints,
                 ifNotExistsConstraints, getCurrentLocation());
     }
 

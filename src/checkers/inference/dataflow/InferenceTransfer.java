@@ -36,7 +36,6 @@ import checkers.inference.model.AnnotationLocation;
 import checkers.inference.model.ExistentialVariableSlot;
 import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Slot;
-import checkers.inference.model.VariableSlot;
 import checkers.inference.util.InferenceUtil;
 
 // TODO: update javadoc in this file regarding "CombVariable" and "comb variable"
@@ -219,7 +218,7 @@ public class InferenceTransfer extends CFTransfer {
             // Fields from library methods can be refined, but the slotToRefine is a ConstantSlot
             // which does not have a refined slots field.
             if (slotToRefine.isVariable()) {
-                ((VariableSlot) slotToRefine).getRefinedToSlots().add(refVar);
+                slotToRefine.getRefinedToSlots().add(refVar);
             }
 
             createdRefinementVariables.put(assignmentTree, refVar);

@@ -33,7 +33,7 @@ public class InequalityConstraint extends Constraint implements BinaryConstraint
         // otherwise => CREATE_REAL_INEQUALITY_CONSTRAINT
 
         // C1 != C2 => TRUE/FALSE depending on annotation
-        if (first instanceof ConstantSlot && second instanceof ConstantSlot) {
+        if (first.isConstant() && second.isConstant()) {
             ConstantSlot firstConst = (ConstantSlot) first;
             ConstantSlot secondConst = (ConstantSlot) second;
 

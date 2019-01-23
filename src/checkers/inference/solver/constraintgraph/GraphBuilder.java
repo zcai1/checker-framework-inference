@@ -14,7 +14,6 @@ import javax.lang.model.element.AnnotationMirror;
 
 import checkers.inference.InferenceMain;
 import checkers.inference.model.AnnotationLocation.Kind;
-import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.ExistentialConstraint;
 import checkers.inference.model.Slot;
@@ -25,7 +24,7 @@ import dataflow.util.DataflowUtils;
 /**
  * GraphBuilder builds the constraint graph and runs graph traversal algorithms
  * to separate the graph in different components.
- * 
+ *
  * @author jianchu
  *
  */
@@ -158,7 +157,7 @@ public class GraphBuilder {
         Slot first = slots.remove(0);
         for (int i = 0; i < slots.size(); i++) {
             Slot next = slots.get(i);
-            if (first instanceof ConstantSlot && next instanceof ConstantSlot) {
+            if (first.isConstant() && next.isConstant()) {
                 continue;
             }
             this.graph.createEdge(first, next, constraint);
@@ -169,13 +168,13 @@ public class GraphBuilder {
     /**
      * The order of subtype and supertype matters, first one has to be subtype,
      * second one has to be supertype.
-     * 
+     *
      * @param subtypeConstraint
      */
     private void addSubtypeEdge(SubtypeConstraint subtypeConstraint) {
         Slot subtype = subtypeConstraint.getSubtype();
         Slot supertype = subtypeConstraint.getSupertype();
-        if (subtype instanceof ConstantSlot && supertype instanceof ConstantSlot) {
+        if (subtype.isConstant() && supertype.isConstant()) {
             return;
         }
         this.graph.createEdge(subtype, supertype, subtypeConstraint);

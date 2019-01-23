@@ -23,7 +23,7 @@ public class VPAConstraint extends Constraint {
     protected static VPAConstraint create(Slot target, Slot decl, VPAVariableSlot result,
             AnnotationLocation location) {
         if (target == null || decl == null || result == null) {
-            throw new BugInCF("Create combine constraint with null argument. Target: "
+            throw new BugInCF("Create VPA constraint with null argument. Target: "
                     + target + " Decl: " + decl + " Result: " + result);
         }
 

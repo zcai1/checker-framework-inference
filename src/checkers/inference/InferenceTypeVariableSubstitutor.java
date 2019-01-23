@@ -2,7 +2,6 @@ package checkers.inference;
 
 import checkers.inference.model.ExistentialVariableSlot;
 import checkers.inference.model.Slot;
-import checkers.inference.model.VariableSlot;
 import checkers.inference.util.InferenceUtil;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedTypeVariable;
@@ -69,11 +68,10 @@ public class InferenceTypeVariableSubstitutor extends TypeVariableSubstitutor {
                 final Slot potentialSlot = ((ExistentialVariableSlot) upperBoundSlot).getPotentialSlot();
 
                 if (argument.getKind() != TypeKind.TYPEVAR) {
-                    final Slot altSlot = slotManager.getSlot(argument);
+                    final Slot alternativeSlot = slotManager.getSlot(argument);
 
-                    final VariableSlot alternative = (VariableSlot) altSlot;
-                    if (alternative != null) {
-                        final ExistentialVariableSlot slot = slotManager.createExistentialVariableSlot(potentialSlot, alternative);
+                    if (alternativeSlot != null) {
+                        final ExistentialVariableSlot slot = slotManager.createExistentialVariableSlot(potentialSlot, alternativeSlot);
                         argument.replaceAnnotation(slotManager.getAnnotation(slot));
                     } else {
                         if (!InferenceMain.isHackMode()) {

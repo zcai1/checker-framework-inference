@@ -13,12 +13,12 @@ import checkers.inference.SlotManager;
  * Constraints are generated.
  *
  * Each slot has a unique ID.
- * 
+ *
  * Constraint variable slots are attached to a code location.
  *
  * Slots for known annotations hold the annotation mirror for that annotation.
  * see {@link ConstantSlot}.
- * 
+ *
  * Slots hold references to slots it is refined by, and slots it is merged to.
  */
 public abstract class Slot implements Comparable<Slot> {
@@ -65,7 +65,7 @@ public abstract class Slot implements Comparable<Slot> {
     /**
      * Create a slot with a default location of
      * {@link AnnotationLocation#MISSING_LOCATION}.
-     * 
+     *
      * @param id
      *            Unique identifier for this variable
      * @param insertable
@@ -91,10 +91,12 @@ public abstract class Slot implements Comparable<Slot> {
         this.location = location;
     }
 
+    /** @return whether this slot is not a constant slot */
     public final boolean isVariable() {
         return !isConstant();
     }
 
+    /** @return whether this slot is a constant slot */
     public final boolean isConstant() {
         return this instanceof ConstantSlot;
     }

@@ -45,7 +45,7 @@ public abstract class IFlowSolver implements InferenceSolver {
     private Collection<PFPermission> getPermissionsUsed(Collection<Slot> solts) {
         Set<PFPermission> permissions = new TreeSet<>();
         for (Slot slot : solts) {
-            if (slot instanceof ConstantSlot) {
+            if (slot.isConstant()) {
                 ConstantSlot constantSlot = (ConstantSlot) slot;
                 AnnotationMirror anno = constantSlot.getAnnotation();
                 permissions.addAll(getPermissionList(anno));
