@@ -89,26 +89,19 @@ public class ToStringSerializer implements Serializer<String, String> {
     }
 
     public String serializeSlots(Iterable<Slot> slots, String delimiter) {
-        // Split slots into two sublists, one for all VariableSlots (and subclasses), and the other
-        // for any other kinds of slots
-        Map<Integer, String> serializedVarSlots = new TreeMap<>();
-        Set<String> serializedOtherSlots = new TreeSet<>();
-
-        for (Slot slot : slots) {
-            if (slot instanceof VariableSlot) {
-                // sort the varSlots by ID through insertion to TreeMap
-                VariableSlot varSlot = (VariableSlot) slot;
-                serializedVarSlots.put(varSlot.getId(),
-                        getCurrentIndentString() + varSlot.serialize(this));
-            } else {
-                // sort all other slots by serialized string content through insertion to TreeSet
-                serializedOtherSlots.add(getCurrentIndentString() + slot.serialize(this));
-            }
-        }
+        Set<Slot> sortedSlots = new TreeSet<>();
 
         List<String> serializedSlots = new ArrayList<>();
-        serializedSlots.addAll(serializedVarSlots.values());
-        serializedSlots.addAll(serializedOtherSlots);
+
+        // sort the slots by ID through insertion to TreeSet
+        for (Slot slot : slots) {
+            sortedSlots.add(slot);
+        }
+
+        // generate strings
+        for (Slot slot : sortedSlots) {
+            serializedSlots.add(getCurrentIndentString() + slot.serialize(this));
+        }
 
         return PluginUtil.join(delimiter, serializedSlots);
     }
