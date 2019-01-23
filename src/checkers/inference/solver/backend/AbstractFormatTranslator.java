@@ -1,22 +1,15 @@
 package checkers.inference.solver.backend;
 
 import checkers.inference.model.ArithmeticConstraint;
-import checkers.inference.model.ArithmeticVariableSlot;
-import checkers.inference.model.VPAVariableSlot;
-import checkers.inference.model.VPAConstraint;
 import checkers.inference.model.ComparableConstraint;
-import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.EqualityConstraint;
 import checkers.inference.model.ExistentialConstraint;
-import checkers.inference.model.ExistentialVariableSlot;
 import checkers.inference.model.ImplicationConstraint;
 import checkers.inference.model.InequalityConstraint;
-import checkers.inference.model.LUBVariableSlot;
-import checkers.inference.model.PolyInvokeVariableSlot;
 import checkers.inference.model.PreferenceConstraint;
-import checkers.inference.model.RefinementVariableSlot;
+import checkers.inference.model.Slot;
 import checkers.inference.model.SubtypeConstraint;
-import checkers.inference.model.VariableSlot;
+import checkers.inference.model.VPAConstraint;
 import checkers.inference.solver.backend.encoder.ArithmeticConstraintEncoder;
 import checkers.inference.solver.backend.encoder.ConstraintEncoderCoordinator;
 import checkers.inference.solver.backend.encoder.ConstraintEncoderFactory;
@@ -34,13 +27,10 @@ import checkers.inference.solver.frontend.Lattice;
  * Abstract base class for all concrete {@link FormatTranslator}.
  *
  * Class {@link AbstractFormatTranslator} provides default implementation for
- * both serializing {@link checkers.inference.model.Slot slot} and
- * {@link checkers.inference.model.Constraint constraint}:
+ * serializing {@link checkers.inference.model.Constraint constraint}:
  * <p>
- * {@link checkers.inference.model.Slot Slot} serialization methods does nothing
- * but returns null. Subclasses of {@link AbstractFormatTranslator} should
- * override corresponding {@link Slot} serialization methods if subclasses have
- * concrete serialization logic.
+ * Subclasses of {@link AbstractFormatTranslator} need to implement
+ * corresponding {@link Slot} serialization methods.
  * <p>
  * {@link checkers.inference.model.Constraint Constraint} serialization methods
  * first check whether corresponding encoder is null. If yes, returns null as
@@ -231,45 +221,5 @@ public abstract class AbstractFormatTranslator<SlotEncodingT, ConstraintEncoding
     public ConstraintEncodingT serialize(ArithmeticConstraint constraint) {
         return arithmeticConstraintEncoder == null ? null
                 : ConstraintEncoderCoordinator.dispatch(constraint, arithmeticConstraintEncoder);
-    }
-
-    @Override
-    public SlotEncodingT serialize(VariableSlot slot) {
-        return null;
-    }
-
-    @Override
-    public SlotEncodingT serialize(ConstantSlot slot) {
-        return null;
-    }
-
-    @Override
-    public SlotEncodingT serialize(ExistentialVariableSlot slot) {
-        return null;
-    }
-
-    @Override
-    public SlotEncodingT serialize(RefinementVariableSlot slot) {
-        return null;
-    }
-
-    @Override
-    public SlotEncodingT serialize(VPAVariableSlot slot) {
-        return null;
-    }
-
-    @Override
-    public SlotEncodingT serialize(LUBVariableSlot slot) {
-        return null;
-    }
-
-    @Override
-    public SlotEncodingT serialize(ArithmeticVariableSlot slot) {
-        return null;
-    }
-
-    @Override
-    public SlotEncodingT serialize(PolyInvokeVariableSlot slot) {
-        return null;
     }
 }

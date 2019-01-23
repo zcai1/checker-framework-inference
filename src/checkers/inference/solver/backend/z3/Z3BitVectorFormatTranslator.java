@@ -23,6 +23,7 @@ import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ExistentialVariableSlot;
 import checkers.inference.model.LUBVariableSlot;
+import checkers.inference.model.PolyInvokeVariableSlot;
 import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
@@ -152,8 +153,14 @@ public abstract class Z3BitVectorFormatTranslator extends AbstractFormatTranslat
     public BitVecExpr serialize(LUBVariableSlot slot) {
         return serializeVarSlot(slot);
     }
-    
-    @Override public BitVecExpr serialize(ArithmeticVariableSlot slot) {
+
+    @Override
+    public BitVecExpr serialize(ArithmeticVariableSlot slot) {
+        return serializeVarSlot(slot);
+    }
+
+    @Override
+    public BitVecExpr serialize(PolyInvokeVariableSlot slot) {
         return serializeVarSlot(slot);
     }
 

@@ -9,6 +9,14 @@ import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 
+import checkers.inference.model.ArithmeticVariableSlot;
+import checkers.inference.model.ConstantSlot;
+import checkers.inference.model.ExistentialVariableSlot;
+import checkers.inference.model.LUBVariableSlot;
+import checkers.inference.model.PolyInvokeVariableSlot;
+import checkers.inference.model.RefinementVariableSlot;
+import checkers.inference.model.VPAVariableSlot;
+import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.AbstractFormatTranslator;
 import checkers.inference.solver.backend.encoder.ConstraintEncoderFactory;
 import checkers.inference.solver.backend.maxsat.encoder.MaxSATConstraintEncoderFactory;
@@ -88,4 +96,43 @@ public class MaxSatFormatTranslator extends AbstractFormatTranslator<VecInt[], V
         return intToType.get(MathUtils.getIntRep(var, lattice));
     }
 
+    @Override
+    public VecInt[] serialize(VariableSlot slot) {
+        return null;
+    }
+
+    @Override
+    public VecInt[] serialize(ConstantSlot slot) {
+        return null;
+    }
+
+    @Override
+    public VecInt[] serialize(ExistentialVariableSlot slot) {
+        return null;
+    }
+
+    @Override
+    public VecInt[] serialize(RefinementVariableSlot slot) {
+        return null;
+    }
+
+    @Override
+    public VecInt[] serialize(VPAVariableSlot slot) {
+        return null;
+    }
+
+    @Override
+    public VecInt[] serialize(LUBVariableSlot slot) {
+        return null;
+    }
+
+    @Override
+    public VecInt[] serialize(ArithmeticVariableSlot slot) {
+        return null;
+    }
+
+    @Override
+    public VecInt[] serialize(PolyInvokeVariableSlot slot) {
+        return null;
+    }
 }
