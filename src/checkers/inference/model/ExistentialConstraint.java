@@ -1,10 +1,11 @@
 package checkers.inference.model;
 
-import org.checkerframework.javacutil.PluginUtil;
-import org.checkerframework.javacutil.BugInCF;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.checkerframework.javacutil.BugInCF;
+import org.checkerframework.javacutil.PluginUtil;
 
 /**
  * An ExistentialConstraint indicates that solvers need to determine if a variable's annotation

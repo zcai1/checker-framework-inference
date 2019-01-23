@@ -1,6 +1,7 @@
 package checkers.inference.model;
 
 import java.util.Arrays;
+
 import org.checkerframework.javacutil.BugInCF;
 
 /**

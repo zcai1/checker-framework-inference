@@ -1,11 +1,12 @@
 package checkers.inference.model;
 
+import javax.lang.model.element.AnnotationMirror;
+
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.BugInCF;
 
+import checkers.inference.SlotManager;
 import checkers.inference.qual.VarAnnot;
-
-import javax.lang.model.element.AnnotationMirror;
 
 /**
  * A ConstantSlot holds an annotation in the real type system to allow

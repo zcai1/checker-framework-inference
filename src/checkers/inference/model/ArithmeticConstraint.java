@@ -1,8 +1,10 @@
 package checkers.inference.model;
 
 import java.util.Arrays;
+
 import org.checkerframework.dataflow.util.HashCodeUtils;
 import org.checkerframework.javacutil.BugInCF;
+
 import com.sun.source.tree.Tree.Kind;
 
 /**

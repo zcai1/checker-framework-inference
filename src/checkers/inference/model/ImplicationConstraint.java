@@ -1,15 +1,15 @@
 package checkers.inference.model;
 
-import org.checkerframework.dataflow.util.HashCodeUtils;
-import org.checkerframework.javacutil.BugInCF;
-
-import checkers.inference.InferenceMain;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.checkerframework.dataflow.util.HashCodeUtils;
+import org.checkerframework.javacutil.BugInCF;
+
+import checkers.inference.InferenceMain;
 
 /**
  * Constraint that models implication logic. If all the assumptions are

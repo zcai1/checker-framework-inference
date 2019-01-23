@@ -160,8 +160,8 @@ public interface SlotManager {
     /**
      * Return the Slot (or an equivalent Slot) that is represented by the given
      * AnnotationMirror. A RuntimeException is thrown if the annotation isn't a
-     * VarAnnot, RefVarAnnot, CombVarAnnot or a member of one of the REAL_QUALIFIER
-     * set provided by InferenceChecker.
+     * VarAnnot or a member of one of the REAL_QUALIFIER set provided by
+     * InferenceChecker.
      * 
      * @param am
      *            The annotationMirror representing a Slot

@@ -1,11 +1,5 @@
 package checkers.inference.model;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.checkerframework.dataflow.util.HashCodeUtils;
-
 /**
  * VariableSlot is a constraint variable which is always inserted into source.
  * After the Solver is run, each VariableSlot should have an assigned value

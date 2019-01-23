@@ -3,11 +3,13 @@ package checkers.inference.model;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.checkerframework.framework.source.Result;
 import org.checkerframework.framework.source.SourceChecker;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.VisitorState;
 import org.checkerframework.javacutil.BugInCF;
+
 import checkers.inference.InferenceAnnotatedTypeFactory;
 import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;

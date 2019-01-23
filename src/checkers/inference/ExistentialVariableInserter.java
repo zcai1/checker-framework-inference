@@ -18,7 +18,6 @@ import javax.lang.model.element.AnnotationMirror;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.ExistentialVariableSlot;
 import checkers.inference.model.Slot;
-import checkers.inference.model.VariableSlot;
 
 /**
  *
