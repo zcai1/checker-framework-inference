@@ -1,19 +1,20 @@
 package checkers.inference;
 
-import checkers.inference.model.LUBVariableSlot;
-import org.checkerframework.framework.type.AnnotatedTypeMirror;
-
 import java.util.List;
 
 import javax.lang.model.element.AnnotationMirror;
 
+import org.checkerframework.framework.type.AnnotatedTypeMirror;
+
 import checkers.inference.model.AnnotationLocation;
 import checkers.inference.model.ArithmeticVariableSlot;
-import checkers.inference.model.VPAVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ExistentialVariableSlot;
+import checkers.inference.model.LUBVariableSlot;
+import checkers.inference.model.PolyInvokeVariableSlot;
 import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Slot;
+import checkers.inference.model.VPAVariableSlot;
 import checkers.inference.model.VariableSlot;
 
 /**
@@ -142,6 +143,18 @@ public interface SlotManager {
      *         exists
      */
     ArithmeticVariableSlot getArithmeticVariableSlot(AnnotationLocation location);
+
+    /**
+     * Create new PolyInvokeVariableSlot and return the reference to it if no
+     * PolyInvokeVariableSlot on this location exists. Otherwise return the
+     * reference to existing PolyInvokeVariableSlot on this location. Each location
+     * uniquely identifies a PolyInvokeVariableSlot
+     *
+     * @param location
+     *            used to locate this variable in code
+     * @return PolyInvokeVariableSlot that corresponds to this location
+     */
+    PolyInvokeVariableSlot createPolyInvokeVariableSlot(AnnotationLocation location);
 
     /**
      * Create a VarAnnot equivalent to the given realQualifier.

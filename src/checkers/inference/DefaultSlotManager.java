@@ -1,10 +1,5 @@
 package checkers.inference;
 
-import org.checkerframework.framework.type.AnnotatedTypeMirror;
-import org.checkerframework.javacutil.AnnotationBuilder;
-import org.checkerframework.javacutil.AnnotationUtils;
-import org.checkerframework.javacutil.BugInCF;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -18,17 +13,22 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 
-import checkers.inference.model.LUBVariableSlot;
+import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.javacutil.AnnotationBuilder;
+import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.BugInCF;
 
 import com.sun.tools.javac.util.Pair;
 
 import checkers.inference.model.AnnotationLocation;
 import checkers.inference.model.ArithmeticVariableSlot;
-import checkers.inference.model.VPAVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ExistentialVariableSlot;
+import checkers.inference.model.LUBVariableSlot;
+import checkers.inference.model.PolyInvokeVariableSlot;
 import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Slot;
+import checkers.inference.model.VPAVariableSlot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.qual.VarAnnot;
 
@@ -51,43 +51,57 @@ public class DefaultSlotManager implements SlotManager {
 
     /**
      * A map for storing all the slots encountered by this slot manager. Key is an
-     * {@link Integer}, representing a slot id. Value is a {@link Slot} that
-     * corresponds to this slot id. Note that ConstantSlots are also stored in this
-     * map.
+     * {@link Integer}, representing a slot id. Value is a {@link Slot} that with
+     * this slot id. Note that {@link ConstantSlot}s are also stored in this map.
      */
     private final Map<Integer, Slot> slots;
 
     /**
      * A map of {@link AnnotationMirror} to {@link ConstantSlot} for caching
-     * ConstantSlot. Each {@link AnnotationMirror} uniquely identify a ConstantSlot.
+     * {@link ConstantSlot}. Each {@link AnnotationMirror} uniquely identify a
+     * {@link ConstantSlot}.
      */
     private final Map<AnnotationMirror, ConstantSlot> constantCache;
 
     /**
-     * A map of {@link AnnotationLocation} to {@link Slot} for caching VariableSlot
-     * and RefinementVariableSlot. Those two kinds of slots can be uniquely
-     * identified by their {@link AnnotationLocation}(Except MissingLocation).
+     * A map of {@link AnnotationLocation} to {@link Slot} for caching
+     * {@link VariableSlot}. The annotation location (except MissingLocation)
+     * uniquely identifies an {@link VariableSlot}.
      */
-    private final Map<AnnotationLocation, Slot> locationCache;
+    private final Map<AnnotationLocation, VariableSlot> variableSlotCache;
+
+    /**
+     * A map of {@link AnnotationLocation} to {@link Slot} for caching
+     * {@link RefinementVariableSlot}. The annotation location (except
+     * MissingLocation) uniquely identifies an {@link RefinementVariableSlot}.
+     */
+    private final Map<AnnotationLocation, RefinementVariableSlot> refinementVariableSlotCache;
+
+    /**
+     * A map of {@link AnnotationLocation} to {@link Slot} for caching
+     * {@link PolyInvokeVariableSlot}. The annotation location (except
+     * MissingLocation) uniquely identifies an {@link PolyInvokeVariableSlot}.
+     */
+    private final Map<AnnotationLocation, PolyInvokeVariableSlot> polyInvokeVariableSlotCache;
 
     /**
      * A map of {@link Pair} of {@link Slot} to {@link ExistentialVariableSlot} for
-     * caching ExistentialVariableSlot. Each ExistentialVariableSlot can be uniquely
-     * identified by its potential and alternative Slots.
+     * caching {@link ExistentialVariableSlot}. Each {@link ExistentialVariableSlot}
+     * can be uniquely identified by its potential and alternative slots.
      */
     private final Map<Pair<Slot, Slot>, ExistentialVariableSlot> existentialSlotCache;
 
     /**
      * A map of {@link Pair} of {@link Slot} to {@link VPAVariableSlot} for caching
-     * VPAVariableSlot. Each pair of receiver slot and declared slot uniquely
-     * identifies a VPAVariableSlot.
+     * {@link VPAVariableSlot}. Each pair of receiver slot and declared slot
+     * uniquely identifies a {@link VPAVariableSlot}.
      */
     private final Map<Pair<Slot, Slot>, VPAVariableSlot> vpaSlotCache;
 
     /**
      * A map of {@link Pair} of {@link Slot} to {@link LUBVariableSlot} for caching
-     * LUBVariableSlot. Each pair of receiver slot and declared slot uniquely
-     * identifies a LUBVariableSlot.
+     * {@link LUBVariableSlot}. Each pair of slots uniquely identifies a
+     * {@link LUBVariableSlot}.
      */
     private final Map<Pair<Slot, Slot>, LUBVariableSlot> lubSlotCache;
 
@@ -116,7 +130,9 @@ public class DefaultSlotManager implements SlotManager {
 
         // Construct empty caches
         constantCache = AnnotationUtils.createAnnotationMap();
-        locationCache = new LinkedHashMap<>();
+        variableSlotCache = new LinkedHashMap<>();
+        refinementVariableSlotCache = new LinkedHashMap<>();
+        polyInvokeVariableSlotCache = new LinkedHashMap<>();
         existentialSlotCache = new LinkedHashMap<>();
         vpaSlotCache = new LinkedHashMap<>();
         lubSlotCache = new LinkedHashMap<>();
@@ -281,17 +297,12 @@ public class DefaultSlotManager implements SlotManager {
             // Don't cache slot for MISSING LOCATION. Just create a new one and return.
             variableSlot = new VariableSlot(nextId(), location);
             addToSlots(variableSlot);
-        } else if (locationCache.containsKey(location)) {
-            Slot slot = locationCache.get(location);
-            if (!(slot instanceof VariableSlot)) {
-                throw new BugInCF("Previous slot created for location " + location
-                        + " is not a VariableSlot.");
-            }
-            variableSlot = (VariableSlot) slot;
+        } else if (variableSlotCache.containsKey(location)) {
+            variableSlot = variableSlotCache.get(location);
         } else {
             variableSlot = new VariableSlot(nextId(), location);
             addToSlots(variableSlot);
-            locationCache.put(location, variableSlot);
+            variableSlotCache.put(location, variableSlot);
         }
         return variableSlot;
     }
@@ -304,17 +315,12 @@ public class DefaultSlotManager implements SlotManager {
             // Don't cache slot for MISSING LOCATION. Just create a new one and return.
             refinementVariableSlot = new RefinementVariableSlot(nextId(), location, refined);
             addToSlots(refinementVariableSlot);
-        } else if (locationCache.containsKey(location)) {
-            Slot slot = locationCache.get(location);
-            if (!(slot instanceof RefinementVariableSlot)) {
-                throw new BugInCF("Previous slot created for location " + location
-                        + " is not a RefinementVariableSlot.");
-            }
-            refinementVariableSlot = (RefinementVariableSlot) slot;
+        } else if (refinementVariableSlotCache.containsKey(location)) {
+            refinementVariableSlot = refinementVariableSlotCache.get(location);
         } else {
             refinementVariableSlot = new RefinementVariableSlot(nextId(), location, refined);
             addToSlots(refinementVariableSlot);
-            locationCache.put(location, refinementVariableSlot);
+            refinementVariableSlotCache.put(location, refinementVariableSlot);
         }
         return refinementVariableSlot;
     }
@@ -406,6 +412,19 @@ public class DefaultSlotManager implements SlotManager {
         } else {
             return arithmeticSlotCache.get(location);
         }
+    }
+
+    @Override
+    public PolyInvokeVariableSlot createPolyInvokeVariableSlot(AnnotationLocation location) {
+        PolyInvokeVariableSlot polyInvokeVariableSlot;
+        if (polyInvokeVariableSlotCache.containsKey(location)) {
+            polyInvokeVariableSlot = polyInvokeVariableSlotCache.get(location);
+        } else {
+            polyInvokeVariableSlot = new PolyInvokeVariableSlot(nextId(), location);
+            addToSlots(polyInvokeVariableSlot);
+            polyInvokeVariableSlotCache.put(location, polyInvokeVariableSlot);
+        }
+        return polyInvokeVariableSlot;
     }
 
     @Override

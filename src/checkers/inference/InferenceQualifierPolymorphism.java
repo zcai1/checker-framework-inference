@@ -9,8 +9,8 @@ import javax.lang.model.element.AnnotationMirror;
 import com.sun.source.tree.Tree;
 
 import checkers.inference.model.ConstantSlot;
+import checkers.inference.model.PolyInvokeVariableSlot;
 import checkers.inference.model.Slot;
-import checkers.inference.model.VariableSlot;
 
 /**
  * InferenceQualifierPolymorphism handle PolymorphicQualifiers for the Inference Framework.
@@ -51,15 +51,15 @@ public class InferenceQualifierPolymorphism {
         private final Tree methodCall;
 
         /**
-         * The variable slot created for this method call
+         * The PolyInvokeVariableSlot created for this method call
          */
-        private VariableSlot polyVar = null;
+        private PolyInvokeVariableSlot polyVar = null;
 
         private PolyReplacer(Tree methodCall) {
             this.methodCall = methodCall;
         }
 
-        private VariableSlot getOrCreatePolyVar() {
+        private PolyInvokeVariableSlot getOrCreatePolyVar() {
             if (polyVar == null) {
                 polyVar = variableAnnotator.getOrCreatePolyVar(methodCall);
             }
