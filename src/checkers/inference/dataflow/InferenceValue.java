@@ -24,6 +24,8 @@ import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 
+//TODO: update javadoc in this file regarding "CombVariable" and "comb variable"
+
 /**
  * InferenceValue extends CFValue for inference.
  *

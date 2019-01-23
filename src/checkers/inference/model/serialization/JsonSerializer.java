@@ -125,10 +125,10 @@ public class JsonSerializer implements Serializer<String, JSONObject> {
     protected static final String COMP_RHS = "rhs";
     protected static final String COMP_LHS = "lhs";
 
-    protected static final String COMB_CONSTRAINT_KEY = "combine";
-    protected static final String COMB_TARGET = "target";
-    protected static final String COMB_DECL = "declared";
-    protected static final String COMB_RESULT = "result";
+    protected static final String VPA_CONSTRAINT_KEY = "viewpoint adaptation";
+    protected static final String VPA_TARGET = "target";
+    protected static final String VPA_DECL = "declared";
+    protected static final String VPA_RESULT = "result";
 
     protected static final String PREFERENCE_CONSTRAINT_KEY = "preference";
     protected static final String PREFERENCE_VARIABLE = "variable";
@@ -335,10 +335,10 @@ public class JsonSerializer implements Serializer<String, JSONObject> {
         }
 
         JSONObject obj = new JSONObject();
-        obj.put(CONSTRAINT_KEY, COMB_CONSTRAINT_KEY);
-        obj.put(COMB_TARGET, constraint.getTarget().serialize(this));
-        obj.put(COMB_DECL, constraint.getDeclared().serialize(this));
-        obj.put(COMB_RESULT, constraint.getResult().serialize(this));
+        obj.put(CONSTRAINT_KEY, VPA_CONSTRAINT_KEY);
+        obj.put(VPA_TARGET, constraint.getTarget().serialize(this));
+        obj.put(VPA_DECL, constraint.getDeclared().serialize(this));
+        obj.put(VPA_RESULT, constraint.getResult().serialize(this));
         return obj;
     }
 

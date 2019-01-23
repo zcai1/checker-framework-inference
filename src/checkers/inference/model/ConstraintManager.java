@@ -122,7 +122,7 @@ public class ConstraintManager {
     /**
      * Creates a {@link VPAConstraint} between the three slots.
      */
-    public VPAConstraint createVPAConstraint(Slot target, Slot decl, Slot result) {
+    public VPAConstraint createVPAConstraint(Slot target, Slot decl, VPAVariableSlot result) {
         return VPAConstraint.create(target, decl, result, getCurrentLocation());
     }
 
@@ -253,7 +253,7 @@ public class ConstraintManager {
     /**
      * Creates and adds a {@link VPAConstraint} to the constraint set.
      */
-    public void addVPAConstraint(Slot target, Slot decl, Slot result) {
+    public void addVPAConstraint(Slot target, Slot decl, VPAVariableSlot result) {
         add(createVPAConstraint(target, decl, result));
     }
 

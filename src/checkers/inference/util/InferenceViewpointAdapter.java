@@ -4,6 +4,7 @@ import checkers.inference.InferenceMain;
 import checkers.inference.SlotManager;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
+import checkers.inference.model.VPAVariableSlot;
 import checkers.inference.model.VariableSlot;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -37,8 +38,8 @@ public class InferenceViewpointAdapter extends AbstractViewpointAdapter {
         assert receiverAnnotation != null && declaredAnnotation != null;
         final Slot recvSlot = slotManager.getSlot(receiverAnnotation);
         final Slot declSlot = slotManager.getSlot(declaredAnnotation);
-        final Slot combVariableSlot = slotManager.createVPAVariableSlot(recvSlot, declSlot);
-        constraintManager.addVPAConstraint(recvSlot, declSlot, combVariableSlot);
-        return slotManager.getAnnotation(combVariableSlot);
+        final VPAVariableSlot vpaVariableSlot = slotManager.createVPAVariableSlot(recvSlot, declSlot);
+        constraintManager.addVPAConstraint(recvSlot, declSlot, vpaVariableSlot);
+        return slotManager.getAnnotation(vpaVariableSlot);
     }
 }

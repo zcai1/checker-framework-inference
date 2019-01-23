@@ -271,7 +271,7 @@ public abstract class CnfVecIntSerializer implements Serializer<VecInt[], VecInt
     }
 
     @Override
-    public VecInt[] serialize(VPAConstraint combineConstraint) {
+    public VecInt[] serialize(VPAConstraint vpaConstraint) {
         // does this just say that the result is a subtype of the other 2?
         // not sure what this means
         return emptyClauses;

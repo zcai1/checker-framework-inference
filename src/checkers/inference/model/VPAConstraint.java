@@ -11,16 +11,16 @@ public class VPAConstraint extends Constraint {
 
     private final Slot target;
     private final Slot decl;
-    private final Slot result;
+    private final VPAVariableSlot result;
 
-    private VPAConstraint(Slot target, Slot decl, Slot result, AnnotationLocation location) {
+    private VPAConstraint(Slot target, Slot decl, VPAVariableSlot result, AnnotationLocation location) {
         super(Arrays.asList(target, decl, result), location);
         this.target = target;
         this.decl = decl;
         this.result = result;
     }
 
-    protected static VPAConstraint create(Slot target, Slot decl, Slot result,
+    protected static VPAConstraint create(Slot target, Slot decl, VPAVariableSlot result,
             AnnotationLocation location) {
         if (target == null || decl == null || result == null) {
             throw new BugInCF("Create combine constraint with null argument. Target: "
@@ -43,7 +43,7 @@ public class VPAConstraint extends Constraint {
         return decl;
     }
 
-    public Slot getResult() {
+    public VPAVariableSlot getResult() {
         return result;
     }
 

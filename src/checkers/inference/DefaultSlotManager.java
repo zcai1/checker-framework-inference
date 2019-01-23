@@ -64,12 +64,11 @@ public class DefaultSlotManager implements SlotManager {
     private final Map<AnnotationMirror, ConstantSlot> constantCache;
 
     /**
-     * A map of {@link AnnotationLocation} to {@link Integer} slot ID for caching
-     * VariableSlot and RefinementVariableSlot. Those two kinds of slots can be
-     * uniquely identified by their {@link AnnotationLocation}(Except
-     * MissingLocation).
+     * A map of {@link AnnotationLocation} to {@link Slot} for caching VariableSlot
+     * and RefinementVariableSlot. Those two kinds of slots can be uniquely
+     * identified by their {@link AnnotationLocation}(Except MissingLocation).
      */
-    private final Map<AnnotationLocation, Integer> locationCache;
+    private final Map<AnnotationLocation, Slot> locationCache;
 
     /**
      * A map of {@link Pair} of {@link Slot} to {@link ExistentialVariableSlot} for
@@ -283,35 +282,39 @@ public class DefaultSlotManager implements SlotManager {
             variableSlot = new VariableSlot(nextId(), location);
             addToSlots(variableSlot);
         } else if (locationCache.containsKey(location)) {
-            int id = locationCache.get(location);
-            Slot slot = getSlot(id);
+            Slot slot = locationCache.get(location);
             if (!(slot instanceof VariableSlot)) {
                 throw new BugInCF("Previous slot created for location " + location
-                        + " is not a VariableSlot");
+                        + " is not a VariableSlot.");
             }
             variableSlot = (VariableSlot) slot;
         } else {
             variableSlot = new VariableSlot(nextId(), location);
             addToSlots(variableSlot);
-            locationCache.put(location, variableSlot.getId());
+            locationCache.put(location, variableSlot);
         }
         return variableSlot;
     }
 
     @Override
-    public RefinementVariableSlot createRefinementVariableSlot(AnnotationLocation location, Slot refined) {
+    public RefinementVariableSlot createRefinementVariableSlot(AnnotationLocation location,
+            Slot refined) {
         RefinementVariableSlot refinementVariableSlot;
         if (location.getKind() == AnnotationLocation.Kind.MISSING) {
-            //Don't cache slot for MISSING LOCATION. Just create a new one and return.
+            // Don't cache slot for MISSING LOCATION. Just create a new one and return.
             refinementVariableSlot = new RefinementVariableSlot(nextId(), location, refined);
             addToSlots(refinementVariableSlot);
         } else if (locationCache.containsKey(location)) {
-            int id = locationCache.get(location);
-            refinementVariableSlot = (RefinementVariableSlot) getSlot(id);
+            Slot slot = locationCache.get(location);
+            if (!(slot instanceof RefinementVariableSlot)) {
+                throw new BugInCF("Previous slot created for location " + location
+                        + " is not a RefinementVariableSlot.");
+            }
+            refinementVariableSlot = (RefinementVariableSlot) slot;
         } else {
             refinementVariableSlot = new RefinementVariableSlot(nextId(), location, refined);
             addToSlots(refinementVariableSlot);
-            locationCache.put(location, refinementVariableSlot.getId());
+            locationCache.put(location, refinementVariableSlot);
         }
         return refinementVariableSlot;
     }
