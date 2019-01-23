@@ -61,7 +61,7 @@ if [[ "${GROUP}" == downstream* && "${SLUGOWNER}" == "opprop" ]]; then
     # Ontology test
     if [[ "${GROUP}" == "downstream-ontology" ]]; then
         ONTOLOGY_GIT=ontology
-        ONTOLOGY_BRANCH=master
+        ONTOLOGY_BRANCH=refactor_slots
         ONTOLOGY_COMMAND="./gradlew build -x test && ./test-ontology.sh"
 
         clone_downstream $ONTOLOGY_GIT $ONTOLOGY_BRANCH
@@ -71,7 +71,7 @@ if [[ "${GROUP}" == downstream* && "${SLUGOWNER}" == "opprop" ]]; then
     # Units test
     if [[ "${GROUP}" == "downstream-units" ]]; then
         UNITS_GIT=units-inference
-        UNITS_BRANCH=master
+        UNITS_BRANCH=refactor_slots
         UNITS_COMMAND="./gradlew build -x test && ./test-units.sh"
 
         clone_downstream $UNITS_GIT $UNITS_BRANCH
