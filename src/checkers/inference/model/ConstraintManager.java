@@ -138,7 +138,7 @@ public class ConstraintManager {
      * Creates an {@link ExistentialConstraint} for the given slot and lists of constraints.
      */
     public ExistentialConstraint createExistentialConstraint(Slot slot,
-            List<Constraint> ifExistsConstraints, List<Constraint> ifNotExistsConstraints) {
+            Set<Constraint> ifExistsConstraints, Set<Constraint> ifNotExistsConstraints) {
         return ExistentialConstraint.create((VariableSlot) slot, ifExistsConstraints,
                 ifNotExistsConstraints, getCurrentLocation());
     }
@@ -267,8 +267,8 @@ public class ConstraintManager {
     /**
      * Creates and adds a {@link ExistentialConstraint} to the constraint set.
      */
-    public void addExistentialConstraint(Slot slot, List<Constraint> ifExistsConstraints,
-            List<Constraint> ifNotExistsConstraints) {
+    public void addExistentialConstraint(Slot slot, Set<Constraint> ifExistsConstraints,
+            Set<Constraint> ifNotExistsConstraints) {
         add(createExistentialConstraint(slot, ifExistsConstraints, ifNotExistsConstraints));
     }
 
