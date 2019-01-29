@@ -124,7 +124,9 @@ public class ConstraintsHashcodeEqualsTest {
         constraintSet.add(compCon);
         constraintSet.add(compCon2);
         constraintSet.add(eqCon);
+        constraintSet.add(eqCon2);
         constraintSet.add(neqCon);
+        constraintSet.add(neqCon2);
         constraintSet.add(exCon);
         constraintSet.add(impCon);
         constraintSet.add(prefCon);
@@ -138,7 +140,9 @@ public class ConstraintsHashcodeEqualsTest {
         assertTrue(constraintSet.contains(compCon));
         assertTrue(constraintSet.contains(compCon2));
         assertTrue(constraintSet.contains(eqCon));
+        assertTrue(constraintSet.contains(eqCon2));
         assertTrue(constraintSet.contains(neqCon));
+        assertTrue(constraintSet.contains(neqCon2));
         assertTrue(constraintSet.contains(exCon));
         assertTrue(constraintSet.contains(impCon));
         assertTrue(constraintSet.contains(prefCon));
@@ -155,7 +159,9 @@ public class ConstraintsHashcodeEqualsTest {
         constraintMap.put(compCon, 6);
         constraintMap.put(compCon2, 66); // compCon2 has the same hashcode as compCon
         constraintMap.put(eqCon, 7);
+        constraintMap.put(eqCon2, 77); // eqCon2 has the same hashcode as eqCon
         constraintMap.put(neqCon, 8);
+        constraintMap.put(neqCon2, 88); // neqCon2 has the same hashcode as neqCon2
         constraintMap.put(exCon, 9);
         constraintMap.put(impCon, 10);
         constraintMap.put(prefCon, 11);
@@ -167,8 +173,8 @@ public class ConstraintsHashcodeEqualsTest {
         assertTrue(constraintMap.containsKey(mulCon) && constraintMap.get(mulCon) == 4);
         assertTrue(constraintMap.containsKey(combCon) && constraintMap.get(combCon) == 5);
         assertTrue(constraintMap.containsKey(compCon) && constraintMap.get(compCon) == 66);
-        assertTrue(constraintMap.containsKey(eqCon) && constraintMap.get(eqCon) == 7);
-        assertTrue(constraintMap.containsKey(neqCon) && constraintMap.get(neqCon) == 8);
+        assertTrue(constraintMap.containsKey(eqCon) && constraintMap.get(eqCon) == 77);
+        assertTrue(constraintMap.containsKey(neqCon) && constraintMap.get(neqCon) == 88);
         assertTrue(constraintMap.containsKey(exCon) && constraintMap.get(exCon) == 9);
         assertTrue(constraintMap.containsKey(impCon) && constraintMap.get(impCon) == 10);
         assertTrue(constraintMap.containsKey(prefCon) && constraintMap.get(prefCon) == 11);
