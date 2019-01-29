@@ -153,7 +153,7 @@ public class ConstraintsHashcodeEqualsTest {
         constraintMap.put(mulCon, 4);
         constraintMap.put(combCon, 5);
         constraintMap.put(compCon, 6);
-        constraintMap.put(compCon2, 66);
+        constraintMap.put(compCon2, 66); // compCon2 has the same hashcode as compCon
         constraintMap.put(eqCon, 7);
         constraintMap.put(neqCon, 8);
         constraintMap.put(exCon, 9);
