@@ -81,7 +81,8 @@ public class ComparableConstraint extends Constraint implements BinaryConstraint
 
     @Override
     public int hashCode() {
-        return HashCodeUtils.hash(769, first, second);
+        // ComparableConstraint is insensitive to the order of the slots
+        return HashCodeUtils.hash(769, first.hashCode() + second.hashCode());
     }
 
     @Override
