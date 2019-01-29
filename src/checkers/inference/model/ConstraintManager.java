@@ -261,7 +261,19 @@ public class ConstraintManager {
      * Creates and adds a {@link PreferenceConstraint} to the constraint set.
      */
     public void addPreferenceConstraint(VariableSlot variable, ConstantSlot goal, int weight) {
-        add(createPreferenceConstraint(variable, goal, weight));
+        PreferenceConstraint pc = createPreferenceConstraint(variable, goal, weight);
+        if (constraints.contains(pc)) {
+            PreferenceConstraint existingPC = (PreferenceConstraint) constraints.stream()
+                    .filter(c -> c.hashCode() == pc.hashCode()).findFirst().get();
+
+            if (existingPC.getWeight() != weight) {
+                throw new BugInCF(
+                        "Constraint " + pc + " already exists in the constraint set with weight "
+                                + existingPC.getWeight() + ".");
+            }
+        } else {
+            add(pc);
+        }
     }
 
     /**

@@ -1,5 +1,6 @@
 package checkers.inference.model;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -7,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -20,7 +22,6 @@ import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConstraintsHashcodeEqualsTest {
-    ConstraintManager manager;
     Set<Constraint> constraintSet;
     Map<Constraint, Integer> constraintMap;
 
@@ -54,7 +55,6 @@ public class ConstraintsHashcodeEqualsTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        manager = new ConstraintManager();
         constraintSet = new HashSet<>();
         constraintMap = new HashMap<>();
 
@@ -179,5 +179,30 @@ public class ConstraintsHashcodeEqualsTest {
         assertTrue(constraintMap.containsKey(impCon) && constraintMap.get(impCon) == 10);
         assertTrue(constraintMap.containsKey(prefCon) && constraintMap.get(prefCon) == 11);
         assertTrue(constraintMap.containsKey(stCon) && constraintMap.get(stCon) == 12);
+    }
+
+    /**
+     * Ensure that a preference constraint expressed over the same slot and goal can only have 1
+     * weight.
+     */
+    @Test
+    public void testDuplicatePreferenceConstraint() {
+        constraintSet.add(atCon);
+        constraintSet.add(afCon);
+        constraintSet.add(addCon);
+        constraintSet.add(mulCon);
+
+        constraintSet.add(prefCon);
+        PreferenceConstraint prefCon2 = PreferenceConstraint.create(three, goal, 200,
+                dummyLocation);
+
+        assertTrue(constraintSet.contains(prefCon2));
+
+        Optional<Constraint> matchingPrefCon = constraintSet.stream()
+                .filter(c -> c.hashCode() == prefCon2.hashCode()).findFirst();
+        assertTrue(matchingPrefCon.isPresent());
+
+        PreferenceConstraint pcInSet = (PreferenceConstraint) matchingPrefCon.get();
+        assertEquals(prefCon.getWeight(), pcInSet.getWeight());
     }
 }
