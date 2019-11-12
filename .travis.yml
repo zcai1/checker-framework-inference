@@ -22,9 +22,9 @@ env:
     - GROUP=cfi-tests JDKVER=jdk8
     - GROUP=downstream-ontology JDKVER=jdk8
     - GROUP=downstream-units JDKVER=jdk8
-    - GROUP=cfi-tests JDKVER=11
-    - GROUP=downstream-ontology JDKVER=11
-    - GROUP=downstream-units JDKVER=11
+    - GROUP=cfi-tests JDKVER=jdk11
+    - GROUP=downstream-ontology JDKVER=jdk11
+    - GROUP=downstream-units JDKVER=jdk11
 
 # This is essential lest the script is ignored and Travis just runs gradle.
 install: true
