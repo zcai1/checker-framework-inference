@@ -1,5 +1,3 @@
-import org.gradle.api.tasks.Copy
-
 plugins {
     id 'com.github.johnrengelman.shadow' version '5.2.0'
 }
@@ -167,8 +165,6 @@ task dependenciesJar(type: Jar) {
 }
 
 task dist(dependsOn: shadowJar, type: Copy) {
-    println "CZP: current gradle jvm" + org.gradle.internal.jvm.Jvm.current()
-
     description = "If your Checker Framework project is fully built, this task " +
             "will build checker-framework-inference.jar, copy all the relevant runtime jars into " +
             "the dist directory."
