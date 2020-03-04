@@ -80,7 +80,7 @@ isJdk8=$?
 
 jdkPaths=""
 if [ $isJdk8 ]; then
-  ${cfDir}"/checker/dist/jdk8.jar"
+    jdkPaths=${cfDir}"/checker/dist/jdk8.jar"
 fi
 
 runtimeBCP=""
