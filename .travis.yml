@@ -23,9 +23,7 @@ jobs:
   - name: "cfi-tests-jdk8"
     env: JDKVER=jdk8
   - name: "cfi-tests-jdk11"
-    env:
-      - JDKVER=jdk11
-      - BUILDJDK=buildjdk
+    env: JDKVER=jdk11 BUILDJDK=buildjdk
 
 # This is essential lest the script is ignored and Travis just runs gradle.
 install: true
