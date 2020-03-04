@@ -29,9 +29,11 @@ fi
 /tmp/plume-scripts/git-clone-related typetools checker-framework ${CHECKERFRAMEWORK}
 
 # This also builds annotation-tools
-(cd $CHECKERFRAMEWORK && checker/bin-devel/build.sh buildjdk)
+echo "CZP - building CF"
+(cd $CHECKERFRAMEWORK && checker/bin-devel/build.sh downloadjdk)
 
 # Finally build checker-framework-inference
+echo "CZP - building CFI"
 ./gradlew dist
 
 echo Exiting "$(cd "$(dirname "$0")" && pwd -P)/$(basename "$0")" in `pwd`
