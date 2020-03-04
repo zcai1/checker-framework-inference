@@ -35,6 +35,6 @@ echo "CZP - building CF"
 # Finally build checker-framework-inference
 echo "CZP - building CFI"
 echo "JAVA_HOME=${JAVA_HOME}"
-./gradlew dist printJdkJarManifest
+./gradlew dist
 
 echo Exiting "$(cd "$(dirname "$0")" && pwd -P)/$(basename "$0")" in `pwd`
