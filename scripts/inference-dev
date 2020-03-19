@@ -76,15 +76,15 @@ if [ "$CLASSPATH" != "" ] ; then
 fi
 
 java -version 2>&1 | grep version | grep 1.8 > /dev/null
-isJdk8=$?
+isJava8=$?
 
 jdkPaths=""
-if [ $isJdk8 ]; then
+if [ $isJava8 ]; then
     jdkPaths=${cfDir}"/checker/dist/jdk8.jar"
 fi
 
 runtimeBCP=""
-if [ $isJdk8 ]; then
+if [ $isJava8 ]; then
     runtimeBCP="${distDir}/javac.jar"
 fi
 
