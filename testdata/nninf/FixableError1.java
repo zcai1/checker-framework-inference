@@ -8,8 +8,8 @@ class FixableError1 {
         this.id = id;
 
         // :: fixable-error: (argument.type.incompatible)
-        recordHistory(id);
+        recordIDs(id);
     }
 
-    public void recordHistory(String id) {}
+    public void recordIDs(String id) {}
 }
