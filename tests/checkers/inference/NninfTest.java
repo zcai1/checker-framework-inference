@@ -19,12 +19,12 @@ public class NninfTest extends CFInferenceTest {
 
     @Override
     public Pair<String, List<String>> getSolverNameAndOptions() {
-        return Pair.<String, List<String>>of(MaxSat2TypeSolver.class.getCanonicalName(), new ArrayList<String>());
+        return Pair.of(MaxSat2TypeSolver.class.getCanonicalName(), new ArrayList<>());
     }
 
     @Parameters
     public static List<File> getTestFiles() {
-        List<File> testfiles = new ArrayList<>();//InferenceTestUtilities.findAllSystemTests();
+        List<File> testfiles = new ArrayList<>();
         testfiles.addAll(TestUtilities.findRelativeNestedJavaFiles("testdata", "nninf"));
         return testfiles;
     }
