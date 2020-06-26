@@ -9,6 +9,7 @@ import java.util.Set;
 
 import javax.lang.model.element.AnnotationMirror;
 
+import checkers.inference.InferenceMain;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
