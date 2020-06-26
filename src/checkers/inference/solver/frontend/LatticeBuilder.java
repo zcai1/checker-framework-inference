@@ -76,7 +76,6 @@ public class LatticeBuilder {
      * @param qualHierarchy of underling type system.
      * @return a new Lattice instance.
      */
-    @SuppressWarnings("deprecation") // replace getTypeQualifiers
     public Lattice buildLattice(QualifierHierarchy qualHierarchy, Collection<Slot> slots) {
         clear();
 
@@ -88,9 +87,13 @@ public class LatticeBuilder {
                     InferenceMain.getInstance().getRealTypeFactory().getElementUtils(), ac));
         }
 
-        allTypes = supportedAnnos;
         top = qualHierarchy.getTopAnnotations().iterator().next();
         bottom = qualHierarchy.getBottomAnnotations().iterator().next();
+
+        // TODO this is a workaround for "computed" bottoms. e.g. DataFlow bottom
+        supportedAnnos.add(bottom);  // this is a set: existing bottom will not added twice
+        allTypes = supportedAnnos;
+
         numTypes = supportedAnnos.size();
 
         // Calculate subtypes map and supertypes map
