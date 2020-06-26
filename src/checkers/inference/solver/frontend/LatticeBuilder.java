@@ -1,5 +1,6 @@
 package checkers.inference.solver.frontend;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -9,6 +10,7 @@ import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 
 import org.checkerframework.framework.type.QualifierHierarchy;
+import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 
 import checkers.inference.model.ConstantSlot;
@@ -76,10 +78,19 @@ public class LatticeBuilder {
     @SuppressWarnings("deprecation") // replace getTypeQualifiers
     public Lattice buildLattice(QualifierHierarchy qualHierarchy, Collection<Slot> slots) {
         clear();
-        allTypes = qualHierarchy.getTypeQualifiers();
+
+        Set<AnnotationMirror> supportedAnnos = new HashSet<>();
+        Set<Class<? extends Annotation>> annoClasses =
+                InferenceMain.getInstance().getRealTypeFactory().getSupportedTypeQualifiers();
+        for (Class<? extends Annotation> ac: annoClasses) {
+            supportedAnnos.add(AnnotationBuilder.fromClass(
+                    InferenceMain.getInstance().getRealTypeFactory().getElementUtils(), ac));
+        }
+
+        allTypes = supportedAnnos;
         top = qualHierarchy.getTopAnnotations().iterator().next();
         bottom = qualHierarchy.getBottomAnnotations().iterator().next();
-        numTypes = qualHierarchy.getTypeQualifiers().size();
+        numTypes = supportedAnnos.size();
 
         // Calculate subtypes map and supertypes map
         for (AnnotationMirror i : allTypes) {
