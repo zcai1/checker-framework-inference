@@ -119,11 +119,8 @@ public class DefaultSlotManager implements SlotManager {
         arithmeticSlotCache = new LinkedHashMap<>();
 
         if (storeConstants) {
-            Set<Class<? extends Annotation>> annoClasses =
-                    InferenceMain.getInstance().getRealTypeFactory().getSupportedTypeQualifiers();
-            for (Class<? extends Annotation> ac : annoClasses) {
-                AnnotationMirror am = AnnotationBuilder.fromClass(
-                        processingEnvironment.getElementUtils(), ac);
+            for (Class<? extends Annotation> annoClass : this.realQualifiers) {
+                AnnotationMirror am = new AnnotationBuilder(processingEnvironment, annoClass).build();
                 ConstantSlot constantSlot = new ConstantSlot(am, nextId());
                 addToVariables(constantSlot);
                 constantCache.put(am, constantSlot.getId());

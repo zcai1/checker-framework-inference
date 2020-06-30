@@ -79,21 +79,23 @@ public class LatticeBuilder {
     public Lattice buildLattice(QualifierHierarchy qualHierarchy, Collection<Slot> slots) {
         clear();
 
-        Set<AnnotationMirror> supportedAnnos = new HashSet<>();
+        Set<AnnotationMirror> supportedAnnos = AnnotationUtils.createAnnotationSet();
         Set<Class<? extends Annotation>> annoClasses =
                 InferenceMain.getInstance().getRealTypeFactory().getSupportedTypeQualifiers();
         for (Class<? extends Annotation> ac: annoClasses) {
-            supportedAnnos.add(AnnotationBuilder.fromClass(
-                    InferenceMain.getInstance().getRealTypeFactory().getElementUtils(), ac));
+            supportedAnnos.add(new AnnotationBuilder(
+                    InferenceMain.getInstance().getRealTypeFactory().getProcessingEnv(), ac).build());
         }
 
         top = qualHierarchy.getTopAnnotations().iterator().next();
         bottom = qualHierarchy.getBottomAnnotations().iterator().next();
 
-        // TODO this is a workaround for "computed" bottoms. e.g. DataFlow bottom
-        supportedAnnos.add(bottom);  // this is a set: existing bottom will not added twice
-        allTypes = supportedAnnos;
+        // this is a workaround for "computed" bottoms. e.g. DataFlow bottom
+        if (!AnnotationUtils.containsSame(supportedAnnos, bottom)) {
+            supportedAnnos.add(bottom);
+        }
 
+        allTypes = Collections.unmodifiableSet(supportedAnnos);
         numTypes = supportedAnnos.size();
 
         // Calculate subtypes map and supertypes map
