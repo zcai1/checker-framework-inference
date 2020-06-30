@@ -38,6 +38,7 @@ public class LatticeBuilder {
      * All type qualifiers in underling type system.
      * Requires annotation ordering, so must created with {@code AnnotationUtils.createAnnotationSet()} when constructing from empty set,
      * even if being converted to {@code UnmodifiableSet} later on
+     * TODO remove the dependency to TreeSet
      */
     private Set<? extends AnnotationMirror> allTypes;
 
