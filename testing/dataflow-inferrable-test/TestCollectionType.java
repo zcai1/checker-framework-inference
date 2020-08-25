@@ -2,6 +2,5 @@ import java.util.ArrayList;
 
 public class TestCollectionType {
 
-    ArrayList<String>
-        collectionTypeTesing = new ArrayList<String>();
+    ArrayList<String> collectionTypeTesing = new ArrayList<>();
 }
