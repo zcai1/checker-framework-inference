@@ -7,7 +7,7 @@ import java.util.ArrayList;
  * General examples for inference.
  *
  * Qualifiers we expect to be inferred are in the
- * the qualifiers in comments, e.g.  /*@Untainted*/
+ * the qualifiers in comments, e.g., {@code /*@Untainted*\/}.
  */
 class InferenceCheck {
 
