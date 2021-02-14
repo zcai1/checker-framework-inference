@@ -18,14 +18,23 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: echo "REMOTE_ORIGIN_URL=`git config --get remote.origin.url`" >> $GITHUB_ENV
+      - name: reattach HEAD to Head Ref
+        run: |
+          branch=`echo ${{ github.head_ref }} | sed -E 's|refs/[a-zA-Z]+/||'`
+          echo "BRANCH=${branch}" >> $GITHUB_ENV
+        if: github.head_ref != ''
+      - name: reattach HEAD to Ref
+        run: |
+          branch=`echo ${{ github.ref }} | sed -E 's|refs/[a-zA-Z]+/||'`
+          echo "BRANCH=${branch}" >> $GITHUB_ENV
+        if: github.head_ref == ''
       - uses: addnab/docker-run-action@v1
         with:
           image: xingweitian/ubuntu-for-cfi-${{ matrix.jdk }}
           run: |
             /bin/bash -c "true &&
-            echo "GITHUB_REF=${{ github.head_ref }}" &&
             echo "REMOTE_ORIGIN_URL=${{ env.REMOTE_ORIGIN_URL }}" &&
-            git clone -b ${{ github.head_ref }} ${{ env.REMOTE_ORIGIN_URL }} &&
+            git clone -b ${{ env.BRANCH }} ${{ env.REMOTE_ORIGIN_URL }} &&
             cd checker-framework-inference &&
             export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8 &&
             ./.travis-build.sh ${{ matrix.group }}"
