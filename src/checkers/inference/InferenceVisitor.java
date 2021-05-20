@@ -829,4 +829,20 @@ public class InferenceVisitor<Checker extends InferenceChecker,
     protected InferenceValidator createTypeValidator() {
         return new InferenceValidator(checker, this, atypeFactory);
     }
+
+    /**
+     * The super method issues a warning if the result type of the constructor is not top.
+     * If we keep the same logic in inference, a hard constraint "classBound == top" will be
+     * created, which is not what we want. Therefore, skip this checking when it's in the
+     * inference mode.
+     * TODO: consider using preference constraints where warnings are issued in the type-checking mode.
+     */
+    @Override
+    protected void checkConstructorResult(
+            AnnotatedExecutableType constructorType, ExecutableElement constructorElement) {
+        if (!infer) {
+            super.checkConstructorResult(constructorType, constructorElement);
+        }
+    }
+
 }
