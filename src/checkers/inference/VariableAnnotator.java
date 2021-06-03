@@ -414,7 +414,6 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
             return;
         }
 
-        AnnotationMirror explicitPrimary = null;
         if (treeToVarAnnoPair.containsKey(typeTree)) {
             potentialVariable = treeToVarAnnoPair.get(typeTree).first;
             typeVar.clearAnnotations();  // might have a primary annotation lingering around
@@ -437,11 +436,6 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
                     .<Slot, Set<? extends AnnotationMirror>> of(
                     potentialVariable, typeVar.getAnnotations());
             treeToVarAnnoPair.put(typeTree, varATMPair);
-
-            // TODO: explicitPrimary is null at this point! Someone needs to set it.
-            if (explicitPrimary != null) {
-                constraintManager.addEqualityConstraint(potentialVariable, slotManager.getSlot(explicitPrimary));
-            }
         }
 
         final Element typeVarDeclElem = typeVar.getUnderlyingType().asElement();
@@ -898,8 +892,11 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
             // TODO: IN JAVA 8, LAMBDAS CAN HAVE INTERSECTION ARGUMENTS
 
             default:
-                InferenceUtil.testArgument(false,
-                        "Unexpected tree type ( " + tree + " ) when visiting AnnotatedIntersectionType( " + intersectionType + " )");
+                throw new IllegalArgumentException(String.format(
+                        "Unexpected tree type ( %s ) when visiting AnnotatedIntersectionType( %s )",
+                        tree,
+                        intersectionType
+                ));
         }
 
         // TODO: So in Java 8 the Ast the "A & B" tree in T extends A & B is an IntersectionTypeTree
