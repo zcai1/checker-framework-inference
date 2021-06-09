@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @SubtypeOf(Nullable.class)
-@QualifierForLiterals(LiteralKind.STRING)
+@QualifierForLiterals(value = {LiteralKind.STRING, LiteralKind.PRIMITIVE})
 @DefaultFor(TypeUseLocation.EXCEPTION_PARAMETER)
 @DefaultQualifierInHierarchy
 @UpperBoundFor(
