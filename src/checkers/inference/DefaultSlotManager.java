@@ -1,5 +1,8 @@
 package checkers.inference;
 
+import com.sun.source.tree.Tree;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
@@ -33,6 +36,9 @@ import checkers.inference.model.Slot;
 import checkers.inference.model.SourceVariableSlot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.qual.VarAnnot;
+import org.checkerframework.javacutil.TreeUtils;
+import scenelib.annotations.io.ASTIndex;
+import scenelib.annotations.io.ASTRecord;
 
 /**
  * The default implementation of SlotManager.
@@ -297,11 +303,13 @@ public class DefaultSlotManager implements SlotManager {
 
     @Override
     public SourceVariableSlot createSourceVariableSlot(AnnotationLocation location, TypeMirror type) {
+        AnnotationMirror defaultAnnotation = getDefaultAnnotationForLocation(location);
+
         SourceVariableSlot sourceVarSlot;
         if (location.getKind() == AnnotationLocation.Kind.MISSING) {
             if (InferenceMain.isHackMode()) {
                 //Don't cache slot for MISSING LOCATION. Just create a new one and return.
-                sourceVarSlot = new SourceVariableSlot(nextId(), location, type, true);
+                sourceVarSlot = new SourceVariableSlot(nextId(), location, type, defaultAnnotation, true);
                 addToSlots(sourceVarSlot);
             } else {
                 throw new BugInCF("Creating SourceVariableSlot on MISSING_LOCATION!");
@@ -311,11 +319,47 @@ public class DefaultSlotManager implements SlotManager {
             int id = locationCache.get(location);
             sourceVarSlot = (SourceVariableSlot) getSlot(id);
         } else {
-            sourceVarSlot = new SourceVariableSlot(nextId(), location, type, true);
+            sourceVarSlot = new SourceVariableSlot(nextId(), location, type, defaultAnnotation, true);
             addToSlots(sourceVarSlot);
             locationCache.put(location, sourceVarSlot.getId());
         }
         return sourceVarSlot;
+    }
+
+    /**
+     * Find the default annotation for this location by checking the real type factory.
+     * @param location Location to create a new {@link SourceVariableSlot}.
+     * @return The default annotation for the given location.
+     */
+    private @Nullable AnnotationMirror getDefaultAnnotationForLocation(AnnotationLocation location) {
+        // only support AstPathLocation for now
+        if (!(location instanceof AnnotationLocation.AstPathLocation)) {
+            return null;
+        }
+
+        BaseAnnotatedTypeFactory realTypeFactory = InferenceMain.getInstance().getRealTypeFactory();
+        ASTRecord astRecord = ((AnnotationLocation.AstPathLocation) location).getAstRecord();
+        Tree node = ASTIndex.getNode(astRecord.ast, astRecord);
+        if (node == null) {
+            return null;
+        }
+
+        AnnotatedTypeMirror annotatedType;
+        if (TreeUtils.isTypeTree(node)) {
+            annotatedType = realTypeFactory.getAnnotatedTypeFromTypeTree(node);
+
+            if (annotatedType instanceof AnnotatedTypeMirror.AnnotatedTypeVariable) {
+                annotatedType = ((AnnotatedTypeMirror.AnnotatedTypeVariable) annotatedType).getLowerBound();
+            }
+        } else {
+            annotatedType = realTypeFactory.getAnnotatedType(node);
+        }
+        Set<AnnotationMirror> annotations = annotatedType.getAnnotations();
+
+        if (annotations.size() == 1) {
+            return annotations.iterator().next();
+        }
+        return null;
     }
 
     @Override

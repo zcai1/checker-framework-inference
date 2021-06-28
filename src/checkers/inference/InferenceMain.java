@@ -1,5 +1,7 @@
 package checkers.inference;
 
+import checkers.inference.model.SourceVariableSlot;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 
 import java.io.FileOutputStream;
@@ -26,6 +28,7 @@ import checkers.inference.model.VariableSlot;
 import checkers.inference.qual.VarAnnot;
 import checkers.inference.util.InferenceUtil;
 import checkers.inference.util.JaifBuilder;
+import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.SystemUtil;
 
 /**
@@ -233,21 +236,13 @@ public class InferenceMain {
                     annotationClasses.add(annotation);
                 }
             }
+
             for (VariableSlot slot : varSlots) {
-                if (slot.getLocation() != null && slot.isInsertable()
-                 && (solverResult == null || solverResult.containsSolutionForVariable(slot.getId()))) {
+                if (slot.getLocation() != null) {
                     // TODO: String serialization of annotations.
-                    if (solverResult != null) {
-                        // Not all VariableSlots will have an inferred value.
-                        // This happens for VariableSlots that have no constraints.
-                        AnnotationMirror result = solverResult.getSolutionForVariable(slot.getId());
-                        if (result != null) {
-                            values.put(slot.getLocation(), result.toString());
-                        }
-                    } else {
-                        // Just use the VarAnnot in the jaif.
-                        String value = slotManager.getAnnotation(slot).toString();
-                        values.put(slot.getLocation(), value);
+                    AnnotationMirror annotationToWrite = getAnnotationToWrite(slot);
+                    if (annotationToWrite != null) {
+                        values.put(slot.getLocation(), annotationToWrite.toString());
                     }
                 }
             }
@@ -283,6 +278,28 @@ public class InferenceMain {
                     getRealTypeFactory().getQualifierHierarchy(),
                     inferenceChecker.getProcessingEnvironment());
         }
+    }
+
+    private @Nullable AnnotationMirror getAnnotationToWrite(VariableSlot slot) {
+        if (!slot.isInsertable()) {
+            return null;
+        } else if (solverResult == null) {
+            // Just use the VarAnnot in the jaif.
+            return slotManager.getAnnotation(slot);
+        }
+
+        // Not all VariableSlots will have an inferred value.
+        // This happens for VariableSlots that have no constraints.
+        AnnotationMirror result = solverResult.getSolutionForVariable(slot.getId());
+        if (result != null && slot instanceof SourceVariableSlot) {
+            AnnotationMirror defaultAnnotation = ((SourceVariableSlot) slot).getDefaultAnnotation();
+            if (defaultAnnotation != null
+                    && AnnotationUtils.compareAnnotationMirrors(defaultAnnotation, result) == 0) {
+                // Don't need to write a solution that's equivalent to default annotation.
+                result = null;
+            }
+        }
+        return result;
     }
 
     // ================================================================================

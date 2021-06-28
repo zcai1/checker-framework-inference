@@ -1,5 +1,8 @@
 package checkers.inference.model;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.type.TypeMirror;
 
 /**
@@ -9,6 +12,9 @@ public class SourceVariableSlot extends VariableSlot {
 
     /** The actual type of the type use */
     protected final TypeMirror actualType;
+
+    /** The default annotation for this slot from the real type factory. */
+    protected final @Nullable AnnotationMirror defaultAnnotation;
 
     /**
      * Should this slot be inserted back into the source code.
@@ -23,9 +29,16 @@ public class SourceVariableSlot extends VariableSlot {
      * @param type the underlying type
      * @param insertable indicates whether this slot should be inserted back into the source code
      */
-    public SourceVariableSlot(int id, AnnotationLocation location, TypeMirror type, boolean insertable) {
+    public SourceVariableSlot(
+            int id,
+            AnnotationLocation location,
+            TypeMirror type,
+            @Nullable AnnotationMirror defaultAnnotation,
+            boolean insertable
+    ) {
         super(id, location);
         this.actualType = type;
+        this.defaultAnnotation = defaultAnnotation;
         this.insertable = insertable;
     }
 
@@ -66,5 +79,9 @@ public class SourceVariableSlot extends VariableSlot {
      */
     public void setInsertable(boolean insertable) {
         this.insertable = insertable;
+    }
+
+    public @Nullable AnnotationMirror getDefaultAnnotation() {
+        return defaultAnnotation;
     }
 }
