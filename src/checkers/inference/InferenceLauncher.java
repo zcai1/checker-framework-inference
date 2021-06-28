@@ -188,6 +188,7 @@ public class InferenceLauncher {
         addIfNotNull("--cfArgs", InferenceOptions.cfArgs, argList);
 
         addIfTrue("--hacks", InferenceOptions.hacks, argList);
+        addIfTrue("--insertDefaultAnnotations", InferenceOptions.insertDefaultAnnotations, argList);
 
         argList.add("--");
 

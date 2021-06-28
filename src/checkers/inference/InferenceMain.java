@@ -291,8 +291,9 @@ public class InferenceMain {
         // Not all VariableSlots will have an inferred value.
         // This happens for VariableSlots that have no constraints.
         AnnotationMirror result = solverResult.getSolutionForVariable(slot.getId());
-        if (result != null && slot instanceof SourceVariableSlot) {
+        if (result != null && !InferenceOptions.insertDefaultAnnotations && slot instanceof SourceVariableSlot) {
             AnnotationMirror defaultAnnotation = ((SourceVariableSlot) slot).getDefaultAnnotation();
+
             if (defaultAnnotation != null
                     && AnnotationUtils.compareAnnotationMirrors(defaultAnnotation, result) == 0) {
                 // Don't need to write a solution that's equivalent to default annotation.

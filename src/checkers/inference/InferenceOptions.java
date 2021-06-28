@@ -122,6 +122,9 @@ public class InferenceOptions {
     @Option("For inference, add debug on the port indicated")
     public static String debug;
 
+    @Option("For inference, insert solutions that are equivalent to the default ones back to code.")
+    public static boolean insertDefaultAnnotations;
+
     // end of command-line options
     // ------------------------------------------------------
 
