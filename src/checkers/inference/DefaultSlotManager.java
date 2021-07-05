@@ -4,6 +4,7 @@ import com.sun.source.tree.Tree;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.BugInCF;
@@ -20,6 +21,9 @@ import java.util.TreeSet;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Name;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
 import checkers.inference.model.LubVariableSlot;
@@ -303,7 +307,7 @@ public class DefaultSlotManager implements SlotManager {
 
     @Override
     public SourceVariableSlot createSourceVariableSlot(AnnotationLocation location, TypeMirror type) {
-        AnnotationMirror defaultAnnotation = getDefaultAnnotationForLocation(location);
+        AnnotationMirror defaultAnnotation = getDefaultAnnotationForLocation(location, type);
 
         SourceVariableSlot sourceVarSlot;
         if (location.getKind() == AnnotationLocation.Kind.MISSING) {
@@ -331,14 +335,41 @@ public class DefaultSlotManager implements SlotManager {
      * @param location Location to create a new {@link SourceVariableSlot}.
      * @return The default annotation for the given location.
      */
-    private @Nullable AnnotationMirror getDefaultAnnotationForLocation(AnnotationLocation location) {
-        // only support AstPathLocation for now
-        if (!(location instanceof AnnotationLocation.AstPathLocation)) {
+    private @Nullable AnnotationMirror getDefaultAnnotationForLocation(AnnotationLocation location, TypeMirror type) {
+        if (location == AnnotationLocation.MISSING_LOCATION) {
             return null;
         }
 
         BaseAnnotatedTypeFactory realTypeFactory = InferenceMain.getInstance().getRealTypeFactory();
-        ASTRecord astRecord = ((AnnotationLocation.AstPathLocation) location).getAstRecord();
+        AnnotatedTypeMirror annotatedType = null;
+        if (location instanceof AnnotationLocation.AstPathLocation) {
+            annotatedType = getRealAnnotatedTypeForLocation(
+                    realTypeFactory,
+                    (AnnotationLocation.AstPathLocation) location);
+        } else if (location instanceof AnnotationLocation.ClassDeclLocation) {
+            annotatedType = getRealAnnotatedTypeForLocation(
+                    realTypeFactory,
+                    (AnnotationLocation.ClassDeclLocation) location,
+                    type);
+        }
+
+        if (annotatedType == null) {
+            return null;
+        }
+
+        Set<? extends AnnotationMirror> topAnnotations = realTypeFactory.getQualifierHierarchy().getTopAnnotations();
+        if (topAnnotations.size() != 1) {
+            throw new BugInCF("Expected 1 real top qualifier, but received %d instead", topAnnotations.size());
+        }
+
+        return annotatedType.getAnnotationInHierarchy(topAnnotations.iterator().next());
+    }
+
+    private @Nullable AnnotatedTypeMirror getRealAnnotatedTypeForLocation(
+            BaseAnnotatedTypeFactory realTypeFactory,
+            AnnotationLocation.AstPathLocation location
+    ) {
+        ASTRecord astRecord = location.getAstRecord();
         Tree node = ASTIndex.getNode(astRecord.ast, astRecord);
         if (node == null) {
             return null;
@@ -348,18 +379,36 @@ public class DefaultSlotManager implements SlotManager {
         if (TreeUtils.isTypeTree(node)) {
             annotatedType = realTypeFactory.getAnnotatedTypeFromTypeTree(node);
 
-            if (annotatedType instanceof AnnotatedTypeMirror.AnnotatedTypeVariable) {
+            if (annotatedType.isDeclaration() && annotatedType instanceof AnnotatedTypeMirror.AnnotatedTypeVariable) {
                 annotatedType = ((AnnotatedTypeMirror.AnnotatedTypeVariable) annotatedType).getLowerBound();
             }
         } else {
             annotatedType = realTypeFactory.getAnnotatedType(node);
         }
-        Set<AnnotationMirror> annotations = annotatedType.getAnnotations();
 
-        if (annotations.size() == 1) {
-            return annotations.iterator().next();
+        return annotatedType;
+    }
+
+    private AnnotatedTypeMirror getRealAnnotatedTypeForLocation(
+            BaseAnnotatedTypeFactory realTypeFactory,
+            AnnotationLocation.ClassDeclLocation location,
+            TypeMirror type
+    ) {
+        Element element = realTypeFactory.getProcessingEnv().getTypeUtils().asElement(type);
+        if (!(element instanceof TypeElement)) {
+            throw new BugInCF(
+                    "Expected to get a TypeElement for %s at %s, but received %s.", type, location, element);
         }
-        return null;
+
+        TypeElement typeElement = (TypeElement) element;
+        Name qualifiedName = typeElement.getQualifiedName();
+        if (!qualifiedName.contentEquals(location.getFullyQualifiedClassName())) {
+            throw new BugInCF(
+                    "TypeElement for %s has qualified name %s, and it doesn't match with the location %s",
+                    type, qualifiedName, location);
+        }
+
+        return realTypeFactory.getAnnotatedType(typeElement);
     }
 
     @Override
