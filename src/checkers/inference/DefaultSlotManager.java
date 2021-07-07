@@ -1,6 +1,7 @@
 package checkers.inference;
 
 import com.sun.source.tree.Tree;
+import com.sun.tools.javac.code.Symbol;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -401,11 +402,11 @@ public class DefaultSlotManager implements SlotManager {
         }
 
         TypeElement typeElement = (TypeElement) element;
-        Name qualifiedName = typeElement.getQualifiedName();
-        if (!qualifiedName.contentEquals(location.getFullyQualifiedClassName())) {
+        Name fullyQualifiedName = ((Symbol.ClassSymbol)typeElement).flatName();
+        if (!fullyQualifiedName.contentEquals(location.getFullyQualifiedClassName())) {
             throw new BugInCF(
                     "TypeElement for %s has qualified name %s, and it doesn't match with the location %s",
-                    type, qualifiedName, location);
+                    type, fullyQualifiedName, location);
         }
 
         return realTypeFactory.getAnnotatedType(typeElement);
